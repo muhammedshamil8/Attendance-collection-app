@@ -4,12 +4,13 @@ import { Outlet } from 'react-router-dom';
 
 
 const UserLayout: React.FC = ({  }) => {
+
     return (
-        <div>
+        <div className='bg-slate-200 dark:bg-slate-900 min-h-screen overflow-auto'>
             {/* Add your header component here */}
-            <header>
+            <header className='border-b border-slate-900 dark:border-slate-200  flex items-center justify-around p-2'>
                 {/* Add your header content */}
-                <h2 className='dark:text-red-300 yestext-green-300'>User Layout</h2>
+                <h2 className='dark:text-red-300 text-green-300'>User Layout</h2>
                 <ModeToggle />
             </header>
 
