@@ -20,6 +20,10 @@ import SignIn from "@/pages/Auth/user/sigin";
 // error routes
 import NotFound from "@/pages/Errors/NotFound";
 import UnAuth from "@/pages/Errors/unAuth";
+import Contact from "./pages/Auth/contact";
+import Event from "./pages/User/Event/event";
+import Students from "./pages/Admin/Students/students";
+import About from "./pages/Auth/about";
 
 
 const router = createBrowserRouter([
@@ -32,9 +36,13 @@ const router = createBrowserRouter([
         element: <Home />
       },
       {
-        path: "/home",
-        element: <Home />
+        path: '/home/contact',
+        element: <Contact />
       },
+      {
+        path: '/event/:id',
+        element: <Event />
+      }
     ]
   },
   {
@@ -50,9 +58,13 @@ const router = createBrowserRouter([
         element: <Dashboard />
       },
       {
-        path: '/users',
+        path: '/dashboard/users',
         element: <Users />
       },
+      {
+        path: '/dashboard/students',
+        element: <Students />
+      }
     ]
   },
   {
@@ -61,12 +73,20 @@ const router = createBrowserRouter([
     children: [
 
       {
-        path: "/login",
+        path: "/admin/login",
         element: <Login />
       },
       {
         path: "/signin",
         element: <SignIn />
+      },
+      {
+        path: '/contact',
+        element: <Contact />
+      },
+      {
+        path: '/about',
+        element: <About />
       }
     ]
   },
