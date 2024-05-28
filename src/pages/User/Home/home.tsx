@@ -119,6 +119,8 @@ const Home: React.FC = () => {
                 variant: 'success',
                 description: "Event created successfully",
             })
+            closeModal();
+            form.reset();
         } catch (error: any) {
             console.error(error);
         }
@@ -180,7 +182,7 @@ const Home: React.FC = () => {
             return;
         }
         // Update Event in Firestore
-        await updateDoc(doc(eventsCollectionRef, values.id), {...values, updateAt: Timestamp.now()});
+        await updateDoc(doc(eventsCollectionRef, values.id), { ...values, updateAt: Timestamp.now() });
         getEvents();
         // console.log('Updating event:', values);
         closeModal();
@@ -199,10 +201,14 @@ const Home: React.FC = () => {
             const userDocSnap = await getDoc(userDocRef);
             const userEvents = userDocSnap.data()?.events || [];
 
-            const eventIDs = userEvents
+            const eventIDs = userEvents ? userEvents
                 .filter((ref: DocumentReference | undefined | null) => ref !== undefined && ref !== null)
-                .map((ref: DocumentReference) => ref.id);
+                .map((ref: DocumentReference) => ref.id) : [];
 
+            if (eventIDs.length === 0) {
+                setLoading(false);
+                return;
+            }
             const q = query(
                 eventsCollectionRef,
                 where(documentId(), "in", eventIDs),
@@ -277,41 +283,41 @@ const Home: React.FC = () => {
                 {loading && loading ? (
                     <>
                         {Array.from({ length: 5 }, (_, index) => (
-                            <div  key={index} className='w-full rounded-md bg-gray-300 p-2 flex flex-col text-center gap-2 min-h-36 animate-pulse' >
+                            <div key={index} className='w-full rounded-md bg-gray-300 p-2 flex flex-col text-center gap-2 min-h-36 animate-pulse' >
                             </div>
                         ))}
                     </>
                 ) : (events.length > 0 ? (
                     events.map((event: Event) => (
                         <div className="bg-white rounded-md shadow-md p-4 flex flex-col gap-3" key={event.id}>
-                        <div className="flex justify-between items-center">
-                          <h2 className="text-xl font-semibold text-gray-800">
-                            {event.title}
-                          </h2>
-                          <div className="flex gap-2">
-                            <AiFillEdit
-                              className="text-blue-500 cursor-pointer"
-                              onClick={() => EditEvent(event.id, event)}
-                            />
-                            <AiFillDelete
-                              className="text-red-500 cursor-pointer"
-                              onClick={() => deleteEvent(event.id)}
-                            />
-                          </div>
+                            <div className="flex justify-between items-center">
+                                <h2 className="text-xl font-semibold text-gray-800">
+                                    {event.title}
+                                </h2>
+                                <div className="flex gap-2">
+                                    <AiFillEdit
+                                        className="text-blue-500 cursor-pointer"
+                                        onClick={() => EditEvent(event.id, event)}
+                                    />
+                                    <AiFillDelete
+                                        className="text-red-500 cursor-pointer"
+                                        onClick={() => deleteEvent(event.id)}
+                                    />
+                                </div>
+                            </div>
+                            <p className="text-gray-600">
+                                {event.description}
+                            </p>
+                            <p className="text-gray-600">
+                                {event.eventDate?.toDate().toDateString()}
+                            </p>
+                            <button
+                                className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-md"
+                                onClick={() => handleOpenEvent(event.id)}
+                            >
+                                View Details
+                            </button>
                         </div>
-                        <p className="text-gray-600">
-                        {event.description}
-                        </p>
-                        <p className="text-gray-600">
-                        {event.eventDate?.toDate().toDateString()}
-                        </p>
-                        <button
-                          className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-md"
-                          onClick={() => handleOpenEvent(event.id)}
-                        >
-                          View Details
-                        </button>
-                      </div>
                     ))
                 ) : (
                     <div className='w-full rounded-md bg-emerald-600/10 p-2 flex flex-col text-center gap-2 min-h-24 animate-pulse justify-center items-center'>
