@@ -35,22 +35,25 @@ const SignIn: React.FC = () => {
     const navigate = useNavigate();
     const { toast } = useToast();
     const UserCollectionRef = collection(db, 'users');
+    const [newLogin, setNewLogin] = useState(false);
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, async (user) => {
             if (user) {
-                toast({
-                    title: 'Already signed in',
-                    description: 'You are already signed in',
-                });
-                const userDocRef = doc(UserCollectionRef, user.uid);
-                const userDocSnap = await getDoc(userDocRef);
-                const role = userDocSnap.data()?.role;
-
-                if (role === 'admin') {
-                    navigate('/dashboard');
-                } else if (role === 'user') {
-                    navigate('/');
+                if (!newLogin) {
+                    toast({
+                        title: 'Already signed in',
+                        description: 'You are already signed in',
+                    });
+                    const userDocRef = doc(UserCollectionRef, user.uid);
+                    const userDocSnap = await getDoc(userDocRef);
+                    const role = userDocSnap.data()?.role;
+    
+                    if (role === 'admin') {
+                        navigate('/dashboard');
+                    } else if (role === 'user') {
+                        navigate('/');
+                    }
                 }
             }
         });
@@ -75,6 +78,7 @@ const SignIn: React.FC = () => {
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
         try {
+            setNewLogin(true);
             const userCredential = await signInWithEmailAndPassword(auth, values.email, values.password);
             const user = userCredential.user;
 
