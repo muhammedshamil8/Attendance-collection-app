@@ -39,27 +39,119 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 
-// import { QRCodeSVG, QRCodeCanvas } from 'qrcode.react';
-// import QrReader from '@types/react-qr-reader'
+import { zodResolver } from "@hookform/resolvers/zod"
+import { useForm } from "react-hook-form"
+import { z } from "zod"
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form"
+import { Timestamp, addDoc, collection, deleteDoc, doc, getDocs, setDoc, updateDoc } from 'firebase/firestore';
+import { db } from '@/config/firebase';
+import { useToast } from '@/components/ui/use-toast';
+
+const formSchema = z.object({
+  name: z.string().nonempty({ message: "Name is required" }),
+  admissionNo: z.string().nonempty({ message: "Admission no is required" }),
+  rollNo: z.string().nonempty({ message: "Roll no is required" }),
+  department: z.string().nonempty({ message: "Department is required" }),
+  joinedYear: z.string().nonempty({ message: "Joined Year is required" }).length(4, { message: "Year must be 4 digits" }),
+  id: z.string().optional(),
+  // email: z.string().email({ message: "Invalid email" }).optional(),
+  // phone: z.string()
+  //   .refine((val) => val.length === 10, { message: "Phone number must be 10 digits" })
+  //   .optional(),
+});
+
 interface Student {
+  id: string;
   name: string;
   admissionNo: string;
   rollNo: string;
   department: string;
-  year: string;
+  joinedYear: string;
+  email?: string;
+  phone?: string;
+  createdAt: Timestamp;
+  updatedAt: Timestamp;
+  active: boolean;
+}
+
+interface StudentForm {
+  id?: string;
+  name: string;
+  admissionNo: string;
+  rollNo: string;
+  department: string;
+  joinedYear: string;
   email?: string;
   phone?: string;
 }
 
 function Students() {
-  const [handleCreateEvent, setHandleCreateEvent] = useState(false);
+  const [handleCreateStudent, setHandleCreateStudent] = useState(false);
   const [open, setOpen] = useState(false)
-  const [value, setValue] = useState("")
-  const [searchAdmNo, setSearchAdmNo] = useState('')
   const [searchName, setSearchName] = useState('')
   const [sortBox, setSortBox] = useState(false);
+  const departmentCollectionRef = collection(db, 'departments');
+  const studentCollectionRef = collection(db, 'students');
+  const [loading, setLoading] = useState(true);
+  const [students, setStudnets] = useState<Student[]>([]);
+  const [filteredStudents, setFilteredStudents] = useState<Student[]>([]);
+  const [Department, setDepartment] = useState<string[]>([]);
+  const [method, setMethod] = useState<string>("POST");
+  const { toast } = useToast();
+
+
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      name: "",
+      admissionNo: "",
+      rollNo: "",
+      department: "",
+      joinedYear: "",
+      id: "",
+      // email: "",
+      // phone: "",
+    },
+  })
+
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    method === "POST" ? createStudent(values) : updateStudent(values);
+  }
+
+  const createStudent = async (values: StudentForm) => {
+    try {
+      const docRef = doc(studentCollectionRef, values.admissionNo);
+      await setDoc(docRef, {
+        ...values,
+        createdAt: Timestamp.now(),
+        updatedAt: Timestamp.now(),
+        active: true,
+      });
+      toast({
+        variant: "success",
+        description: "Student added successfully",
+      })
+      getStudents();
+      setHandleCreateStudent(false);
+      form.reset();
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        description: error.message,
+      })
+    }
+  }
 
   const Fields = [
+    { label: "No", value: "col-no" },
     { label: "Name", value: "col-name" },
     { label: "Admission No", value: "col-admissionNo" },
     { label: "Roll No", value: "col-rollNo" },
@@ -75,6 +167,7 @@ function Students() {
   ];
 
   const [selectedItems, setSelectedItems] = useState<string[]>([
+    "col-no",
     "col-name",
     "col-admissionNo",
     "col-rollNo",
@@ -83,8 +176,6 @@ function Students() {
     "col-action",
   ]);
   const [selectedItems2, setSelectedItems2] = useState<string>('');
-
-
 
   const handleItemSelect = (item: { label: string, value: string }) => {
     let updatedItems;
@@ -117,125 +208,68 @@ function Students() {
       });
     });
   }
+
   useEffect(() => {
     updateSelectedItems(selectedItems);
   }, []);
 
-  const Department = [
-    {
-      value: "bsc_computer_science",
-      label: "Bsc Computer Science",
-    },
-    {
-      value: "bsc_biochemistry",
-      label: "Bsc Biochemistry",
-    },
-    {
-      value: 'bsc_microbiology',
-      label: 'Bsc Microbiology',
-    },
-    {
-      value: 'bsc_biotecnology',
-      label: 'Bsc Biotecnology',
-    },
-    {
-      value: 'bsc_maths&pysics',
-      label: 'Bsc Maths & Pysics',
-    },
-    {
-      value: 'ba_west_asia',
-      label: 'BA West Asia',
-    },
-    {
-      value: 'ba_economics',
-      label: 'BA Economics',
-    },
-  ] as const;
+  const getDepartment = async () => {
+    try {
+      const departmentSnapshot = await getDocs(departmentCollectionRef);
+      const departments = departmentSnapshot.docs.map((doc) => {
+        const data = doc.data();
+        return data.department;
+      });
+      // departments.sort((a, b) => a.department.localeCompare(b.department));
+      setDepartment(departments);
+    } catch (error: any) {
+      console.error(error);
+    }
+  };
 
-  const students = [
-    {
-      name: 'John Doe',
-      admissionNo: '123456789',
-      rollNo: '12',
-      department: 'A Computer Science',
-      year: '1st year',
-      email: 'johndoe@example.com',
-      phone: '555-555-3434',
-    },
-    {
-      name: 'Jane Doe',
-      admissionNo: '987654321',
-      rollNo: '25',
-      department: 'Electrical Engineering',
-      year: '2nd year',
-    },
-    {
-      name: 'Jim Smith',
-      admissionNo: '456123789',
-      rollNo: '36',
-      department: 'AA Mechanical Engineering',
-      year: '3rd year',
-    },
-    {
-      name: 'Jill Johnson',
-      admissionNo: '789456123',
-      rollNo: '47',
-      department: 'AB Chemical Engineering',
-      year: '4th year',
-    },
-    {
-      name: 'Bob Brown',
-      admissionNo: '135791357',
-      rollNo: '58',
-      department: 'Civil Engineering',
-      year: '1st year',
-    },
-    {
-      name: 'Alice White',
-      admissionNo: '246810246',
-      rollNo: '69',
-      department: 'Mathematics',
-      year: '2nd year',
-    },
-    {
-      name: 'Charlie Green',
-      admissionNo: '579135791',
-      rollNo: '70',
-      department: 'Physics',
-      year: '3rd year',
-    },
-  ];
-  const [filteredStudents, setFilteredStudents] = useState<Student[]>(students);
+  const getStudents = async () => {
+    try {
+      const usersSnapshot = await getDocs(studentCollectionRef);
+      const filteredUsers = usersSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })) as Student[];
+      setStudnets(filteredUsers);
+      setFilteredStudents(filteredUsers);
+      setLoading(false);
+      // filterAndSortStudents();
+    } catch (error: any) {
+      console.error(error);
 
+    }
+  }
 
   const closeModal = () => {
-    setHandleCreateEvent(false);
+    setHandleCreateStudent(false);
   }
-  const openModal = () => {
-    setHandleCreateEvent(true);
+  const openModal = (method: string) => {
+    setMethod(method);
+    setHandleCreateStudent(true);
   }
- 
-  const filteredStudentsAdmNo = students.filter((student) => {
-    if (searchAdmNo === '') return null;
-    return student.admissionNo.toLowerCase().includes(searchAdmNo.toLowerCase())
-  })
-
 
   function filterAndSortStudents() {
     let filtered = students;
+    console.log('filtered', filtered);
+    console.log(students);
     if (searchName !== '') {
-      filtered = filtered.filter((student) => student.name.toLowerCase().includes(searchName.toLowerCase()));
+      filtered = filtered.filter((student) => student?.name.toLowerCase().includes(searchName.toLowerCase()) || student?.admissionNo.toLowerCase().includes(searchName.toLowerCase()));
     } else {
       filtered = students;
+      console.log('no search value');
     }
     return setFilteredStudents(filtered.sort((a, b) => {
       if (selectedItems2 === 'department') {
+        console.log('department');
         return a.department.localeCompare(b.department);
       } else if (selectedItems2 === 'year-desc') {
-        return b.year.localeCompare(a.year);
+        console.log('year-desc');
+        return b.joinedYear.localeCompare(a.joinedYear);
       } else if (selectedItems2 === 'year-asc') {
-        return a.year.localeCompare(b.year);
+        return a.joinedYear.localeCompare(b.joinedYear);
       } else {
+        console.log('no sort value');
         return 0;
       }
     }));
@@ -245,20 +279,105 @@ function Students() {
     filterAndSortStudents();
   }, [searchName, selectedItems2]);
 
+  useEffect(() => {
+    getDepartment();
+    getStudents();
+  }, []);
+
   const handleSortBox = () => {
     setSortBox(!sortBox);
+  }
+
+  const handleDeleteStudnet = async (id: string) => {
+    try {
+      await deleteDoc(doc(studentCollectionRef, id));
+      console.log('id', id);
+      toast({
+        variant: "success",
+        description: "Student deleted successfully",
+      })
+      getStudents();
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        description: error.message,
+      })
+    }
+  }
+  const handleEditStudent = (student: Student) => {
+    console.log('student', student);
+    try {
+      form.setValue('name', student.name);
+      form.setValue('admissionNo', student.admissionNo);
+      form.setValue('rollNo', student.rollNo);
+      form.setValue('department', student.department);
+      form.setValue('joinedYear', student.joinedYear);
+      form.setValue('id', student.id);
+      // form.setValue('email', student.email);
+      // form.setValue('phone', student.phone);
+      openModal('PUT');
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        description: error.message,
+      })
+    }
+  }
+
+  const updateStudent = async (student: StudentForm) => {
+    try {
+      if (!student.id) {
+        throw new Error("Student id is missing");
+      }
+      await updateDoc(doc(studentCollectionRef, student.id), {
+        ...student,
+        updatedAt: Timestamp.now(),
+      });
+      toast({
+        variant: "success",
+        description: "Student updated successfully",
+      })
+      setHandleCreateStudent(false);
+      getStudents();
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        description: error.message,
+      })
+    }
+  }
+
+  const getStudentYear = (joinedYear: string): string => {
+    const joinedYearInt = parseInt(joinedYear);
+    const currentYear = new Date().getFullYear();
+    const studentYear = currentYear - joinedYearInt + 1;
+    let yearDescription = "";
+
+    if (studentYear === 1) {
+      yearDescription = "1st year";
+    } else if (studentYear === 2) {
+      yearDescription = "2nd year";
+    } else if (studentYear === 3) {
+      yearDescription = "3rd year";
+    } else if (studentYear === 4) {
+      yearDescription = "4th year";
+    } else {
+      yearDescription = `graduate`;
+    }
+
+    return `${yearDescription}`;
   }
 
   return (
     <div className='flex flex-col gap-10 justify-start items-center h-full mt-20  mx-auto' >
       <div className='w-full'>
-        <Button className='!bg-slate-300 w-full flex justify-between items-center gap-4 font-bold h-[50px] rounded-xl' onClick={openModal}>
+        <Button className='!bg-slate-300 w-full flex justify-between items-center gap-4 font-bold h-[50px] rounded-xl' onClick={() => openModal('POST')}>
           <p className='text-emerald-700'>
             Add Student
           </p>
           <div className='bg-emerald-700 rounded-full w-6 h-6 flex items-center justify-center'>
-                        <LuPlus className='text-white' />
-                    </div>
+            <LuPlus className='text-white' />
+          </div>
         </Button>
       </div>
 
@@ -291,7 +410,7 @@ function Students() {
               </DropdownMenu>
 
               <DropdownMenu>
-                <DropdownMenuTrigger className='outline-none border-none'> 
+                <DropdownMenuTrigger className='outline-none border-none'>
                   <div className='p-2 bg-emerald-700 flex gap-2 items-center justify-center text-white rounded-lg px-4'>Columns <IoIosArrowDown /></div>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
@@ -317,6 +436,7 @@ function Students() {
             <table className="min-w-full rounded-xl  " id='custom-table'>
               <thead className=''>
                 <tr >
+                  <th className="col-no tracking-wider">No</th>
                   <th className="col-name tracking-wider">Student Name</th>
                   <th className="col-admissionNo tracking-wider">Admission no:</th>
                   <th className="col-rollNo tracking-wider">Roll No:</th>
@@ -326,24 +446,35 @@ function Students() {
                 </tr>
               </thead>
               <tbody className=''>
-                {filteredStudents.length ? (
-                  filteredStudents.map((student, index) => (
-                    <tr key={index}>
-                      <td className="col-name whitespace-nowrap">{student.name}</td>
-                      <td className="col-admissionNo whitespace-nowrap">{student.admissionNo}</td>
-                      <td className="col-rollNo whitespace-nowrap">{student.rollNo}</td>
-                      <td className="col-department whitespace-nowrap">{student.department}</td>
-                      <td className="col-year whitespace-nowrap">{student.year}</td>
-                      <td className='col-action whitespace-nowrap flex gap-1 items-center justify-center'>
-                        <AiFillEdit className='col-action mx-auto text-emerald-700 cursor-pointer hover:text-emerald-600 transition-all ease-in-out' />
-                        <AiFillDelete className='col-action mx-auto text-red-500 cursor-pointer hover:text-red-600 transition-all ease-in-out' />
-                      </td>
-                    </tr>
-                  ))
-                ) : (
+                {loading && loading ? (
                   <tr>
-                    <td colSpan={6} className='text-center'>No data found</td>
+                    <td colSpan={7} className='text-center'>Loading...</td>
                   </tr>
+                ) : (
+                  filteredStudents.length > 0 ? (
+                    filteredStudents.map((student, index) => (
+                      <tr key={student.id}>
+                        <td className='col-no whitespace-nowrap '>{index + 1}
+                          {/* <pre>
+                            {JSON.stringify(student)}
+                          </pre> */}
+                        </td>
+                        <td className="col-name whitespace-nowrap">{student.name}</td>
+                        <td className="col-admissionNo whitespace-nowrap">{student.admissionNo}</td>
+                        <td className="col-rollNo whitespace-nowrap">{student.rollNo}</td>
+                        <td className="col-department whitespace-nowrap">{student.department}</td>
+                        <td className="col-year whitespace-nowrap">{getStudentYear(student.joinedYear)}</td>
+                        <td className='col-action whitespace-nowrap flex gap-1 items-center justify-center'>
+                          <AiFillEdit className='col-action mx-auto text-emerald-700 cursor-pointer hover:text-emerald-600 transition-all ease-in-out' onClick={() => handleEditStudent(student)} />
+                          <AiFillDelete className='col-action mx-auto text-red-500 cursor-pointer hover:text-red-600 transition-all ease-in-out' onClick={() => handleDeleteStudnet(student.id)} />
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={7} className='text-center'>No data found</td>
+                    </tr>
+                  )
                 )}
               </tbody>
             </table>
@@ -356,7 +487,7 @@ function Students() {
         </div> */}
       </div>
 
-      <Dialog open={handleCreateEvent} onOpenChange={closeModal}>
+      <Dialog open={handleCreateStudent} onOpenChange={closeModal}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
@@ -369,87 +500,146 @@ function Students() {
                         </DialogDescription> */}
           </DialogHeader>
           <div className='flex flex-col gap-5 w-full  mx-auto'>
-          <div  className='w-full'>
-                <div className='flex flex-col gap-5 w-full max-w-[320px] mx-auto mt-4'>
-                  <label htmlFor="title" className='font-semibold text-sm dark:text-white'>Student Name</label>
-                  <Input type="text" placeholder="Title" name="title" className='h-[50px]' />
-
-                  <label htmlFor="title" className='font-semibold text-sm dark:text-white '>Select Department</label>
-                  <Popover open={open} onOpenChange={setOpen}>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        role="combobox"
-                        aria-expanded={open}
-                        className="w-full justify-between h-[50px] dark:text-white bg-slate-100"
-                      >
-                        {value
-                          ? Department.find((item) => item.value === value)?.label
-                          : "Select Department..."}
-                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-full p-0">
-                      <Command>
-                        <CommandInput placeholder="Search Department..." />
-                        <CommandEmpty>No framework found.</CommandEmpty>
-                        <CommandGroup>
-                          <CommandList className='max-h-[200px]'>
-                            {
-                              Department.map((item) => (
-                                <CommandItem
-                                  key={item.value}
-                                  value={item.value}
-                                  onSelect={(currentValue) => {
-                                    setValue(currentValue === value ? "" : currentValue)
-                                    setOpen(false)
-                                  }}
+            <div className='w-full'>
+              <div className='flex flex-col gap-5 w-full max-w-[320px] mx-auto mt-4'>
+                <Form {...form}>
+                  <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+                    <FormField
+                      control={form.control}
+                      name="name"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel >Student Name</FormLabel>
+                          <FormControl>
+                            <Input className='h-[50px]' placeholder="eg: - NSS" {...field} />
+                          </FormControl>
+                          {/* <FormDescription>
+                                        This is your public display name.
+                                    </FormDescription> */}
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="department"
+                      render={({ field: { onChange, value } }) => (
+                        <FormItem>
+                          <FormLabel>Select Department</FormLabel>
+                          <FormControl>
+                            <Popover open={open} onOpenChange={setOpen} >
+                              <PopoverTrigger asChild>
+                                <Button
+                                  variant="outline"
+                                  role="combobox"
+                                  aria-expanded={open}
+                                  className="w-full justify-between h-[50px] dark:text-white bg-slate-100"
                                 >
-                                  <Check
-                                    className={cn(
-                                      "mr-2 h-4 w-4",
-                                      value === item.value ? "opacity-100" : "opacity-0"
-                                    )}
-                                  />
-                                  {item.label}
-                                </CommandItem>
-                              ))
-                            }
-                          </CommandList>
-                        </CommandGroup>
-                      </Command>
-                    </PopoverContent>
-                  </Popover>
-
-                  <label htmlFor="title" className='font-semibold text-sm dark:text-white'>Admission No</label>
-                  <Input type="text" placeholder="Title" name="title" className='h-[50px]' />
-
-                  <label htmlFor="title" className='font-semibold text-sm dark:text-white'>Roll No</label>
-                  <Input type="text" placeholder="Title" name="title" className='h-[50px]' />
-
-
-                  <label htmlFor="JoinYear" className='font-semibold text-sm dark:text-white'>Joined Year</label>
-                  <Input
-                    type='number'
-                    aria-disabled={true}
-                    pattern="[0-9]{4}"
-                    inputMode="numeric"
-                    maxLength={4}
-                    placeholder="Joined Year"
-                    name="JoinYear"
-                    className='h-[50px] '
-                    onChange={(event) => {
-                      if (event.target.value.length > 4) {
-                        event.target.value = event.target.value.slice(0, 4);
-                      }
-                    }}
-                  />
-                  <div className='flex gap-2 items-center justify-end'>
-                    <Button onClick={closeModal} className='!bg-slate-200 font-bold mt-6 !text-emerald-600'>Cancel</Button>
-                    <Button onClick={closeModal} className='!bg-emerald-600 font-bold mt-6 !text-white'>Submit</Button>
-                  </div>
-                </div>
-          </div>
+                                  {value ? Department.find((item) => item === value) : "Select Department..."}
+                                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                </Button>
+                              </PopoverTrigger>
+                              <PopoverContent className="!w-full p-0 min-w-[300px]">
+                                <Command>
+                                  <CommandInput placeholder="Search Department..." />
+                                  <CommandEmpty>No Department found.</CommandEmpty>
+                                  <CommandGroup>
+                                    <CommandList className='max-h-[200px]'>
+                                      {
+                                        Department.map((item, index) => (
+                                          <CommandItem
+                                            key={index}
+                                            value={item}
+                                            onSelect={(currentValue) => {
+                                              onChange(currentValue);
+                                              setOpen(false);
+                                            }}
+                                          >
+                                            <Check
+                                              className={cn(
+                                                "mr-2 h-4 w-4",
+                                                value === item ? "opacity-100" : "opacity-0"
+                                              )}
+                                            />
+                                            {item}
+                                          </CommandItem>
+                                        ))
+                                      }
+                                    </CommandList>
+                                  </CommandGroup>
+                                </Command>
+                              </PopoverContent>
+                            </Popover>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="admissionNo"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel >Admission No</FormLabel>
+                          <FormControl>
+                            <Input className='h-[50px]' placeholder="eg: - ABSC123" {...field} />
+                          </FormControl>
+                          {/* <FormDescription>
+                                        This is your public display name.
+                                    </FormDescription> */}
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="rollNo"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel >Roll No</FormLabel>
+                          <FormControl>
+                            <Input className='h-[50px]' placeholder="eg: - 7" {...field} />
+                          </FormControl>
+                          {/* <FormDescription>
+                                        This is your public display name.
+                                    </FormDescription> */}
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="joinedYear"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel >Joined Year</FormLabel>
+                          <FormControl>
+                            <Input
+                              type='number'
+                              aria-disabled={true}
+                              pattern="[0-9]{4}"
+                              inputMode="numeric"
+                              maxLength={4}
+                              placeholder="Joined Year"
+                              className='h-[50px] '
+                              {...field}
+                            />
+                          </FormControl>
+                          {/* <FormDescription>
+                                        This is your public display name.
+                                    </FormDescription> */}
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <div className='flex gap-2 items-center justify-end'>
+                      <Button type='button' onClick={closeModal} className='!bg-slate-200 font-bold mt-6 !text-emerald-600'>Cancel</Button>
+                      <Button type='submit' className='!bg-emerald-600 font-bold mt-6 !text-white'>Submit</Button>
+                    </div>
+                  </form>
+                </Form>
+              </div>
+            </div>
           </div>
 
         </DialogContent>
