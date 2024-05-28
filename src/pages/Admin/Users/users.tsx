@@ -50,6 +50,7 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { IoEyeOffOutline, IoEyeOutline } from 'react-icons/io5';
+import { ImSpinner6 } from "react-icons/im";
 
 const formSchema = z.object({
   email: z.string().email({ message: 'Invalid email address' }),
@@ -296,7 +297,11 @@ function users() {
               <tbody className=''>
                 {loading && loading ? (
                   <tr>
-                    <td colSpan={6} className='text-center'>Loading...</td>
+                    <td colSpan={6} className='text-center '>
+                      <div className='flex items-center justify-center'>
+                      <ImSpinner6 className='animate-spin h-8 w-8 text-gray-400 text-lg mx-2' /> Loading...
+                      </div>
+                    </td>
                   </tr>
                 ) : (
                   filteredUsers.length ? (

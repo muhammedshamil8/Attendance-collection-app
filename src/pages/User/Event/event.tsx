@@ -59,6 +59,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { ImSpinner6 } from "react-icons/im";
 
 const formSchema = z.object({
   name: z.string().nonempty({ message: "Name is required" }),
@@ -449,7 +450,11 @@ function Event() {
               <tbody className=''>
                 {loading && loading ? (
                   <tr>
-                    <td colSpan={7} className='text-center'>Loading...</td>
+                     <td colSpan={7} className='text-center '>
+                      <div className='flex items-center justify-center'>
+                      <ImSpinner6 className='animate-spin h-8 w-8 text-gray-400 text-lg mx-2' /> Loading...
+                      </div>
+                    </td>
                   </tr>
                 ) : (
                   filteredAttendedStudents.length ? (

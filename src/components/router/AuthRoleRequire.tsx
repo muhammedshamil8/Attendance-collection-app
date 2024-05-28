@@ -4,6 +4,7 @@ import { auth, db } from '@/config/firebase';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { collection, doc, getDoc } from 'firebase/firestore';
 import { useToast } from '../ui/use-toast';
+import { ImSpinner6 } from "react-icons/im";
 
 interface AuthRoleRequireProps {
     role: 'admin' | 'user';
@@ -89,7 +90,7 @@ const AuthRoleRequire: React.FC<AuthRoleRequireProps> = ({ role, children }) => 
 
     if (loading) {
         return <div className='fixed top-0 left-0 w-full h-full bg-white dark:bg-slate-900 flex items-center justify-center z-50'>
-            <p className='text-center dark:text-white'>Loading...</p>
+            <p className='text-center dark:text-white flex items-center justify-center'><ImSpinner6 className='animate-spin h-8 w-8 text-white text-lg mx-2'/> Loading...</p>
         </div>;
     }
 

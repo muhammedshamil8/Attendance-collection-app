@@ -278,7 +278,7 @@ const Home: React.FC = () => {
             <div className='w-full flex flex-col gap-4 '>
                 {loading && loading ? (
                     <>
-                        {Array.from({ length: 5 }, (_, index) => (
+                        {Array.from({ length: 4 }, (_, index) => (
                             <div key={index} className='w-full rounded-md bg-gray-300 p-2 flex flex-col text-center gap-2 min-h-36 animate-pulse' >
                             </div>
                         ))}

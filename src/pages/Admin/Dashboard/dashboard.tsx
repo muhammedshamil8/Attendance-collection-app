@@ -1,8 +1,8 @@
-import React, { useEffect,  useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { db, auth } from '@/config/firebase';
-import { collection, getDocs, addDoc, doc,  Timestamp,  deleteDoc } from 'firebase/firestore';
+import { collection, getDocs, addDoc, doc, Timestamp, deleteDoc } from 'firebase/firestore';
 import { useToast } from "@/components/ui/use-toast"
-import {  AiFillDelete, AiFillEye } from "react-icons/ai";
+import { AiFillDelete, AiFillEye } from "react-icons/ai";
 import { Button } from '@/components/ui/button';
 import { LuPlus } from "react-icons/lu";
 import {
@@ -25,6 +25,7 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { onAuthStateChanged } from 'firebase/auth';
+import { ImSpinner6 } from "react-icons/im";
 
 const formSchema = z.object({
   category: z.string().nonempty('Category is required'),
@@ -263,13 +264,17 @@ const Dashboard: React.FC = () => {
       <div className="flex flex-col gap-5 w-full max-w-[320px] mx-auto">
         <h2 className="text-xl font-bold text-center dark:text-white">Categories</h2>
         {CategoryLoading && CategoryLoading ? (
-          <p className="text-center dark:text-white bg-slate-200 animate-pulse h-20 rounded-md">Loading...</p>
+          Array.from({ length: 2 }, (_, index) => (
+            <p className="text-center dark:text-white bg-slate-200 animate-pulse h-20 rounded-md flex items-center justify-center" key={index}>
+              <ImSpinner6 className='animate-spin h-8 w-8 text-white text-lg mx-2' />   Loading
+            </p>
+          ))
         ) : (category.length > 0 ? (
           category.map((item) => (
-            <div key={item.id} className="flex items-center justify-between bg-gray-100 p-4 rounded-md">
+            <div key={item.id} className="flex items-center justify-between bg-gray-400  dark:bg-gray-100 p-4 rounded-md">
               <div className="flex items-center gap-2">
-                <AiFillEye className="text-gray-500" />
-                <span className="text-gray-700">{item.category}</span>
+                <AiFillEye className="dark:text-gray-500 text-slate-100 " />
+                <span className="dark:text-gray-700 text-white font-semibold">{item.category}</span>
                 {/* <span className="text-gray-500 text-xs">({item.createdAt.toDate().toDateString()}) </span> */}
               </div>
               <button onClick={() => deleteCategory(item.id)}>
@@ -285,13 +290,17 @@ const Dashboard: React.FC = () => {
 
         <h2 className="text-xl font-bold text-center dark:text-white">Departments</h2>
         {DepartmentLoading && DepartmentLoading ? (
-          <p className="text-center dark:text-white bg-slate-200 animate-pulse h-20 rounded-md">Loading...</p>
+          Array.from({ length: 4 }, (_, index) => (
+            <p className="text-center dark:text-white bg-slate-200 animate-pulse h-20 rounded-md flex items-center justify-center" key={index}>
+              <ImSpinner6 className='animate-spin h-8 w-8 text-white text-lg mx-2' />   Loading
+            </p>
+          ))
         ) : (department.length > 0 ? (
           department.map((item) => (
-            <div key={item.id} className="flex items-center justify-between bg-gray-100 p-4 rounded-md">
+            <div key={item.id} className="flex items-center justify-between bg-gray-400  dark:bg-gray-100 p-4 rounded-md">
               <div className="flex items-center gap-2">
-                <AiFillEye className="text-gray-500" />
-                <span className="text-gray-700">{item.department}</span>
+                <AiFillEye className="dark:text-gray-500 text-slate-100" />
+                <span className="dark:text-gray-700 text-white font-semibold">{item.department}</span>
                 {/* <span className="text-gray-500 text-xs">({item.createdAt.toDate().toDateString()}) </span> */}
               </div>
               <button onClick={() => deleteDepartment(item.id)}>
