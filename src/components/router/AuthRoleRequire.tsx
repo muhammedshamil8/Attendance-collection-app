@@ -25,7 +25,7 @@ const AuthRoleRequire: React.FC<AuthRoleRequireProps> = ({ role, children }) => 
             if (user) {
                 isAuthenticated(user.uid);
             } else {
-                isAuthenticated('');
+                navigate('/signin');
             }
         });
 
