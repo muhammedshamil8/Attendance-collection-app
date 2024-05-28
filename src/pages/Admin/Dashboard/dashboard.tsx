@@ -27,18 +27,24 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form"
+import { set } from 'date-fns';
+import { onAuthStateChanged } from 'firebase/auth';
 
 const formSchema = z.object({
   category: z.string().nonempty('Category is required'),
+})
+const formSchema2 = z.object({
   department: z.string().nonempty('Department is required'),
 })
 
 
 interface Category {
+  id: string;
   category: string;
   createdAt: Timestamp;
 }
 interface Department {
+  id: string;
   department: string;
   createdAt: Timestamp;
 }
@@ -53,6 +59,45 @@ const Dashboard: React.FC = () => {
   const { toast } = useToast()
   const [CategoryLoading, setCategoryLoading] = useState<boolean>(true);
   const [DepartmentLoading, setDepartmentLoading] = useState<boolean>(true);
+  const [token, setToken] = useState<string>('');
+  const APIURL = import.meta.env.VITE_API_URL;
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        user.getIdToken().then((idToken) => {
+          setToken(idToken);
+        }
+        );
+      } else {
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    if (token) {
+      fetchData();
+    }
+  }, [token]);
+
+  const fetchData = async () => {
+    try {
+      const response = await fetch(`${APIURL}/todos`, {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        }
+      });
+      const data = await response.json();
+      console.log(data);
+    } catch (error: any) {
+      console.error(error);
+    }
+
+
+  }
 
 
   const Categoryform = useForm<z.infer<typeof formSchema>>({
@@ -62,8 +107,8 @@ const Dashboard: React.FC = () => {
     },
   })
 
-  const Departmentform = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const Departmentform = useForm<z.infer<typeof formSchema2>>({
+    resolver: zodResolver(formSchema2),
     defaultValues: {
       department: '',
     },
@@ -80,13 +125,15 @@ const Dashboard: React.FC = () => {
       console.log('Category created successfully');
       getCategory();
       toast({
+        variant: "success",
         description: "Category created successfully",
       })
+      setHandlecreateCategory(false);
     } catch (error: any) {
       console.error(error);
     }
   }
-  async function onSubmitDepartment(values: z.infer<typeof formSchema>) {
+  async function onSubmitDepartment(values: z.infer<typeof formSchema2>) {
     console.log(values);
     const data = {
       department: values.department,
@@ -94,11 +141,13 @@ const Dashboard: React.FC = () => {
     }
     try {
       const department = await addDoc(departmentCollectionRef, data);
-      console.log('Department created successfully' , department);
+      console.log('Department created successfully', department);
       getDepartment();
       toast({
+        variant: "success",
         description: "Department created successfully",
       })
+      setHandlecreateDepartment(false);
     } catch (error: any) {
       console.error(error);
     }
@@ -107,6 +156,10 @@ const Dashboard: React.FC = () => {
   const deleteCategory = async (id: string) => {
     try {
       await deleteDoc(doc(db, 'category', id));
+      toast({
+        variant: "success",
+        description: "Category item deleted successfully",
+      })
       getCategory();
     } catch (error: any) {
       console.error(error);
@@ -114,7 +167,11 @@ const Dashboard: React.FC = () => {
   }
   const deleteDepartment = async (id: string) => {
     try {
-      await deleteDoc(doc(db, 'department', id));
+      await deleteDoc(doc(db, 'departments', id));
+      toast({
+        variant: "success",
+        description: "Department item deleted successfully",
+      })
       getDepartment();
     } catch (error: any) {
       console.error(error);
@@ -122,22 +179,19 @@ const Dashboard: React.FC = () => {
   }
 
 
-  useEffect(() => {
-    getCategory();
-    getDepartment();
-  }, []);
-
   const getCategory = async () => {
     try {
       const categorySnapshot = await getDocs(catergoryCollectionRef);
       setCategory(categorySnapshot.docs.map((doc) => {
         const data = doc.data();
         return {
+          id: doc.id,
           category: data.category,
           createdAt: data.createdAt,
         }
       }
       ));
+      console.log(category);
       setCategoryLoading(false);
     } catch (error: any) {
       console.error(error);
@@ -150,6 +204,7 @@ const Dashboard: React.FC = () => {
       const departments = departmentSnapshot.docs.map((doc) => {
         const data = doc.data();
         return {
+          id: doc.id,
           department: data.department,
           createdAt: data.createdAt,
         }
@@ -162,6 +217,14 @@ const Dashboard: React.FC = () => {
       console.error(error);
     }
   };
+
+
+  useEffect(() => {
+    getCategory();
+    getDepartment();
+  }, []);
+
+
 
   const closeCategoryModal = () => {
     setHandlecreateCategory(false);
@@ -204,15 +267,16 @@ const Dashboard: React.FC = () => {
       <div className="flex flex-col gap-5 w-full max-w-[320px] mx-auto">
         <h2 className="text-xl font-bold text-center dark:text-white">Categories</h2>
         {CategoryLoading && CategoryLoading ? (
-          <p className="text-center dark:text-white">Loading...</p>
-        ) : (category.length === 0 ? (
+          <p className="text-center dark:text-white bg-slate-200 animate-pulse h-20 rounded-md">Loading...</p>
+        ) : (category.length > 0 ? (
           category.map((item) => (
-            <div key={item.createdAt.toDate().getTime()} className="flex items-center justify-between bg-gray-100 p-4 rounded-md">
+            <div key={item.id} className="flex items-center justify-between bg-gray-100 p-4 rounded-md">
               <div className="flex items-center gap-2">
                 <AiFillEye className="text-gray-500" />
                 <span className="text-gray-700">{item.category}</span>
+                {/* <span className="text-gray-500 text-xs">({item.createdAt.toDate().toDateString()}) </span> */}
               </div>
-              <button onClick={() => deleteCategory(item.createdAt.toDate().getTime().toString())}>
+              <button onClick={() => deleteCategory(item.id)}>
                 <AiFillDelete className="text-red-500" />
               </button>
             </div>
@@ -225,15 +289,16 @@ const Dashboard: React.FC = () => {
 
         <h2 className="text-xl font-bold text-center dark:text-white">Departments</h2>
         {DepartmentLoading && DepartmentLoading ? (
-          <p className="text-center dark:text-white">Loading...</p>
-        ) : (department.length === 0 ? (
+          <p className="text-center dark:text-white bg-slate-200 animate-pulse h-20 rounded-md">Loading...</p>
+        ) : (department.length > 0 ? (
           department.map((item) => (
-            <div key={item.createdAt.toDate().getTime()} className="flex items-center justify-between bg-gray-100 p-4 rounded-md">
+            <div key={item.id} className="flex items-center justify-between bg-gray-100 p-4 rounded-md">
               <div className="flex items-center gap-2">
                 <AiFillEye className="text-gray-500" />
                 <span className="text-gray-700">{item.department}</span>
+                {/* <span className="text-gray-500 text-xs">({item.createdAt.toDate().toDateString()}) </span> */}
               </div>
-              <button onClick={() => deleteDepartment(item.createdAt.toDate().getTime().toString())}>
+              <button onClick={() => deleteDepartment(item.id)}>
                 <AiFillDelete className="text-red-500" />
               </button>
             </div>
