@@ -1,4 +1,165 @@
 @tailwind base;
-  @tailwind components;
-  @tailwind utilities;
-  
+@tailwind components;
+@tailwind utilities;
+
+
+.hidden-column {
+  display: none !important;
+}
+
+/* the layout responsive */
+.custom-container {
+  width: 100%;
+  padding: 0px 10px;
+  /* border-left: 5px solid black;
+  border-right: 5px solid black; */
+}
+
+@media (min-width: 640px) {
+  .custom-container {
+    max-width: 580px;
+    padding: 0 10px;
+    margin: 0 auto;
+  }
+}
+
+@media (min-width: 768px) {
+  .custom-container {
+    max-width: 750px;
+    margin: 0 auto;
+  }
+}
+
+/* 
+
+@media (min-width: 1024px) {
+  .custom-container {
+      max-width: 980px;
+      margin: 0 auto;
+  }
+}
+
+@media (min-width: 1204px) {
+  .custom-container {
+      max-width: 1300px;
+      margin: 0 auto;
+  }
+} */
+
+
+/* hamburger */
+.nav-icon {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: start;
+  cursor: pointer;
+  width: 30px;
+  height: fit-content;
+  position: relative;
+}
+
+.line {
+  width: 25px;
+  height: 3px;
+  position: absolute;
+  border-radius: 5px;
+  transition: margin 0.3s ease-in-out;
+}
+
+.line-1 {
+  margin-top: -13px;
+}
+
+.line-2 {
+  width: 35px;
+
+}
+
+.line-3 {
+  margin-top: 14px;
+}
+
+
+.nav-icon.open .line-1 {
+  margin-top: -2px;
+  height: 5px;
+
+}
+
+.nav-icon.open .line-2 {
+  height: 5px;
+
+}
+
+.nav-icon.open .line-3 {
+  margin-top: 2px;
+  height: 5px;
+
+}
+
+/* custom table */
+#custom-table {
+  font-family: Arial, Helvetica, sans-serif;
+  border-collapse: collapse;
+  width: 100%;
+}
+
+#custom-table td,
+#custom-table th {
+  padding: 10px 8px;
+}
+
+#custom-table td {
+  border-top: 1px solid #9cb19da3;
+}
+
+#custom-table tr:nth-child(even) {
+  background-color: #6ee1b73d;
+}
+#custom-table tr:nth-child(odd) {
+  background-color: #f2f2f2;
+}
+
+
+#custom-table tr:hover {
+  background-color: #baffc2;
+}
+
+#custom-table th {
+  padding-top: 12px;
+  padding-bottom: 12px;
+  text-align: left;
+  background-color: #04aa6d86 !important;
+  color: white;
+}
+
+#custom-table tr:first-child th:first-child {
+  border-top-left-radius: 20px;
+  padding: 15px;
+}
+
+#custom-table tr:first-child th:last-child {
+  border-top-right-radius: 20px;
+}
+
+#custom-table tr:last-child td:first-child {
+  border-bottom-left-radius: 20px;
+  padding-bottom: 15px
+}
+
+#custom-table tr:last-child td:last-child {
+  border-bottom-right-radius: 20px;
+}
+
+/* Chrome, Safari, Edge, Opera */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Firefox */
+input[type=number] {
+  -moz-appearance: textfield;
+}
