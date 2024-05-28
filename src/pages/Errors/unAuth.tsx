@@ -4,7 +4,7 @@ function unAuth() {
   const navigate = useNavigate();
 
   const handleGoBack = () => {
-    navigate('./');
+    navigate(-1);
   }
   return (
     <div className='bg-white dark:bg-gray-800 min-h-screen w-full flex items-center justify-center text-center flex-col'>

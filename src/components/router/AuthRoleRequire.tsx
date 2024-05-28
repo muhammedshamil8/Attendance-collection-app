@@ -39,7 +39,7 @@ const AuthRoleRequire: React.FC<AuthRoleRequireProps> = ({ role, children }) => 
                 title: 'Session expired',
                 description: 'You need to login to access this page',
             });
-            navigate('/admin/login');
+            navigate('/signin');
             return;
         }
 
