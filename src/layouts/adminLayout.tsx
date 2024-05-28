@@ -38,7 +38,7 @@ const AdminLayout: React.FC = () => {
         navigate(route);
     }, [navigate]);
 
-    const handleSignOut = useCallback(async () => {
+    const handleSignOut = async () => {
         try {
             await signOut(auth);
             toast({
@@ -55,7 +55,7 @@ const AdminLayout: React.FC = () => {
                 description: error.message,
             });
         }
-    }, [navigate, toast]);
+    };
 
     return (
         <AuthRoleRequire role='admin'>
@@ -77,7 +77,7 @@ const AdminLayout: React.FC = () => {
                             {pathname === item.route && <ActiveBadge />}
                         </div>
                     ))}
-                    <div className='absolute border left-2 top-2 bg-white dark:bg-black rounded-md h-10 w-10 flex items-center justify-center cursor-pointer hover:bg-slate-100 dark:hover:bg-gray-900' onClick={() => handleSignOut}>
+                    <div className='absolute border left-2 top-2 bg-white dark:bg-black rounded-md h-10 w-10 flex items-center justify-center cursor-pointer hover:bg-slate-100 dark:hover:bg-gray-900' onClick={handleSignOut}>
                         <LogOut className='h-4 w-4 text-black dark:text-white' />
                     </div>
                 </header>

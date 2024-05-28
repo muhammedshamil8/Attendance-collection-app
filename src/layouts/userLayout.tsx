@@ -48,11 +48,12 @@ const UserLayout: React.FC = ({ }) => {
         setSidebar(false);
         navigate(route);
     }
+
     const NavItems = [
         {
             name: 'Home',
             icon: <FaHome />,
-            route: '/home'
+            route: '/'
         },
         {
             name: 'Profile',
@@ -87,8 +88,6 @@ const UserLayout: React.FC = ({ }) => {
         }
     }, [navigate, toast]);
 
-  
-
     return (
         <AuthRoleRequire role='user'>
         <div className='bg-slate-200 dark:bg-slate-900 min-h-screen overflow-auto'>
@@ -122,9 +121,9 @@ const UserLayout: React.FC = ({ }) => {
                             </SheetDescription> */}
                         </SheetHeader>
                         <nav className='flex-1 flex flex-col items-center justify-start  w-full gap-1'>
-                            <ul className='w-full mt-8'>
+                            <ul className='w-full mt-8 '>
                                 {NavItems.map((item, index) => (
-                                    <li key={index} className={`p-2 font-semibold text-gray-500 dark:text-white flex items-center gap-2 justify-center rounded-md  w-full hover:bg-slate-100  hover:text-black/80 dark:hover:text-black/80 transition-all ease-in-out cursor-pointer ${pathname === item.route ? 'bg-slate-100 text-black/80 dark:text-black/80' : ''}`} onClick={() => handleNavigate(item.route)} >
+                                    <li key={index} className={`p-2 font-semibold text-gray-500 flex items-center gap-2 justify-center rounded-md  w-full hover:bg-slate-100  hover:text-black/80 dark:hover:text-black/80 transition-all ease-in-out cursor-pointer my-2 ${pathname === item.route ? 'bg-slate-100 text-black/80 dark:text-black/80' : ''}`} onClick={() => handleNavigate(item.route)} >
                                         {item.icon}
                                         <span>
                                             {item.name}

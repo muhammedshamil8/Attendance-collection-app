@@ -36,26 +36,26 @@ const Login: React.FC = () => {
     const { toast } = useToast();
     const UserCollectionRef = collection(db, 'users');
 
-    useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                toast({
-                    title: 'Already signed in',
-                    description: 'You are already signed in',
-                });
-                const userDocRef = doc(UserCollectionRef, user.uid);
-                const userDocSnap = await getDoc(userDocRef);
-                const role = userDocSnap.data()?.role;
+    // useEffect(() => {
+    //     const unsubscribe = onAuthStateChanged(auth, async (user) => {
+    //         if (user) {
+    //             toast({
+    //                 title: 'Already signed in',
+    //                 description: 'You are already signed in',
+    //             });
+    //             const userDocRef = doc(UserCollectionRef, user.uid);
+    //             const userDocSnap = await getDoc(userDocRef);
+    //             const role = userDocSnap.data()?.role;
 
-                if (role === 'admin') {
-                    navigate('/dashboard');
-                } else if (role === 'user') {
-                    navigate('/');
-                }
-            }
-        });
-        return () => unsubscribe();
-    }, []);
+    //             if (role === 'admin') {
+    //                 navigate('/dashboard');
+    //             } else if (role === 'user') {
+    //                 navigate('/');
+    //             }
+    //         }
+    //     });
+    //     return () => unsubscribe();
+    // }, []);
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -119,6 +119,44 @@ const Login: React.FC = () => {
             });
         }
     }
+    // async function onSubmit(values: z.infer<typeof formSchema>) {
+    //     try {
+    //         const response = await fetch('http://localhost:5000/api/login', {
+    //             method: 'POST',
+    //             headers: {
+    //                 'Content-Type': 'application/json',
+    //             },
+    //             body: JSON.stringify(values),
+    //         });
+    //         const data = await response.json();
+    //         console.log('data', data);
+    //         // if (data.error) {
+    //         //     toast({
+    //         //         variant: 'destructive',
+    //         //         title: 'Error signing in',
+    //         //         description: data.error,
+    //         //         duration: 2000,
+    //         //     });
+    //         // } else {
+    //         //     toast({
+    //         //         variant: 'success',
+    //         //         title: 'Signed in',
+    //         //         description: 'You have successfully signed in',
+    //         //         duration: 2000,
+    //         //     });
+    //         //     navigate('/dashboard');
+    //         // }
+    //     } catch (error: any) {
+    //         console.error('Error signing in:', error);
+    //         toast({
+    //             variant: 'destructive',
+    //             title: 'Error signing in',
+    //             description: error.message,
+    //             duration: 2000,
+    //         });
+
+    //     }
+    // }
 
     const toggleShowPassword = () => {
         setShowPassword(!showPassword);

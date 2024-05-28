@@ -39,65 +39,114 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 
-import { auth, db } from '@/config/firebase';
+import { auth, db} from '@/config/firebase';
 import { createUserWithEmailAndPassword, signOut } from 'firebase/auth';
-import { collection, doc, addDoc, setDoc } from 'firebase/firestore';
+import { collection, doc, addDoc, setDoc, getDocs, Timestamp } from 'firebase/firestore';
 import { ToastAction } from "@/components/ui/toast"
 import { useToast } from "@/components/ui/use-toast"
 
+import { zodResolver } from "@hookform/resolvers/zod"
+import { useForm } from "react-hook-form"
+import { z } from "zod"
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form"
+import { IoEyeOffOutline, IoEyeOutline } from 'react-icons/io5';
+import { set } from 'date-fns';
 
-// import { QRCodeSVG, QRCodeCanvas } from 'qrcode.react';
-// import QrReader from '@types/react-qr-reader'
+const formSchema = z.object({
+  email: z.string().email({ message: 'Invalid email address' }),
+  password: z.string().min(6, { message: 'Password must be at least 6 characters' }),
+  category: z.string().nonempty({ message: 'Category required' }),
+  name: z.string().min(3, { message: 'Name must be at least 3 characters' }),
+  role: z.string(),
+  status: z.boolean(),
+})
+
+
 interface User {
+  id: string;
   email: string;
   category: string;
-}
-interface NewUser {
-  email: string;
-  password: string;
-  category: string;
+  name: string;
   role: string;
-  status: boolean;
+  status?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+  events?: string[];
 }
 
 function users() {
-  const [handleCreateEvent, setHandleCreateEvent] = useState(false);
+  const [handleCreateUser, setHandleCreateUser] = useState(false);
   const [open, setOpen] = useState(false)
   const [searchName, setSearchName] = useState('')
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
+  const [Categories, setCategories] = useState<string[]>([]);
+  const [Users, setUsers] = useState<User[]>([]);
+  const [filteredUsers, setFilteredUsers] = useState<User[]>(Users);
   const { toast } = useToast()
-
-  const [formData, setFormData] = useState<NewUser>({
-    email: '',
-    password: '',
-    category: '',
-    role: 'user',
-    status: true,
-  });
+  const catergoryCollectionRef = collection(db, 'category');
+  const UserCollectionRef = collection(db, 'users');
 
 
-  function isValidEmail(email: string): boolean {
-    // Regular expression pattern for validating email addresses
-    const pattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return pattern.test(email);
+
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      email: '',
+      password: '',
+      category: '',
+      name: '',
+      role: 'user',
+      status: true,
+    },
+  })
+
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    console.log(values);
+    try {
+      const { user } = await createUserWithEmailAndPassword(auth, values.email, values.password);
+      await setDoc(doc(UserCollectionRef, user.uid), {
+        ...values,
+        events: [],
+        createdAt: Timestamp.now(),
+        updatedAt: Timestamp.now(),
+      });
+      form.reset();
+      toast({
+        variant: "success",
+        description: "User created successfully",
+      })
+      setHandleCreateUser(false);
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        description: error.message,
+      })
+    }
   }
 
   const Fields = [
+    { label: "No", value: "col-id" },
     { label: "Name", value: "col-name" },
-    { label: "Admission No", value: "col-admissionNo" },
-    { label: "Roll No", value: "col-rollNo" },
-    { label: "Department", value: "col-department" },
-    { label: "Year", value: "col-year" },
+    { label: "Category", value: "col-category" },
+    { label: "Email", value: "col-email" },
     { label: "Action", value: "col-action" },
   ];
 
-
-
   const [selectedItems, setSelectedItems] = useState<string[]>([
+    "col-id",
+    "col-name",
     "col-category",
     "col-email",
-    "col-id",
     "col-action",
   ]);
 
@@ -133,114 +182,68 @@ function users() {
       });
     });
   }
-  useEffect(() => {
-    updateSelectedItems(selectedItems);
-  }, []);
 
-  const Category = [
-    {
-      label: 'Department',
-      value: 'Department'
-    },
-    {
-      label: 'Club',
-      value: 'Club'
-    },
-    {
-      label: 'union',
-      value: 'union'
-    },
-    {
-      label: 'Other',
-      value: 'Other'
-    },
-  ] as const;
 
-  const users = [
-    {
-      email: 'johndoe@example.com',
-      category: 'Department',
-    },
-    {
-      email: 'jahnluis@example.com',
-      category: 'Department',
-    },
-    {
-      email: 'janesmith@example.com',
-      category: 'Admin',
-    },
-    {
-      email: 'jimbrown@example.com',
-      category: 'Student',
-    },
-    {
-      email: 'jakewhite@example.com',
-      category: 'Faculty',
-    },
-  ];
-  const [filteredUsers, setFilteredUsers] = useState<User[]>(users);
+  const getCategory = async () => {
+    try {
+      const categorySnapshot = await getDocs(catergoryCollectionRef);
+      setCategories(categorySnapshot.docs.map((doc) => {
+        const data = doc.data();
+        return data.category;
+      }));
+    } catch (error: any) {
+      console.error(error);
+    }
+  };
 
+  const getUsers = async () => {
+    try {
+      const usersSnapshot = await getDocs(UserCollectionRef);
+      const filteredUsers = usersSnapshot.docs.map((doc) => doc.data()) as User[];
+      const filteredUserRoleUsers = filteredUsers.filter((user) => user.role === 'user');
+      console.log('filteredUserRoleUsers', filteredUserRoleUsers);
+      setUsers(filteredUserRoleUsers);
+      setLoading(false);
+      filterAndSortStudents();
+    } catch (error: any) {
+      console.error(error);
+
+    }
+  }
 
   const closeModal = () => {
-    setHandleCreateEvent(false);
+    setHandleCreateUser(false);
   }
   const openModal = () => {
-    setHandleCreateEvent(true);
+    setHandleCreateUser(true);
   }
 
 
   function filterAndSortStudents() {
-    let filtered = users;
+    let filtered = Users;
     if (searchName !== '') {
-      filtered = filtered.filter((user) => user.email.toLowerCase().includes(searchName.toLowerCase()));
+      filtered = filtered.filter((user) => user.name.toLowerCase().includes(searchName.toLowerCase()));
     } else {
-      filtered = users;
+      filtered = Users;
     }
     return setFilteredUsers(filtered);
   };
 
   useEffect(() => {
+    getUsers();
+    getCategory();
+  }, []);
+
+  useEffect(() => {
+    updateSelectedItems(selectedItems);
+  }, []);
+
+  useEffect(() => {
     filterAndSortStudents();
-  }, [searchName]);
+  }, [Users, searchName]);
 
-
-
-  const UserCollectionRef = collection(db, 'users');
-  const handleSignUp = async (e: React.FormEvent<HTMLFormElement>) => {
-    console.log('formData', formData);
-    e.preventDefault();
-    if (!formData.email || !formData.password) return setError('Email and password required');
-    if (formData.category === '') return setError('Category required');
-    if (formData.password.length < 6) return setError('Password must be at least 6 characters');
-    if (!isValidEmail(formData.email)) return setError('Invalid email address');
-
-    try {
-      const { user } = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
-      console.log('user', user);
-      await setDoc(doc(UserCollectionRef, user.uid), { ...formData });
-      toast({
-        description: "User created",
-      })
-      setFormData({
-        email: '',
-        password: '',
-        category: '',
-        role: 'user',
-        status: true,
-      });
-      setError('Account created');
-    } catch (error: any) {
-      setError(error.message);
-    }
-  };
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value, type } = e.target;
-    const newValue = type === 'number' ? parseInt(value) : value;
-    setFormData({
-      ...formData,
-      [name]: newValue
-    });
+  const toggleShowPassword = () => {
+    setShowPassword(!showPassword);
   };
 
   return (
@@ -294,28 +297,36 @@ function users() {
               <thead className=''>
                 <tr >
                   <th className="col-id tracking-wider">No</th>
+                  <th className="col-name tracking-wider">Name</th>
                   <th className="col-category tracking-wider">Category</th>
                   <th className="col-email tracking-wider">Email</th>
                   <th className="col-action tracking-wider">Action</th>
                 </tr>
               </thead>
               <tbody className=''>
-                {filteredUsers.length ? (
-                  filteredUsers.map((user, index) => (
-                    <tr key={index}>
-                      <td className="col-id whitespace-nowrap">{index + 1}</td>
-                      <td className="col-category whitespace-nowrap">{user.category}</td>
-                      <td className="col-email whitespace-nowrap">{user.email}</td>
-                      <td className='col-action whitespace-nowrap flex gap-1 items-center justify-center'>
-                        <AiFillEdit className='col-action mx-auto text-emerald-700 cursor-pointer hover:text-emerald-600 transition-all ease-in-out' />
-                        <AiFillDelete className='col-action mx-auto text-red-500 cursor-pointer hover:text-red-600 transition-all ease-in-out' />
-                      </td>
-                    </tr>
-                  ))
-                ) : (
+                {loading && loading ? (
                   <tr>
-                    <td colSpan={6} className='text-center'>No data found</td>
+                    <td colSpan={6} className='text-center'>Loading...</td>
                   </tr>
+                ) : (
+                  filteredUsers.length ? (
+                    filteredUsers.map((user, index) => (
+                      <tr key={index}>
+                        <td className="col-id whitespace-nowrap">{index + 1}</td>
+                        <td className="col-name whitespace-nowrap">{user.name}</td>
+                        <td className="col-category whitespace-nowrap">{user.category}</td>
+                        <td className="col-email whitespace-nowrap">{user.email}</td>
+                        <td className='col-action whitespace-nowrap flex gap-1 items-center justify-center'>
+                          <AiFillEdit className='col-action mx-auto text-emerald-700 cursor-pointer hover:text-emerald-600 transition-all ease-in-out' />
+                          <AiFillDelete className='col-action mx-auto text-red-500 cursor-pointer hover:text-red-600 transition-all ease-in-out' />
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={6} className='text-center'>No data found</td>
+                    </tr>
+                  )
                 )}
               </tbody>
             </table>
@@ -328,7 +339,7 @@ function users() {
         </div> */}
       </div>
 
-      <Dialog open={handleCreateEvent} onOpenChange={closeModal}>
+      <Dialog open={handleCreateUser} onOpenChange={closeModal}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
@@ -342,67 +353,119 @@ function users() {
           </DialogHeader>
           <div className='flex flex-col gap-5 w-full  mx-auto'>
             <div className='w-full'>
-              <form onSubmit={handleSignUp} className='flex flex-col gap-5 w-full max-w-[320px] mx-auto mt-4'>
-
-                <label htmlFor="email" className='font-semibold text-sm dark:text-white'>Email</label>
-                <Input type="email" placeholder="Email" name="email" className='h-[50px]' value={formData.email} onChange={handleChange} />
-                <label htmlFor="password" className='font-semibold text-sm dark:text-white'>Password</label>
-                <Input type={showPassword ? 'text' : 'password'} placeholder="Password" name="password" className='h-[50px]' value={formData.password} onChange={handleChange} />
-
-                <label htmlFor="title" className='font-semibold text-sm dark:text-white '>Select Category</label>
-                <Popover open={open} onOpenChange={setOpen}>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      role="combobox"
-                      aria-expanded={open}
-                      className="w-full justify-between h-[50px] dark:text-white bg-slate-100"
-                    >
-                      {formData.category
-                        ? Category.find((item) => item.value === formData.category)?.label
-                        : "Select Department..."}
-                      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-full p-0">
-                    <Command>
-                      <CommandInput placeholder="Search Department..." />
-                      <CommandEmpty>No framework found.</CommandEmpty>
-                      <CommandGroup>
-                        <CommandList className='max-h-[200px]'>
-                          {
-                            Category.map((item) => (
-                              <CommandItem
-                                key={item.value}
-                                value={item.value}
-                                onSelect={(currentValue) => {
-                                  formData.category = currentValue;
-                                  setOpen(false)
-                                }}
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+                  <FormField
+                    control={form.control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel >Name</FormLabel>
+                        <FormControl>
+                          <Input className='h-[50px]' placeholder="eg: - NSS" {...field} />
+                        </FormControl>
+                        {/* <FormDescription>
+                                        This is your public display name.
+                                    </FormDescription> */}
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel >Email</FormLabel>
+                        <FormControl>
+                          <Input type="email" className='h-[50px]' placeholder="Email" {...field} />
+                        </FormControl>
+                        {/* <FormDescription>
+                                        This is your public display name.
+                                    </FormDescription> */}
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="password"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Password</FormLabel>
+                        <FormControl>
+                          <div className='relative'>
+                            <Input type={showPassword ? 'text' : 'password'} className='h-[50px]' placeholder="Password" {...field} />
+                            <div className='absolute right-4 top-4 cursor-pointer dark:text-white' onClick={toggleShowPassword}>
+                              {showPassword ? <IoEyeOutline /> : <IoEyeOffOutline />}
+                            </div>
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="category"
+                    render={({ field: { onChange, value } }) => (
+                      <FormItem>
+                        <FormLabel>Select Category</FormLabel>
+                        <FormControl>
+                          <Popover open={open} onOpenChange={setOpen} >
+                            <PopoverTrigger asChild>
+                              <Button
+                                variant="outline"
+                                role="combobox"
+                                aria-expanded={open}
+                                className="w-full justify-between h-[50px] dark:text-white bg-slate-100"
                               >
-                                <Check
-                                  className={cn(
-                                    "mr-2 h-4 w-4",
-                                    formData.category === item.value ? "opacity-100" : "opacity-0"
-                                  )}
-                                />
-                                {item.label}
-                              </CommandItem>
-                            ))
-                          }
-                        </CommandList>
-                      </CommandGroup>
-                    </Command>
-                  </PopoverContent>
-                </Popover>
-
-
-
-                <div className='flex gap-2 items-center justify-end'>
-                  <Button onClick={closeModal} className='!bg-slate-200 font-bold mt-6 !text-emerald-600'>Cancel</Button>
-                  <Button type="submit" className='!bg-emerald-600 font-bold mt-6 !text-white'>Submit</Button>
-                </div>
-              </form>
+                                {value ? Categories.find((item) => item === value) : "Select Department..."}
+                                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                              </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="!w-full p-0 min-w-[300px]">
+                              <Command>
+                                <CommandInput placeholder="Search Category..." />
+                                <CommandEmpty>No Category found.</CommandEmpty>
+                                <CommandGroup>
+                                  <CommandList className='max-h-[200px]'>
+                                    {
+                                      Categories.map((item, index) => (
+                                        <CommandItem
+                                          key={index}
+                                          value={item}
+                                          onSelect={(currentValue) => {
+                                            onChange(currentValue);
+                                            setOpen(false);
+                                          }}
+                                        >
+                                          <Check
+                                            className={cn(
+                                              "mr-2 h-4 w-4",
+                                              value === item ? "opacity-100" : "opacity-0"
+                                            )}
+                                          />
+                                          {item}
+                                        </CommandItem>
+                                      ))
+                                    }
+                                  </CommandList>
+                                </CommandGroup>
+                              </Command>
+                            </PopoverContent>
+                          </Popover>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <div className='flex gap-2 items-center justify-end'>
+                    <Button type='button' onClick={closeModal} className='!bg-slate-200 font-bold mt-6 !text-emerald-600'>Cancel</Button>
+                    <Button type='submit' className='!bg-emerald-600 font-bold mt-6 !text-white'>Submit</Button>
+                  </div>
+                </form>
+              </Form>
             </div>
           </div>
 
@@ -412,4 +475,4 @@ function users() {
   )
 }
 
-export default users
+export default users;
