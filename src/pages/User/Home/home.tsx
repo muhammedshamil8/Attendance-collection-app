@@ -1,18 +1,15 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { db, auth } from '@/config/firebase';
-import { collection, getDocs, addDoc, doc, getDoc, setDoc, DocumentReference, updateDoc, documentId, query, where, Timestamp, orderBy, deleteDoc } from 'firebase/firestore';
-import { ToastAction } from "@/components/ui/toast"
+import { collection, getDocs, addDoc, doc, getDoc,  DocumentReference, updateDoc, documentId, query, where, Timestamp, orderBy, deleteDoc } from 'firebase/firestore';
 import { useToast } from "@/components/ui/use-toast"
-import { AiFillEdit, AiFillDelete, AiFillEye } from "react-icons/ai";
+import { AiFillEdit, AiFillDelete, } from "react-icons/ai";
 import { Button } from '@/components/ui/button';
 import { LuPlus } from "react-icons/lu";
 import {
     Dialog,
     DialogContent,
-    DialogDescription,
     DialogHeader,
     DialogTitle,
-    DialogTrigger,
 } from "@/components/ui/dialog"
 import { Input } from '@/components/ui/input';
 import { format } from "date-fns"
@@ -33,7 +30,6 @@ import { z } from "zod"
 import {
     Form,
     FormControl,
-    FormDescription,
     FormField,
     FormItem,
     FormLabel,

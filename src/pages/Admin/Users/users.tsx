@@ -1,13 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import  { useEffect, useState } from 'react';
 import { LuPlus } from "react-icons/lu";
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog"
 import { Input } from '@/components/ui/input';
 import { AiFillEdit, AiFillDelete } from "react-icons/ai";
@@ -15,12 +13,8 @@ import { IoIosArrowDown, IoIosSearch } from "react-icons/io";
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
   DropdownMenuCheckboxItem,
 } from "@/components/ui/dropdown-menu"
 import { Check, ChevronsUpDown } from "lucide-react"
@@ -40,9 +34,8 @@ import {
 } from "@/components/ui/popover"
 
 import { auth, db} from '@/config/firebase';
-import { createUserWithEmailAndPassword, signOut } from 'firebase/auth';
-import { collection, doc, addDoc, setDoc, getDocs, Timestamp } from 'firebase/firestore';
-import { ToastAction } from "@/components/ui/toast"
+import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { collection, doc,  setDoc, getDocs, Timestamp } from 'firebase/firestore';
 import { useToast } from "@/components/ui/use-toast"
 
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -51,14 +44,12 @@ import { z } from "zod"
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from "@/components/ui/form"
 import { IoEyeOffOutline, IoEyeOutline } from 'react-icons/io5';
-import { set } from 'date-fns';
 
 const formSchema = z.object({
   email: z.string().email({ message: 'Invalid email address' }),
@@ -86,7 +77,6 @@ function users() {
   const [handleCreateUser, setHandleCreateUser] = useState(false);
   const [open, setOpen] = useState(false)
   const [searchName, setSearchName] = useState('')
-  const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [Categories, setCategories] = useState<string[]>([]);

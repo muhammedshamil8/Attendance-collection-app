@@ -1,24 +1,19 @@
-"use client"
-import React, { useEffect, useState } from 'react';
+import  { useEffect, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog"
 import { Input } from '@/components/ui/input';
-import { AiFillEdit, AiFillDelete } from "react-icons/ai";
+import {  AiFillDelete } from "react-icons/ai";
 import { IoMdArrowDropdown, IoIosArrowDown, IoIosSearch } from "react-icons/io";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
   DropdownMenuRadioGroup,
@@ -51,7 +46,6 @@ import { z } from "zod"
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -102,7 +96,7 @@ function Event() {
   const eventCollectionRef = collection(db, 'events');
   const [Department, setDepartment] = useState<string[]>([]);
   const [students, setStudnets] = useState<Student[]>([]);
-  const [filteredStudents, setFilteredStudents] = useState<Student[]>(students);
+  const [ , setFilteredStudents] = useState<Student[]>(students);
   const [filteredAttendedStudents, setFilteredAttendedStudents] = useState<Student[]>(students);
   const [selectedStudents, setSelectedStudents] = useState<string[]>([]);
   const [attendedStudents, setAttendedStudents] = useState<string[]>([]);

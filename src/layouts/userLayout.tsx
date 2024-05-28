@@ -5,16 +5,14 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
     Sheet,
     SheetContent,
-    SheetDescription,
     SheetHeader,
     SheetTitle,
-    SheetTrigger,
     SheetFooter,
 } from "@/components/ui/sheet"
 import { Button } from '@/components/ui/button';
 import { FaHome } from "react-icons/fa";
 import { LogOut } from 'lucide-react';
-import { auth, db } from '@/config/firebase';
+import { auth} from '@/config/firebase';
 import { signOut } from 'firebase/auth';
 import { useToast } from '@/components/ui/use-toast';
 import AuthRoleRequire from '@/components/router/AuthRoleRequire';
@@ -29,7 +27,7 @@ const UserLayout: React.FC = ({ }) => {
     const { pathname } = location;
     const { toast } = useToast();
     const UserProfile = auth.currentUser?.photoURL ? auth.currentUser?.photoURL : undefined;
-    const [userDp, setUserDp] = useState<string | undefined>('Me');
+    const [userDp] = useState<string | undefined>('Me');
 
 
     const closeSideBar = () => {

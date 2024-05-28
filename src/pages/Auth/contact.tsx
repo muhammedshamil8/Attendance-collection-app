@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { auth } from '@/config/firebase';
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from 'firebase/auth';
+// import { auth } from '@/config/firebase';
+// import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from 'firebase/auth';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Textarea } from "@/components/ui/textarea"
@@ -13,77 +13,84 @@ import {
 } from "@/components/ui/select"
 import {
     Dialog,
-    DialogClose,
     DialogContent,
     DialogDescription,
     DialogFooter,
     DialogHeader,
-    DialogTitle,
-    DialogTrigger,
 } from "@/components/ui/dialog"
 import  ErrorImg  from "@/assets/error.svg"
-import SuccessImg from "@/assets/succes.svg"
+import { useToast } from '@/components/ui/use-toast';
+// import SuccessImg from "@/assets/succes.svg"
 
 
 
 const Contact: React.FC = () => {
     const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [showPassword, setShowPassword] = useState(false);
-    const [error, setError] = useState('');
+    // const [password, setPassword] = useState('');
+    // const [showPassword, setShowPassword] = useState(false);
+    // const [error, setError] = useState('');
     const [showDialog, setShowDialog] = useState(false);
+    const { toast } = useToast();
 
-    function isValidEmail(email: string): boolean {
-        // Regular expression pattern for validating email addresses
-        const pattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return pattern.test(email);
-    }
+    // function isValidEmail(email: string): boolean {
+    //     // Regular expression pattern for validating email addresses
+    //     const pattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    //     return pattern.test(email);
+    // }
 
-    const handleSignIn = async () => {
-        if (!email || !password) return setError('Email and password required');
-        if (password.length < 6) return setError('Password must be at least 6 characters');
-        if (!isValidEmail(email)) return setError('Invalid email address');
-        try {
-            await signInWithEmailAndPassword(auth, email, password);
-            setError('Signed in');
-        } catch (error: any) {
-            setError(error.message);
-        }
-    };
+    // const handleSignIn = async () => {
+    //     if (!email || !password) return setError('Email and password required');
+    //     if (password.length < 6) return setError('Password must be at least 6 characters');
+    //     if (!isValidEmail(email)) return setError('Invalid email address');
+    //     try {
+    //         await signInWithEmailAndPassword(auth, email, password);
+    //         setError('Signed in');
+    //     } catch (error: any) {
+    //         setError(error.message);
+    //     }
+    // };
 
-    const handleSignUp = async () => {
-        setShowDialog(true);
-        if (!email || !password) return setError('Email and password required');
-        if (password.length < 6) return setError('Password must be at least 6 characters');
-        if (!isValidEmail(email)) return setError('Invalid email address');
+    // const handleSignUp = async () => {
+    //     setShowDialog(true);
+    //     if (!email || !password) return setError('Email and password required');
+    //     if (password.length < 6) return setError('Password must be at least 6 characters');
+    //     if (!isValidEmail(email)) return setError('Invalid email address');
 
-        try {
-            await createUserWithEmailAndPassword(auth, email, password);
-            setError('Account created');
-        } catch (error: any) {
-            setError(error.message);
-        }
-    };
+    //     try {
+    //         await createUserWithEmailAndPassword(auth, email, password);
+    //         setError('Account created');
+    //     } catch (error: any) {
+    //         setError(error.message);
+    //     }
+    // };
 
-    const handleSignOut = async () => {
-        try {
-            await signOut(auth);
-            setError('Signed out');
-        } catch (error: any) {
-            setError(error.message);
-        }
-    }
+    // const handleSignOut = async () => {
+    //     try {
+    //         await signOut(auth);
+    //         setError('Signed out');
+    //     } catch (error: any) {
+    //         setError(error.message);
+    //     }
+    // }
 
-    const handleContact = () => {
-        setError('Contact admin');
-    }
+    // const handleContact = () => {
+    //     setError('Contact admin');
+    // }
 
-    const toggleShowPassword = () => {
-        setShowPassword(!showPassword);
-    };
+    // const toggleShowPassword = () => {
+    //     setShowPassword(!showPassword);
+    // };
     const handleDialogClose = () => {
         setShowDialog(false);
       };
+
+      const handleClick = () => {
+        toast({
+            title: 'Feature not available',
+            description: 'This feature is not available at the moment',
+            duration: 2000,
+        });
+    }
 
     return (
         <div className='flex flex-col gap-10 justify-around items-center h-full min-h-[600px] max-h-screen '>
@@ -118,8 +125,8 @@ const Contact: React.FC = () => {
                     <Textarea placeholder="Type your message here..." className='dark:text-white border dark:border-slate-900 focus:border-emerald-400 dark:focus:border-emerald-400 p-3' />
                 </div>
                 <div className='flex gap-2 items-center justify-end'>
-                    <Button onClick={handleSignUp} className='!bg-slate-200 font-bold mt-6 !text-emerald-600'>Cancel</Button>
-                    <Button onClick={handleSignUp} className='!bg-emerald-600 font-bold mt-6 !text-white'>Submit</Button>
+                    <Button  className='!bg-slate-200 font-bold mt-6 !text-emerald-600'>Cancel</Button>
+                    <Button onClick={handleClick} className='!bg-emerald-600 font-bold mt-6 !text-white'>Submit</Button>
                 </div>
 
             </div>

@@ -1,11 +1,11 @@
 import { ModeToggle } from '@/components/mode-toggle';
-import React, { useCallback,  useState } from 'react';
+import React, { useCallback } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { FaHome } from "react-icons/fa";
 import { LogOut } from 'lucide-react';
 import ActiveBadge from '@/components/ActiveBadge';
-import { auth, db } from '@/config/firebase';
+import { auth } from '@/config/firebase';
 import {  signOut } from 'firebase/auth';
 import { useToast } from '@/components/ui/use-toast';
 import AuthRoleRequire from '@/components/router/AuthRoleRequire';

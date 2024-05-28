@@ -1,20 +1,17 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect,  useState } from 'react';
 import { db, auth } from '@/config/firebase';
-import { collection, getDocs, addDoc, doc, query, where, Timestamp, orderBy, deleteDoc } from 'firebase/firestore';
+import { collection, getDocs, addDoc, doc,  Timestamp,  deleteDoc } from 'firebase/firestore';
 import { useToast } from "@/components/ui/use-toast"
-import { AiFillEdit, AiFillDelete, AiFillEye } from "react-icons/ai";
+import {  AiFillDelete, AiFillEye } from "react-icons/ai";
 import { Button } from '@/components/ui/button';
 import { LuPlus } from "react-icons/lu";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog"
 import { Input } from '@/components/ui/input';
-import { useNavigate } from 'react-router-dom';
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
@@ -27,7 +24,6 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form"
-import { set } from 'date-fns';
 import { onAuthStateChanged } from 'firebase/auth';
 
 const formSchema = z.object({

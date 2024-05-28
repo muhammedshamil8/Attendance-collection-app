@@ -47,25 +47,7 @@ const AuthRoleRequire: React.FC<AuthRoleRequireProps> = ({ role, children }) => 
             const userDocRef = doc(UserCollectionRef, userID);
             const userDocSnap = await getDoc(userDocRef);
             const Userrole = userDocSnap.data()?.role;
-
-            if (role === 'admin') {
-                 if (Userrole === 'user') {
-                    toast({
-                        variant: 'destructive',
-                        title: 'Access denied',
-                        description: 'You dont have permission to access this page',
-                    });
-                    navigate('/')
-                }else if (Userrole !== 'admin') {
-                    await signOut(auth);
-                    toast({
-                        variant: 'destructive',
-                        title: 'Access denied',
-                        description: 'You need to login as an admin to access this page',
-                    });
-                    navigate('/signin');
-                }
-            } else if (role === 'user' ) {
+            if (role === 'user') {
                 if (Userrole === 'admin') {
                     toast({
                         variant: 'destructive',
@@ -79,6 +61,23 @@ const AuthRoleRequire: React.FC<AuthRoleRequireProps> = ({ role, children }) => 
                         variant: 'destructive',
                         title: 'Access denied',
                         description: 'You need to login to access this page',
+                    });
+                    navigate('/signin');
+                }
+            } else if (role === 'admin') {
+                if (Userrole === 'user') {
+                    toast({
+                        variant: 'destructive',
+                        title: 'Access denied',
+                        description: 'You dont have permission to access this page',
+                    });
+                    navigate('/')
+                } else if (Userrole !== 'admin') {
+                    await signOut(auth);
+                    toast({
+                        variant: 'destructive',
+                        title: 'Access denied',
+                        description: 'You need to login as an admin to access this page',
                     });
                     navigate('/signin');
                 }

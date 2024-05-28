@@ -1,13 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import  { useEffect, useState } from 'react';
 import { LuPlus } from "react-icons/lu";
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog"
 import { Input } from '@/components/ui/input';
 import { AiFillEdit, AiFillDelete } from "react-icons/ai";
@@ -15,8 +13,6 @@ import { IoIosArrowDown, IoIosSearch } from "react-icons/io";
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
   DropdownMenuRadioGroup,
@@ -45,13 +41,12 @@ import { z } from "zod"
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from "@/components/ui/form"
-import { Timestamp, addDoc, collection, deleteDoc, doc, getDocs, setDoc, updateDoc } from 'firebase/firestore';
+import { Timestamp, collection, deleteDoc, doc, getDocs, setDoc, updateDoc } from 'firebase/firestore';
 import { db } from '@/config/firebase';
 import { useToast } from '@/components/ui/use-toast';
 

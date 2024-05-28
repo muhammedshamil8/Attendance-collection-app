@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { auth, db } from '@/config/firebase';
-import { onAuthStateChanged, signInWithEmailAndPassword, signOut } from 'firebase/auth';
+import { signInWithEmailAndPassword, signOut } from 'firebase/auth';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { IoEyeOffOutline, IoEyeOutline } from "react-icons/io5";
-import { toast, useToast } from '@/components/ui/use-toast';
+import { useToast } from '@/components/ui/use-toast';
 import { doc, collection, getDoc } from 'firebase/firestore';
 import { useNavigate } from 'react-router-dom';
 
@@ -14,7 +14,6 @@ import { z } from "zod"
 import {
     Form,
     FormControl,
-    FormDescription,
     FormField,
     FormItem,
     FormLabel,
@@ -34,7 +33,7 @@ const Login: React.FC = () => {
     const [showPassword, setShowPassword] = useState(false);
     const navigate = useNavigate();
     const { toast } = useToast();
-    const UserCollectionRef = collection(db, 'users');
+    // const UserCollectionRef = collection(db, 'users');
 
     // useEffect(() => {
     //     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -216,7 +215,9 @@ const Login: React.FC = () => {
                     </form>
                 </Form>
             </div>
-
+            <p className='text-sm dark:text-white'>
+                Are you a user? <button onClick={() => navigate('/signin')} className='underline text-emerald-700'>Sign in</button>
+            </p>
 
         </div>
     );
