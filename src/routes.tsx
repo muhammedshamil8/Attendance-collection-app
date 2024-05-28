@@ -24,6 +24,7 @@ import Contact from "./pages/Auth/contact";
 import Event from "./pages/User/Event/event";
 import Students from "./pages/Admin/Students/students";
 import About from "./pages/Auth/about";
+import ProfilePage from "./pages/User/Profile/profile";
 
 
 const router = createBrowserRouter([
@@ -42,6 +43,14 @@ const router = createBrowserRouter([
       {
         path: '/event/:id',
         element: <Event />
+      },
+      {
+        path: '/about',
+        element: <About />
+      },
+      {
+        path: '/profile',
+        element: <ProfilePage />
       }
     ]
   },
@@ -71,14 +80,13 @@ const router = createBrowserRouter([
     path: "/",
     element: <AuthLayout />,
     children: [
-
-      {
-        path: "/admin/login",
-        element: <Login />
-      },
       {
         path: "/signin",
         element: <SignIn />
+      },
+      {
+        path: "/admin/login",
+        element: <Login />
       },
       {
         path: '/contact',
