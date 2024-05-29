@@ -19,6 +19,7 @@ import {
     FormLabel,
     FormMessage,
 } from "@/components/ui/form"
+import { LoadingButton } from '@/components/ui/loading-button';
 
 const formSchema = z.object({
     email: z.string().email({
@@ -34,20 +35,28 @@ const SignIn: React.FC = () => {
     const navigate = useNavigate();
     const { toast } = useToast();
     const UserCollectionRef = collection(db, 'users');
-    const [newLogin, setNewLogin] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const [isNewUser, setIsNewUser] = useState(true);
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, async (user) => {
             if (user) {
-                if (!newLogin) {
-                    toast({
-                        title: 'Already signed in',
-                        description: 'You are already signed in',
-                    });
+                if (isNewUser) {
+                    // New user signing in for the first time, don't show "Already signed in" message
+                    setIsNewUser(false);
+                } else {
+                    // User is already signed in, show "Already signed in" message
                     const userDocRef = doc(UserCollectionRef, user.uid);
                     const userDocSnap = await getDoc(userDocRef);
                     const role = userDocSnap.data()?.role;
-    
+
+                    if (form.getValues('email') === '' && form.getValues('password') === '') {
+                        toast({
+                            title: 'Already signed in',
+                            description: 'You are already signed in',
+                        });
+                    }
+
                     if (role === 'admin') {
                         navigate('/dashboard');
                     } else if (role === 'user') {
@@ -57,7 +66,7 @@ const SignIn: React.FC = () => {
             }
         });
         return () => unsubscribe();
-    }, []);
+    }, [isNewUser]);
 
     const handleContact = () => {
         navigate('/contact');
@@ -71,13 +80,13 @@ const SignIn: React.FC = () => {
         resolver: zodResolver(formSchema),
         defaultValues: {
             email: "",
-            password: "password",
+            password: "",
         },
     })
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
         try {
-            setNewLogin(true);
+            setLoading(true);
             const userCredential = await signInWithEmailAndPassword(auth, values.email, values.password);
             const user = userCredential.user;
 
@@ -128,9 +137,15 @@ const SignIn: React.FC = () => {
                 description: error.message,
                 duration: 2000,
             });
+        } finally {
+            setLoading(false);
         }
     }
 
+    const handleFilldata = () => {
+        form.setValue('email', 'user@gmail.com');
+        form.setValue('password', 'password');
+    }
     return (
         <div className='flex flex-col gap-10 justify-around items-center h-full min-h-[600px] max-h-screen '>
 
@@ -140,6 +155,12 @@ const SignIn: React.FC = () => {
                     Welcome!
                 </h1>
                 <p className='text-gray-600 -mt-2 text-sm dark:text-gray-300'>Sign to your account</p>
+            </div>
+            <div className='bg-slate-200 rounded-md py-3 px-6'>
+                <p className='underline text-center'>For testing</p>
+                <p>Email: user@gmail.com</p>
+                <p>Password: password</p>
+                <Button onClick={handleFilldata} className='w-full my-2 text-white font-semibold'>Click to Fill </Button>
             </div>
             <div className='flex flex-col gap-5 w-full max-w-[320px]'>
                 <Form {...form}>
@@ -181,8 +202,7 @@ const SignIn: React.FC = () => {
                                 </FormItem>
                             )}
                         />
-
-                        <Button type="submit" className='!bg-emerald-600 font-bold mt-6 !text-white w-full'>Login</Button>
+                        <LoadingButton className='!bg-emerald-600 font-bold mt-6 !text-white w-full' loading={loading} type="submit">Login</LoadingButton>
 
                     </form>
                 </Form>

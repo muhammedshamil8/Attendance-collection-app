@@ -19,6 +19,7 @@ import {
     FormLabel,
     FormMessage,
 } from "@/components/ui/form"
+import { LoadingButton } from '@/components/ui/loading-button';
 
 const formSchema = z.object({
     email: z.string().email({
@@ -33,6 +34,7 @@ const Login: React.FC = () => {
     const [showPassword, setShowPassword] = useState(false);
     const navigate = useNavigate();
     const { toast } = useToast();
+    const [loading, setLoading] = useState(false);
     // const UserCollectionRef = collection(db, 'users');
 
     // useEffect(() => {
@@ -59,13 +61,14 @@ const Login: React.FC = () => {
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            email: "admin@gmail.com",
-            password: "password",
+            email: "",
+            password: "",
         },
     })
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
         try {
+            setLoading(true);
             const userCredential = await signInWithEmailAndPassword(auth, values.email, values.password);
             const user = userCredential.user;
 
@@ -116,6 +119,8 @@ const Login: React.FC = () => {
                 description: error.message,
                 duration: 2000,
             });
+        } finally {
+            setLoading(false);
         }
     }
     // async function onSubmit(values: z.infer<typeof formSchema>) {
@@ -161,6 +166,11 @@ const Login: React.FC = () => {
         setShowPassword(!showPassword);
     };
 
+    const handleFilldata = () => {
+        form.setValue('email', 'user@gmail.com');
+        form.setValue('password', 'password');
+    }
+
     return (
         <div className='flex flex-col gap-10 justify-around items-center h-full min-h-[600px] max-h-screen '>
             <div className='text-center '>
@@ -168,6 +178,12 @@ const Login: React.FC = () => {
                     Welcome!
                 </h1>
                 <p className='text-gray-600 -mt-2 text-sm dark:text-gray-300'>Sign to your admin account</p>
+            </div>
+            <div className='bg-slate-200 rounded-md py-3 px-6'>
+                <p className='underline text-center'>For testing</p>
+                <p>Email: admin@gmail.com</p>
+                <p>Password: password</p>
+                <Button onClick={handleFilldata} className='w-full my-2 text-white font-semibold'>Click to Fill </Button>
             </div>
             <div className='flex flex-col gap-5 w-full max-w-[320px]'>
                 <Form {...form}>
@@ -210,7 +226,7 @@ const Login: React.FC = () => {
                             )}
                         />
 
-                        <Button type="submit" className='!bg-emerald-600 font-bold mt-6 !text-white w-full'>Login</Button>
+                        <LoadingButton className='!bg-emerald-600 font-bold mt-6 !text-white w-full' loading={loading} type="submit">Login</LoadingButton>
 
                     </form>
                 </Form>
