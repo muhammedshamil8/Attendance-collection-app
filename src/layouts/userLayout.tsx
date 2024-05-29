@@ -106,7 +106,7 @@ const UserLayout: React.FC = ({ }) => {
         <AuthRoleRequire role='user'>
             <div className='bg-slate-200 dark:bg-slate-900 min-h-screen overflow-auto'>
                 {/* Add your header component here */}
-                <header className='border-b border-slate-200   flex items-center justify-around p-2 shadow-lg dark:shadow-black/30 dark:border-slate-950'>
+                <header className='border-b border-slate-200   flex items-center justify-between p-2 px-4 shadow-lg dark:shadow-black/30 dark:border-slate-950'>
                     {/* Add your header content */}
                     <button className='flex items-center justify-center h-full w-fit ' onClick={openSidebar}>
                         <div className={`nav-icon ${isOpen ? 'open' : ''}`} >
@@ -194,8 +194,13 @@ const UserLayout: React.FC = ({ }) => {
                 </main>
 
                 {/* Add your footer component here */}
-                <footer>
+                <footer className=''>
                     {/* Add your footer content */}
+                    <div className='bg-slate-200 dark:bg-slate-950 border-t border-slate-200 dark:border-slate-900 p-2 text-center'>
+                        <p className='text-sm text-gray-500 dark:text-gray-300'>
+                            IEDC EMEA &copy; {new Date().getFullYear()} All rights reserved.
+                        </p>
+                    </div>
                 </footer>
             </div>
         </AuthRoleRequire>

@@ -139,6 +139,7 @@ function Students() {
     try {
       const docRef = doc(studentCollectionRef, values.admissionNo);
       await setDoc(docRef, {
+        id: values.admissionNo,
         ...values,
         createdAt: Timestamp.now(),
         updatedAt: Timestamp.now(),

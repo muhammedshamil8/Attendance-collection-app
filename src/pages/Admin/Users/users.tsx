@@ -34,8 +34,7 @@ import {
 } from "@/components/ui/popover"
 
 import { auth, db } from '@/config/firebase';
-import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { collection, doc, setDoc, getDocs, Timestamp } from 'firebase/firestore';
+import { collection, getDocs, Timestamp } from 'firebase/firestore';
 import { useToast } from "@/components/ui/use-toast"
 
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -63,7 +62,8 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
-
+import { onAuthStateChanged } from 'firebase/auth';
+import { MdPersonAddDisabled } from "react-icons/md";
 
 const formSchema = z.object({
   email: z.string().email({ message: 'Invalid email address' }),
@@ -72,6 +72,7 @@ const formSchema = z.object({
   name: z.string().min(3, { message: 'Name must be at least 3 characters' }),
   role: z.string(),
   status: z.boolean(),
+  Head_name: z.string().nonempty({ message: 'Head name required' }),
 })
 
 
@@ -99,7 +100,43 @@ function users() {
   const { toast } = useToast()
   const catergoryCollectionRef = collection(db, 'category');
   const UserCollectionRef = collection(db, 'users');
+  const [token, setToken] = useState<string>('');
+  const APIURL = import.meta.env.VITE_API_URL;
 
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        user.getIdToken().then((idToken) => {
+          setToken(idToken);
+        }
+        );
+      } else {
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    if (token) {
+      fetchData();
+    }
+  }, [token]);
+
+  const fetchData = async () => {
+    try {
+      const response = await fetch(`${APIURL}/todos`, {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        }
+      });
+      const data = await response.json();
+      console.log(data);
+    } catch (error: any) {
+      console.error(error);
+    }
+  }
 
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -109,36 +146,89 @@ function users() {
       password: '',
       category: '',
       name: '',
+      Head_name: '',
       role: 'user',
       status: true,
     },
   })
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    toast({
-      title: 'This feature not available',
-      description: 'This feature is not available at the moment',
-    });
-    return;
     try {
-      const { user } = await createUserWithEmailAndPassword(auth, values.email, values.password);
-      await setDoc(doc(UserCollectionRef, user.uid), {
-        ...values,
-        events: [],
+      const data = {
+        email: values.email,
+        password: values.password,
+        category: values.category,
+        name: values.name,
+        Head_name: values.Head_name,
+        role: values.role,
+        status: values.status,
         createdAt: Timestamp.now(),
-        updatedAt: Timestamp.now(),
+      }
+      const response = await fetch(`${APIURL}/create-user`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(data),
       });
-      form.reset();
-      toast({
-        variant: "success",
-        description: "User created successfully",
-      })
-      setHandleCreateUser(false);
+
+      const responseData = await response.json();
+      console.log('responseData', responseData);
+      if (response.ok) {
+        toast({
+          variant: 'success',
+          description: responseData.message,
+        });
+        getUsers();
+        form.reset();
+        closeModal();
+      } else {
+        toast({
+          variant: 'destructive',
+          description: responseData.message,
+        });
+      }
     } catch (error: any) {
+      console.error(error);
       toast({
-        variant: "destructive",
+        variant: 'destructive',
         description: error.message,
       })
+      closeModal();
+      form.reset();
+    }
+  }
+
+  const DeleteUser = async (id: string) => {
+    try {
+      const response = await fetch(`${APIURL}/delete-user/${id}`, {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        }
+      });
+      const data = await response.json();
+      console.log(data);
+      if (response.ok) {
+        toast({
+          variant: 'success',
+          description: data.message,
+        });
+        getUsers();
+      } else {
+        toast({
+          variant: 'destructive',
+          description: data.message,
+        });
+      }
+    }
+    catch (error: any) {
+      console.error(error);
+      toast({
+        variant: 'destructive',
+        description: error.message,
+      });
     }
   }
 
@@ -207,7 +297,7 @@ function users() {
   const getUsers = async () => {
     try {
       const usersSnapshot = await getDocs(UserCollectionRef);
-      const filteredUsers = usersSnapshot.docs.map((doc) => doc.data()) as User[];
+      const filteredUsers = usersSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })) as User[];
       const filteredUserRoleUsers = filteredUsers.filter((user) => user.role === 'user');
       console.log('filteredUserRoleUsers', filteredUserRoleUsers);
       setUsers(filteredUserRoleUsers);
@@ -328,8 +418,8 @@ function users() {
                         <td className="col-name whitespace-nowrap">{user.name}</td>
                         <td className="col-category whitespace-nowrap">{user.category}</td>
                         <td className="col-email whitespace-nowrap">{user.email}</td>
-                        <td className='col-action whitespace-nowrap flex gap-1 items-center justify-center'>
-                          <AiFillEdit className='col-action mx-auto text-emerald-700 cursor-pointer hover:text-emerald-600 transition-all ease-in-out' onClick={() => toast({ description: 'this feature on process' })} />
+                        <td className='col-action whitespace-nowrap flex gap-1 items-center justify-center h-full w-full'>
+                        <AiFillEdit className='col-action mx-auto text-emerald-700 cursor-pointer hover:text-emerald-600 transition-all ease-in-out' onClick={() => toast({ description: 'this feature on process' })} />
                           <AlertDialog>
                             <AlertDialogTrigger>
                               <AiFillDelete className='col-action mx-auto text-red-500 cursor-pointer hover:text-red-600 transition-all ease-in-out' />
@@ -341,15 +431,17 @@ function users() {
                                 </AlertDialogTitle>
                                 <AlertDialogDescription>
                                   This action cannot be undone. it will delete the user permanently.
-                                  so be sure before you continue.
+                                  so be sure before you continue. the user & user all data will be lost.
+                                  you can disable the user if you want to keep the data.
                                 </AlertDialogDescription>
                               </AlertDialogHeader>
                               <AlertDialogFooter>
                                 <AlertDialogCancel className='dark:text-white'>Cancel</AlertDialogCancel>
-                                <AlertDialogAction onClick={() => toast({ description: 'this feature on process' })}>Continue</AlertDialogAction>
+                                <AlertDialogAction onClick={() => DeleteUser(user.id)}>Continue</AlertDialogAction>
                               </AlertDialogFooter>
                             </AlertDialogContent>
                           </AlertDialog>
+                          <MdPersonAddDisabled className='col-action mx-auto text-emerald-700 cursor-pointer hover:text-gray-500 transition-all ease-in-out' onClick={() => toast({ description: 'this disable feature on working' })} />
                         </td>
                       </tr>
                     ))
@@ -382,7 +474,7 @@ function users() {
                             you can create an event here
                         </DialogDescription> */}
           </DialogHeader>
-          <div className='flex flex-col gap-5 w-full  mx-auto'>
+          <div className='flex flex-col gap-5 w-full  mx-auto max-w-[320px]'>
             <div className='w-full'>
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -391,9 +483,25 @@ function users() {
                     name="name"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel >Name</FormLabel>
+                        <FormLabel>Team Name</FormLabel>
                         <FormControl>
-                          <Input className='h-[50px]' placeholder="eg: - NSS" {...field} />
+                          <Input className='h-[50px]' placeholder="eg: - IEDC" {...field} />
+                        </FormControl>
+                        {/* <FormDescription>
+                                        This is your public display name.
+                                    </FormDescription> */}
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                   <FormField
+                    control={form.control}
+                    name="Head_name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel >Head Name</FormLabel>
+                        <FormControl>
+                          <Input className='h-[50px]' placeholder="Faisal Sir" {...field} />
                         </FormControl>
                         {/* <FormDescription>
                                         This is your public display name.

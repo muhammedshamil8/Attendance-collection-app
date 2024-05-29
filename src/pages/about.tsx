@@ -11,12 +11,33 @@ interface Story {
 const About: React.FC = () => {
     const [parent] = useAutoAnimate();
     const [Accordion, setAccordion] = useState<Story[]>([
-        { title: 'The Ant and The Grasshopper', showStory: false, story: "The ant and the grasshopper were good friends..." },
-        { title: 'The Boy Who Cried Wolf', showStory: false, story: "There was once a shepherd boy who liked to play tricks..." },
+        { title: 'For What this App developed?', showStory: false, story: "This app is developed for collecting students data much faster for an  each event conducting EMEA college" },
+        { title: 'How to use this App?', showStory: false, story: "This app is very simple to use. Just click on the 'Add, Student' button and fill the form with the student's details. Then click on the 'Submit' button to save the student's details."},
+        { title: 'How to delete a student?', showStory: false, story: "To delete a student, click on the 'Delete' button on the student's card."},
+        { title: 'Can i add any student?', showStory: false, story: "No, you can't add any student. You can only add students who are studying in EMEA college."},
+        { title: 'Who can use this App?', showStory: false, story: "This app is only for the EMEA college staff. They can use this app to collect students' data for each event."},
+        { title: 'How to contact the developer?', showStory: false, story: "You can contact the developer by clicking on the '...Me...' link at the bottom of the page." },
+        {
+            title: 'Who developed this App?',
+            showStory: false,
+            story: "This app is developed by Zamil. He is a full-stack developer with 3 years of experience in web development. He is passionate about learning new technologies and building web applications."
+        },
+        {
+            title: 'Who desined this App?',
+            showStory: false,
+            story: "This app is designed by dayyan. He is a UI/UX designer with 2 years of experience in designing web applications. He is passionate about creating user-friendly interfaces and designing beautiful websites."
+        },
+        {
+            title: 'whose idea is this App?',
+            showStory: false,
+            story: "This app is an idea of the IEDC CCO Hasil. He is a creative thinker with 5 years of experience in entrepreneurship. He is passionate about creating innovative solutions and building successful businesses."
+        }
+
+
     ]);
 
     return (
-        <div className="bg-gray-900 text-white p-8 pb-2 m-4 flex flex-col justify-between">
+        <div className="bg-gray-900 text-white p-8 pb-2 m-4 flex flex-col justify-between min-h-screen">
             <div>
             <h1 className="text-4xl font-bold mb-4">About This App</h1>
             <p className="text-lg mb-4">

@@ -130,7 +130,6 @@ const Home: React.FC = () => {
             const eventRef = await addDoc(eventsCollectionRef, data);
             const eventID = eventRef.id;
             await addEventToUser(userID!, eventID, UserCollectionRef);
-            getEvents();
             toast({
                 variant: 'success',
                 description: "Event created successfully",
@@ -159,6 +158,7 @@ const Home: React.FC = () => {
                 const updatedEvents = [...userDocSnap.data()?.events, eventRef];
                 await updateDoc(userRef, { events: updatedEvents });
                 console.log("Event added to user's events successfully.");
+                getEvents();
             } else {
                 console.error("User not found.");
             }
@@ -284,9 +284,9 @@ const Home: React.FC = () => {
     }, []);
 
     return (
-        <div className='flex flex-col gap-10 justify-start items-center h-full mt-20 max-w-[320px] mx-auto mb-10' ref={formRef}>
+        <div className='flex flex-col gap-10 justify-start items-center h-full mt-20 max-w-[320px] mx-auto mb-10 min-h-screen' ref={formRef}>
             <div>
-                <h1 className='font-bold text-green-900 text-[30px]'>
+                <h1 className='font-bold text-green-900 dark:text-emerald-400 text-[30px]'>
                     Select Event
                 </h1>
             </div>
@@ -302,7 +302,7 @@ const Home: React.FC = () => {
 
             <div className='w-full relative mb-4'>
                 <IoIosSearch className='absolute bottom-4 right-2 text-lg text-emerald-700' />
-                <Input type="search" placeholder="Search Event..." name="title" className='h-[50px] pr-8' value={search} onChange={(e) => setSearch(e.target.value)}/>
+                <Input type="search" placeholder="Search Event..." name="title" className='h-[50px] pr-8' value={search} onChange={(e) => setSearch(e.target.value)} />
             </div>
 
             <div className='w-full flex flex-col gap-4 '>
@@ -315,9 +315,9 @@ const Home: React.FC = () => {
                     </>
                 ) : (filteredEvents.length > 0 ? (
                     filteredEvents.map((event: Event) => (
-                        <div className="bg-white rounded-md shadow-md p-4 flex flex-col gap-3 overflow-hidden" key={event.id}>
+                        <div className="bg-white rounded-md shadow-md p-4 flex flex-col gap-3 overflow-hidden dark:bg-slate-300" key={event.id}>
                             <div className="flex justify-between  flex-col ">
-                                <div className="flex gap-2 justify-end w-full">
+                                <div className="flex gap-4 justify-end w-full">
                                     <AiFillEdit
                                         className="text-blue-500 cursor-pointer"
                                         onClick={() => EditEvent(event.id, event)}
@@ -356,7 +356,7 @@ const Home: React.FC = () => {
                                 {event.eventDate?.toDate().toDateString()}
                             </p>
                             <button
-                                className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-md"
+                                className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 px-4 rounded-md transition-all ease-in-out"
                                 onClick={() => handleOpenEvent(event.id)}
                             >
                                 View Details
