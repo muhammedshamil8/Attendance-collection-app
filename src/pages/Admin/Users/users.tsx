@@ -52,6 +52,19 @@ import {
 import { IoEyeOffOutline, IoEyeOutline } from 'react-icons/io5';
 import { ImSpinner6 } from "react-icons/im";
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
+
+
 const formSchema = z.object({
   email: z.string().email({ message: 'Invalid email address' }),
   password: z.string().min(6, { message: 'Password must be at least 6 characters' }),
@@ -312,8 +325,27 @@ function users() {
                         <td className="col-category whitespace-nowrap">{user.category}</td>
                         <td className="col-email whitespace-nowrap">{user.email}</td>
                         <td className='col-action whitespace-nowrap flex gap-1 items-center justify-center'>
-                          <AiFillEdit className='col-action mx-auto text-emerald-700 cursor-pointer hover:text-emerald-600 transition-all ease-in-out' />
+                          <AiFillEdit className='col-action mx-auto text-emerald-700 cursor-pointer hover:text-emerald-600 transition-all ease-in-out' onClick={() => toast({description: 'this feature on process'})}/>
+                          <AlertDialog>
+                            <AlertDialogTrigger>
                           <AiFillDelete className='col-action mx-auto text-red-500 cursor-pointer hover:text-red-600 transition-all ease-in-out' />
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle className='dark:text-white'>
+                                  Are you sure you want to delete this user?
+                                </AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  This action cannot be undone. it will delete the user permanently.
+                                  so be sure before you continue.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel className='dark:text-white'>Cancel</AlertDialogCancel>
+                                <AlertDialogAction onClick={() => toast({description: 'this feature on process'})}>Continue</AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
                         </td>
                       </tr>
                     ))

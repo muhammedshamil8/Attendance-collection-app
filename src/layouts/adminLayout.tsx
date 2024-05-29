@@ -6,9 +6,21 @@ import { FaHome } from "react-icons/fa";
 import { LogOut } from 'lucide-react';
 import ActiveBadge from '@/components/ActiveBadge';
 import { auth } from '@/config/firebase';
-import {  signOut } from 'firebase/auth';
+import { signOut } from 'firebase/auth';
 import { useToast } from '@/components/ui/use-toast';
 import AuthRoleRequire from '@/components/router/AuthRoleRequire';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
+
 
 const AdminLayout: React.FC = () => {
     const navigate = useNavigate();
@@ -77,9 +89,28 @@ const AdminLayout: React.FC = () => {
                             {pathname === item.route && <ActiveBadge />}
                         </div>
                     ))}
-                    <div className='absolute border left-2 top-2 bg-white dark:bg-black rounded-md h-10 w-10 flex items-center justify-center cursor-pointer hover:bg-slate-100 dark:hover:bg-gray-900' onClick={handleSignOut}>
-                        <LogOut className='h-4 w-4 text-black dark:text-white' />
-                    </div>
+                        <AlertDialog>
+                            <AlertDialogTrigger >
+                            <div className='absolute border left-2 top-2 bg-white dark:bg-black rounded-md h-10 w-10 flex items-center justify-center cursor-pointer hover:bg-slate-100 dark:hover:bg-gray-900'>
+                                <LogOut className='h-4 w-4 text-black dark:text-white' />
+                                </div>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                                <AlertDialogHeader>
+                                    <AlertDialogTitle className='dark:text-white'>
+                                        Are you sure you want to sign out?
+                                    </AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                        You will be redirected to the sign in page. You will have to sign in again to access your account.
+                                        so make sure you have saved your work before signing out.
+                                    </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                    <AlertDialogCancel className='dark:text-white'>Cancel</AlertDialogCancel>
+                                    <AlertDialogAction onClick={handleSignOut}>Continue</AlertDialogAction>
+                                </AlertDialogFooter>
+                            </AlertDialogContent>
+                        </AlertDialog>
                 </header>
 
                 <main className='custom-container'>

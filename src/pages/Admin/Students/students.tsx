@@ -1,4 +1,4 @@
-import  { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { LuPlus } from "react-icons/lu";
 import { Button } from '@/components/ui/button';
 import {
@@ -50,6 +50,19 @@ import { Timestamp, collection, deleteDoc, doc, getDocs, setDoc, updateDoc } fro
 import { db } from '@/config/firebase';
 import { useToast } from '@/components/ui/use-toast';
 import { ImSpinner6 } from "react-icons/im";
+
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
+
 
 const formSchema = z.object({
   name: z.string().nonempty({ message: "Name is required" }),
@@ -444,9 +457,9 @@ function Students() {
               <tbody className=''>
                 {loading && loading ? (
                   <tr>
-                     <td colSpan={7} className='text-center '>
+                    <td colSpan={7} className='text-center '>
                       <div className='flex items-center justify-center'>
-                      <ImSpinner6 className='animate-spin h-8 w-8 text-gray-400 text-lg mx-2' /> Loading...
+                        <ImSpinner6 className='animate-spin h-8 w-8 text-gray-400 text-lg mx-2' /> Loading...
                       </div>
                     </td>
                   </tr>
@@ -466,7 +479,27 @@ function Students() {
                         <td className="col-year whitespace-nowrap">{getStudentYear(student.joinedYear)}</td>
                         <td className='col-action whitespace-nowrap flex gap-1 items-center justify-center'>
                           <AiFillEdit className='col-action mx-auto text-emerald-700 cursor-pointer hover:text-emerald-600 transition-all ease-in-out' onClick={() => handleEditStudent(student)} />
-                          <AiFillDelete className='col-action mx-auto text-red-500 cursor-pointer hover:text-red-600 transition-all ease-in-out' onClick={() => handleDeleteStudnet(student.id)} />
+                          <AlertDialog>
+                            <AlertDialogTrigger>
+                              <AiFillDelete className='col-action mx-auto text-red-500 cursor-pointer hover:text-red-600 transition-all ease-in-out' />
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle className='dark:text-white'>
+                                  Are you sure you want to delete this student?
+                                </AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  This action cannot be undone. it will delete the student permanently.
+                                  so be sure before you continue.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel className='dark:text-white'>Cancel</AlertDialogCancel>
+                                <AlertDialogAction onClick={() => handleDeleteStudnet(student.id)}>Continue</AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+
                         </td>
                       </tr>
                     ))

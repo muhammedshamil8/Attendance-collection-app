@@ -1,4 +1,4 @@
-import  { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -8,7 +8,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Input } from '@/components/ui/input';
-import {  AiFillDelete } from "react-icons/ai";
+import { AiFillDelete } from "react-icons/ai";
 import { IoMdArrowDropdown, IoIosArrowDown, IoIosSearch } from "react-icons/io";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
@@ -61,6 +61,19 @@ import {
 } from "@/components/ui/tooltip"
 import { ImSpinner6 } from "react-icons/im";
 
+
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
+
 const formSchema = z.object({
   name: z.string().nonempty({ message: "Name is required" }),
   admissionNo: z.string().nonempty({ message: "Admission no is required" }),
@@ -97,7 +110,7 @@ function Event() {
   const eventCollectionRef = collection(db, 'events');
   const [Department, setDepartment] = useState<string[]>([]);
   const [students, setStudnets] = useState<Student[]>([]);
-  const [ , setFilteredStudents] = useState<Student[]>(students);
+  const [, setFilteredStudents] = useState<Student[]>(students);
   const [filteredAttendedStudents, setFilteredAttendedStudents] = useState<Student[]>(students);
   const [selectedStudents, setSelectedStudents] = useState<string[]>([]);
   const [attendedStudents, setAttendedStudents] = useState<string[]>([]);
@@ -450,9 +463,9 @@ function Event() {
               <tbody className=''>
                 {loading && loading ? (
                   <tr>
-                     <td colSpan={7} className='text-center '>
+                    <td colSpan={7} className='text-center '>
                       <div className='flex items-center justify-center'>
-                      <ImSpinner6 className='animate-spin h-8 w-8 text-gray-400 text-lg mx-2' /> Loading...
+                        <ImSpinner6 className='animate-spin h-8 w-8 text-gray-400 text-lg mx-2' /> Loading...
                       </div>
                     </td>
                   </tr>
@@ -467,7 +480,26 @@ function Event() {
                         <td className="col-department whitespace-nowrap">{student.department}</td>
                         <td className="col-year whitespace-nowrap">{student.year}</td>
                         <td className='col-action whitespace-nowrap'>
-                          <AiFillDelete className='col-action mx-auto text-red-500 cursor-pointer hover:text-red-600 transition-all ease-in-out' onClick={() => RemoveStudentFromList(student.id)} />
+                          <AlertDialog>
+                            <AlertDialogTrigger>
+                              <AiFillDelete className='col-action mx-auto text-red-500 cursor-pointer hover:text-red-600 transition-all ease-in-out' />
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle className='dark:text-white'>
+                                  Are you sure you want to delete this studnet?
+                                </AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  The student will be removed from the list. You can add them again.
+                                  so be sure to continue.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel className='dark:text-white'>Cancel</AlertDialogCancel>
+                                <AlertDialogAction onClick={() => RemoveStudentFromList(student.id)}>Continue</AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
                         </td>
                       </tr>
                     ))
@@ -484,7 +516,7 @@ function Event() {
         </div>
         <div className='flex gap-2 items-center justify-center'>
           <Button onClick={() => handleClearAttendedStudents} className='!bg-slate-300 font-bold mt-6 !text-emerald-600'>Clear</Button>
-          <Button onClick={closeModal} className='!bg-emerald-600 font-bold mt-6 !text-white'>Export</Button>
+          <Button onClick={() => toast({description: 'This feature not aviable now'})} className='!bg-emerald-600 font-bold mt-6 !text-white'>Export</Button>
         </div>
       </div>
 

@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { db, auth } from '@/config/firebase';
-import { collection, getDocs, addDoc, doc, getDoc,  DocumentReference, updateDoc, documentId, query, where, Timestamp, orderBy, deleteDoc } from 'firebase/firestore';
+import { collection, getDocs, addDoc, doc, getDoc, DocumentReference, updateDoc, documentId, query, where, Timestamp, orderBy, deleteDoc } from 'firebase/firestore';
 import { useToast } from "@/components/ui/use-toast"
 import { AiFillEdit, AiFillDelete, } from "react-icons/ai";
 import { Button } from '@/components/ui/button';
@@ -36,6 +36,19 @@ import {
     FormMessage,
 } from "@/components/ui/form"
 import { onAuthStateChanged } from 'firebase/auth';
+
+
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 
 const formSchema = z.object({
     title: z.string().min(2, {
@@ -295,10 +308,27 @@ const Home: React.FC = () => {
                                         className="text-blue-500 cursor-pointer"
                                         onClick={() => EditEvent(event.id, event)}
                                     />
-                                    <AiFillDelete
-                                        className="text-red-500 cursor-pointer"
-                                        onClick={() => deleteEvent(event.id)}
-                                    />
+
+                                    <AlertDialog>
+                                        <AlertDialogTrigger>
+                                            <AiFillDelete className="text-red-500 cursor-pointer" />
+                                        </AlertDialogTrigger>
+                                        <AlertDialogContent>
+                                            <AlertDialogHeader>
+                                                <AlertDialogTitle className='dark:text-white'>
+                                                    Are you sure you want to delete this Event?
+                                                </AlertDialogTitle>
+                                                <AlertDialogDescription>
+                                                    This action cannot be undone. it will delete the Event permanently.
+                                                    so be sure before you continue.
+                                                </AlertDialogDescription>
+                                            </AlertDialogHeader>
+                                            <AlertDialogFooter>
+                                                <AlertDialogCancel className='dark:text-white'>Cancel</AlertDialogCancel>
+                                                <AlertDialogAction onClick={() => deleteEvent(event.id)}>Continue</AlertDialogAction>
+                                            </AlertDialogFooter>
+                                        </AlertDialogContent>
+                                    </AlertDialog>
                                 </div>
                             </div>
                             <p className="text-gray-600">

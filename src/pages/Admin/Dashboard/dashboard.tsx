@@ -27,6 +27,19 @@ import {
 import { onAuthStateChanged } from 'firebase/auth';
 import { ImSpinner6 } from "react-icons/im";
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
+
+
 const formSchema = z.object({
   category: z.string().nonempty('Category is required'),
 })
@@ -277,9 +290,26 @@ const Dashboard: React.FC = () => {
                 <span className="dark:text-gray-700 text-white font-semibold">{item.category}</span>
                 {/* <span className="text-gray-500 text-xs">({item.createdAt.toDate().toDateString()}) </span> */}
               </div>
-              <button onClick={() => deleteCategory(item.id)}>
-                <AiFillDelete className="text-red-500" />
-              </button>
+              <AlertDialog>
+                <AlertDialogTrigger>
+                  <AiFillDelete className="text-red-500" />
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle className='dark:text-white'>
+                       Are you sure you want to delete this department?
+                    </AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This action cannot be undone. it will delete the department permanently.
+                      so be sure before you continue.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel className='dark:text-white'>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={() => deleteCategory(item.id)}>Continue</AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             </div>
           ))
         ) : (
@@ -303,9 +333,26 @@ const Dashboard: React.FC = () => {
                 <span className="dark:text-gray-700 text-white font-semibold">{item.department}</span>
                 {/* <span className="text-gray-500 text-xs">({item.createdAt.toDate().toDateString()}) </span> */}
               </div>
-              <button onClick={() => deleteDepartment(item.id)}>
-                <AiFillDelete className="text-red-500" />
-              </button>
+              <AlertDialog>
+                <AlertDialogTrigger>
+                  <AiFillDelete className="text-red-500" />
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle className='dark:text-white'>
+                       Are you sure you want to delete this department?
+                    </AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This action cannot be undone. it will delete the department permanently.
+                      so be sure before you continue.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel className='dark:text-white'>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={() => deleteDepartment(item.id)}>Continue</AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             </div>
           ))
         ) : (
