@@ -59,7 +59,7 @@ const ProfilePage: React.FC = () => {
     return (
         <div className="flex flex-col items-center justify-start mt-20 h-screen ">
             {loading && loading ? (
-                 <div className="bg-slate-300 animate-pulse h-60 w-[300px]  rounded-lg shadow-md p-8" />
+                 <div className="bg-slate-300 animate-pulse h-80 w-[300px]  rounded-lg shadow-md p-8" />
             ) : (
                 <div className="bg-white rounded-lg shadow-md p-8 min-w-[300px] overflow-hidden">
                 <div className="flex items-center justify-center mb-4">

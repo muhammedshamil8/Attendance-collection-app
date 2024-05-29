@@ -251,7 +251,7 @@ const Dashboard: React.FC = () => {
 
 
   return (
-    <div className='flex flex-col gap-10 justify-start items-center h-full mt-20 max-w-[320px] mx-auto'>
+    <div className='flex flex-col gap-10 justify-start items-center h-full mt-20 mb-10 max-w-[320px] mx-auto'>
       <div>
         <h1 className='font-bold text-green-900 text-[30px]'>
           Select Event

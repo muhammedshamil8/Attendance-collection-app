@@ -77,7 +77,7 @@ const UserLayout: React.FC = ({ }) => {
         {
             name: 'Contact',
             icon: <FaEnvelope />,
-            route: '/contact'
+            route: '/home/contact'
         }
     ]
 

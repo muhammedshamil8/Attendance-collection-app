@@ -9,7 +9,8 @@ const AuthLayout: React.FC = ({  }) => {
             <header className="flex p-2 w-full justify-end items-end">
                 <ModeToggle />
             </header>
-            <div className="auth-layout__content custom-container md:border-x min-h-full">
+            {/* md:border-x */}
+            <div className="auth-layout__content custom-container  min-h-full">
                 <Outlet />
             </div>
         </div>
