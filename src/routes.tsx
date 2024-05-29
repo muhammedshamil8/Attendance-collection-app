@@ -25,10 +25,7 @@ import Event from "./pages/User/Event/event";
 import Students from "./pages/Admin/Students/students";
 import About from "./pages/Auth/about";
 import ProfilePage from "./pages/User/Profile/profile";
-<<<<<<< HEAD
 // import LandingPage from "./pages/landingPage";
-=======
->>>>>>> f97b5314a8f32f932bc1a7064dff73bc53500a76
 
 const router = createBrowserRouter([
   {
