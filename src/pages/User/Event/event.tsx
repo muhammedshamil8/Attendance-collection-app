@@ -78,7 +78,7 @@ import {
 import PrintTable from '@/components/Pdf';
 import getStudentYear from '@/lib/Year';
 import exportToExcel from '@/lib/Excel';
-
+import BarcodeReader from '@/components/BarcodeReader';
 
 const formSchema = z.object({
   name: z.string().nonempty({ message: "Name is required" }),
@@ -134,6 +134,12 @@ function Event() {
   const { id } = useParams();
   const [event, setEvent] = useState<any>({});
   const [eventLoading, setEventLoading] = useState(true);
+  const [scanModal, setScanModal] = useState(false);
+  const [barcode, setBarcode] = useState<string>('');
+
+  const handleDetected = (result: string) => {
+    setBarcode(result);
+  };
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -150,6 +156,16 @@ function Event() {
   })
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    if (values.id === '') {
+      values.id = values.admissionNo;
+    }
+    const alreadyAdded = students.some(student => student.admissionNo === values.admissionNo);
+    if (alreadyAdded) {
+      return toast({
+        variant: "destructive",
+        description: "Student admission no already added",
+      });
+    }
     try {
       const docRef = doc(studentCollectionRef, values.admissionNo);
       await setDoc(docRef, {
@@ -157,16 +173,17 @@ function Event() {
         createdAt: Timestamp.now(),
         updatedAt: Timestamp.now(),
         active: true,
+      }).then(async () => {
+        toast({
+          variant: "success",
+          description: "Student added successfully",
+        })
+        await getStudents()
+        setSelectedStudents([values.admissionNo]);
+        AddStudenttoList([values.admissionNo]);
+        setHandleCreateStudent(false);
+        form.reset();
       });
-      toast({
-        variant: "success",
-        description: "Student added successfully",
-      })
-      getStudents();
-      setSelectedStudents([...selectedStudents, values.admissionNo]);
-      AddStudenttoList([values.admissionNo]);
-      setHandleCreateStudent(false);
-      form.reset();
     } catch (error: any) {
       toast({
         variant: "destructive",
@@ -176,10 +193,40 @@ function Event() {
   }
 
   const AddStudenttoList = async (ids: string[]) => {
+    await getStudents();
     if (!ids.length) {
       return toast({
         variant: "destructive",
         description: "Please select a student",
+      });
+    } else if (!id) {
+      return toast({
+        variant: "destructive",
+        description: "Event not found",
+      });
+    } else if (ids.includes('')) {
+      return toast({
+        variant: "destructive",
+        description: "Student ID cannot be empty",
+      });
+    }
+    const alreadyAdded = ids.some((id) => attendedStudents.includes(id));
+    if (alreadyAdded) {
+      return toast({
+        variant: "destructive",
+        description: "Student admission no already added",
+      });
+    }
+    console.log(ids);
+    console.log(students);
+    const validStudents = ids.filter((id) => students.some((student) => student.id === id));
+    console.log(validStudents);
+    if (validStudents.length !== ids.length) {
+      return toast({
+        variant: "destructive",
+        title: "Student not found",
+        description: "The student you are trying to add is not found in the our storage. Please check the student admission no and try again.",
+        duration: 6000,
       });
     }
     try {
@@ -384,6 +431,12 @@ function Event() {
   const handleExport = () => {
     setOpenExport(!openExport);
   }
+  const openScanModal = () => {
+    setScanModal(true);
+  }
+  const closeScanModal = () => {
+    setScanModal(false);
+  }
 
 
   const filteredStudentsAdmNo = students.filter((student) => {
@@ -433,12 +486,12 @@ function Event() {
 
 
   return (
-    <div className='flex flex-col gap-10 justify-start items-center h-full mt-20  mx-auto' >
-      <div className='text-center flex flex-col items-center justify-center max-w-[300px] overflow-hidden'>
+    <div className='flex flex-col gap-10 justify-start items-center h-full mt-20  mx-auto min-h-screen' >
+      <div className='text-center flex flex-col items-center justify-center max-w-[500px] overflow-hidden'>
         {eventLoading && eventLoading ? (
           <div className='bg-slate-400 dark:bg-slate-200 animate-pulse w-60 h-12 rounded-md my-2' />
         ) : (
-          <h1 className='font-bold text-green-900 text-[35px] max-w-[300px] text-wrap ' style={{ overflowWrap: 'anywhere' }}>
+          <h1 className='font-bold text-green-900 dark:text-emerald-400 text-[35px] max-w-[350px] text-wrap ' style={{ overflowWrap: 'anywhere' }}>
             {event?.title || 'Event Name'}
           </h1>
         )}
@@ -446,7 +499,7 @@ function Event() {
         {eventLoading && eventLoading ? (
           <div className='bg-slate-400 dark:bg-slate-200  animate-pulse w-60 h-8 rounded-md my-2' />
         ) : (
-          <p className='dark:text-slate-100 max-w-[300px] text-wrap' style={{ overflowWrap: 'anywhere' }}>
+          <p className='dark:text-slate-100 max-w-[500px] text-wrap' style={{ overflowWrap: 'anywhere' }}>
             {event?.description || 'Event Description'}
           </p>
         )}
@@ -466,7 +519,7 @@ function Event() {
           <IoMdArrowDropdown className='text-emerald-700' />
         </Button>
 
-        <Button className='!bg-slate-300 w-full flex justify-between items-center gap-4 font-bold h-[50px] rounded-xl' onClick={() => toast({ description: 'Feature not aviable now on working' })}>
+        <Button className='!bg-slate-300 w-full flex justify-between items-center gap-4 font-bold h-[50px] rounded-xl' onClick={openScanModal}>
           <p className='text-emerald-700'>
             Scan Student
           </p>
@@ -610,7 +663,7 @@ function Event() {
               </AlertDialogHeader>
               <AlertDialogFooter>
                 <AlertDialogCancel className='dark:text-white'>Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={() => handleClearAttendedStudents}>Continue</AlertDialogAction>
+                <AlertDialogAction onClick={handleClearAttendedStudents}>Continue</AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
@@ -860,6 +913,31 @@ function Event() {
             </Tabs>
           </div>
 
+        </DialogContent>
+      </Dialog>
+
+
+
+      <Dialog open={scanModal} onOpenChange={closeScanModal}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              <div className='!text-[30px] !font-bold mx-auto text-center my-4 dark:text-white'>
+                Scan Student Barcode
+              </div>
+            </DialogTitle>
+            <DialogDescription>
+              The barcode will be scanned and the studnet admission number will be detected and you can add the student to the list.
+            </DialogDescription>
+          </DialogHeader>
+          <div>
+            <BarcodeReader onDetected={handleDetected} />
+            <Input type="text" placeholder="Search Admission No" name="title" className='h-[50px] w-full mt-4' value={barcode} onChange={(e) => setBarcode(e.target.value)} />
+            <div className='flex gap-2 items-center justify-center pb-6'>
+              <Button onClick={closeScanModal} className='!bg-slate-200 font-bold mt-4 !text-emerald-600 w-full'>Cancel</Button>
+              <Button onClick={() => AddStudenttoList([barcode])} className='!bg-emerald-600 font-bold mt-4 !text-white w-full'>Submit</Button>
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
     </div>
