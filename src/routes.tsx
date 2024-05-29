@@ -8,11 +8,14 @@ import UserLayout from "@/layouts/userLayout";
 // admin routes
 import Dashboard from "@/pages/Admin/Dashboard/dashboard";
 import Users from "@/pages/Admin/Users/users";
+import Students from "./pages/Admin/Students/students";
 
 
 // user routes
 import Home from "@/pages/User/Home/home";
-
+import Event from "./pages/User/Event/event";
+import ProfilePage from "./pages/User/Profile/profile";
+import AuthContact from "./pages/User/Contact/contact";
 // auth routes
 import Login from "@/pages/Auth/admin/login";
 import SignIn from "@/pages/Auth/user/sigin";
@@ -20,12 +23,12 @@ import SignIn from "@/pages/Auth/user/sigin";
 // error routes
 import NotFound from "@/pages/Errors/NotFound";
 import UnAuth from "@/pages/Errors/unAuth";
+
+// other routes
 import Contact from "./pages/contact";
-import Event from "./pages/User/Event/event";
-import Students from "./pages/Admin/Students/students";
 import About from "./pages/about";
-import ProfilePage from "./pages/User/Profile/profile";
 // import LandingPage from "./pages/landingPage";
+import Test from "./pages/test";
 
 const router = createBrowserRouter([
   {
@@ -38,7 +41,7 @@ const router = createBrowserRouter([
       },
       {
         path: '/home/contact',
-        element: <Contact />
+        element: <AuthContact />
       },
       {
         path: '/event/:id',
@@ -51,7 +54,7 @@ const router = createBrowserRouter([
       {
         path: '/profile',
         element: <ProfilePage />
-      }
+      },
     ]
   },
   {
@@ -95,11 +98,15 @@ const router = createBrowserRouter([
       {
         path: '/about',
         element: <About />
-      }
+      },
+      {
+        path: "/test",
+        element: <Test />
+      },
     ]
   },
   {
-    path: "/403",
+    path: "/401",
     element: <UnAuth />
   },
   {
