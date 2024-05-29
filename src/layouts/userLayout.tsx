@@ -10,7 +10,7 @@ import {
     SheetFooter,
 } from "@/components/ui/sheet"
 import { Button } from '@/components/ui/button';
-import { FaHome } from "react-icons/fa";
+import { FaHome , FaUser , FaGrinStars , FaEnvelope } from "react-icons/fa";
 import { LogOut } from 'lucide-react';
 import { auth } from '@/config/firebase';
 import { signOut } from 'firebase/auth';
@@ -57,7 +57,7 @@ const UserLayout: React.FC = ({ }) => {
         setSidebar(false);
         navigate(route);
     }
-
+    
     const NavItems = [
         {
             name: 'Home',
@@ -66,14 +66,19 @@ const UserLayout: React.FC = ({ }) => {
         },
         {
             name: 'Profile',
-            icon: <FaHome />,
+            icon: <FaUser />,
             route: '/profile'
         },
         {
             name: 'About',
-            icon: <FaHome />,
+            icon: <FaGrinStars />,
             route: '/about'
         },
+        {
+            name: 'Contact',
+            icon: <FaEnvelope />,
+            route: '/contact'
+        }
     ]
 
     const handleSignOut = useCallback(async () => {
@@ -101,7 +106,7 @@ const UserLayout: React.FC = ({ }) => {
         <AuthRoleRequire role='user'>
             <div className='bg-slate-200 dark:bg-slate-900 min-h-screen overflow-auto'>
                 {/* Add your header component here */}
-                <header className='border-b border-slate-900 dark:border-slate-200  flex items-center justify-around p-2'>
+                <header className='border-b border-slate-200   flex items-center justify-around p-2 shadow-lg dark:shadow-black/30 dark:border-slate-950'>
                     {/* Add your header content */}
                     <button className='flex items-center justify-center h-full w-fit ' onClick={openSidebar}>
                         <div className={`nav-icon ${isOpen ? 'open' : ''}`} >
@@ -111,7 +116,7 @@ const UserLayout: React.FC = ({ }) => {
                         </div>
                     </button>
 
-                    <Avatar >
+                    <Avatar onClick={() => navigate('/profile')} className='cursor-pointer'>
                         <AvatarImage src={UserProfile} />
                         <AvatarFallback className='dark:text-white p-2 text-sm'>{userDp}</AvatarFallback>
                     </Avatar>
@@ -123,7 +128,7 @@ const UserLayout: React.FC = ({ }) => {
                     <Sheet open={sidebar} onOpenChange={closeSideBar}>
                         <SheetContent className='flex flex-col h-full justify-between'>
                             <SheetHeader>
-                                <SheetTitle>YoYo!</SheetTitle>
+                                <SheetTitle>App Name!</SheetTitle>
                                 {/* <SheetDescription>
                                 This action cannot be undone. This will permanently delete your account
                                 and remove your data from our servers.

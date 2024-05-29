@@ -55,7 +55,7 @@ const About: React.FC = () => {
             </div>
 
             <p className='text-center mt-20'>
-                crafted with <span className='text-red-600'>❤</span> by <a href="https://zamil.me" className='underline'>Me...</a>
+                crafted with <span className='text-red-600'>❤</span> by <a href="https://zamil.me" className='hover:underline'>...Me...</a>
             </p>
         </div>
     );

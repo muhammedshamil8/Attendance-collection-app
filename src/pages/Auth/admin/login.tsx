@@ -167,7 +167,7 @@ const Login: React.FC = () => {
     };
 
     const handleFilldata = () => {
-        form.setValue('email', 'user@gmail.com');
+        form.setValue('email', 'admin@gmail.com');
         form.setValue('password', 'password');
     }
 

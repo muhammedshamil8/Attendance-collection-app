@@ -2,7 +2,8 @@ import { ModeToggle } from '@/components/mode-toggle';
 import React, { useCallback } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { FaHome } from "react-icons/fa";
+import { FaHome , FaUsers } from "react-icons/fa";
+import { PiStudentBold } from "react-icons/pi";
 import { LogOut } from 'lucide-react';
 import ActiveBadge from '@/components/ActiveBadge';
 import { auth } from '@/config/firebase';
@@ -36,12 +37,12 @@ const AdminLayout: React.FC = () => {
         },
         {
             name: 'Users',
-            icon: <FaHome />,
+            icon: <FaUsers />,
             route: '/dashboard/users'
         },
         {
             name: 'Students',
-            icon: <FaHome />,
+            icon: <PiStudentBold />,
             route: '/dashboard/students'
         },
     ];
@@ -81,6 +82,7 @@ const AdminLayout: React.FC = () => {
                         <div key={item.route} className='relative'>
                             <Button
                                 className={`min-w-[130px] hover:text-white hover:bg-emerald-700 dark:hover:bg-emerald-700 dark:hover:text-white font-semibold transition-all ease-in-out duration-300
+                                flex items-center justify-center gap-2 
                                 ${pathname === item.route ? 'bg-emerald-700 dark:bg-emerald-700 dark:text-white text-white' : 'bg-slate-300 text-emerald-700 dark:bg-slate-300 dark:text-emerald-700'}`}
                                 onClick={() => handleNavigate(item.route)}
                             >

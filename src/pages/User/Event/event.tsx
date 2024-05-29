@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
@@ -20,7 +21,7 @@ import {
   DropdownMenuRadioItem,
   DropdownMenuCheckboxItem,
 } from "@/components/ui/dropdown-menu"
-import { Check, ChevronsUpDown } from "lucide-react"
+import { Check, ChevronsUpDown, SmileIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
 import {
   Command,
@@ -74,6 +75,11 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 
+import PrintTable from '@/components/Pdf';
+import getStudentYear from '@/lib/Year';
+import exportToExcel from '@/lib/Excel';
+
+
 const formSchema = z.object({
   name: z.string().nonempty({ message: "Name is required" }),
   admissionNo: z.string().nonempty({ message: "Admission no is required" }),
@@ -93,14 +99,23 @@ interface Student {
   admissionNo: string;
   rollNo: string;
   department: string;
-  year: string;
+  joinedYear: string;
   email?: string;
   phone?: string;
+}
+interface PdfData {
+  No: number;
+  AdmissionNo: string;
+  Name: string;
+  RollNo: string;
+  Department: string;
+  JoinedYear: string;
 }
 
 function Event() {
   const [handleCreateStudent, setHandleCreateStudent] = useState(false);
-  const [open, setOpen] = useState(false)
+  const [open, setOpen] = useState(false);
+  const [openExport, setOpenExport] = useState(false);
   const [searchAdmNo, setSearchAdmNo] = useState('')
   const [searchName, setSearchName] = useState('')
   const [loading, setLoading] = useState(true);
@@ -112,10 +127,13 @@ function Event() {
   const [students, setStudnets] = useState<Student[]>([]);
   const [, setFilteredStudents] = useState<Student[]>(students);
   const [filteredAttendedStudents, setFilteredAttendedStudents] = useState<Student[]>(students);
+  const [PdfData, setPdfData] = useState<PdfData[]>([]);
   const [selectedStudents, setSelectedStudents] = useState<string[]>([]);
   const [attendedStudents, setAttendedStudents] = useState<string[]>([]);
   const [AttendedStudentsObj, setAttendedStudentsObj] = useState<Student[]>([]);
   const { id } = useParams();
+  const [event, setEvent] = useState<any>({});
+  const [eventLoading, setEventLoading] = useState(true);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -183,11 +201,17 @@ function Event() {
     }
   }
 
-  const RemoveStudentFromList = async (id: string) => {
+  const RemoveStudentFromList = async (Studnetid: string) => {
+    if (!Studnetid) {
+      return toast({
+        variant: "destructive",
+        description: "Please select a student",
+      });
+    }
     try {
       const updateDoc = doc(eventCollectionRef, id);
       await setDoc(updateDoc, {
-        attendees: arrayRemove(id)
+        attendees: arrayRemove(Studnetid)
       }, { merge: true });
       toast({
         variant: "success",
@@ -221,11 +245,37 @@ function Event() {
     try {
       const eventDoc = await getDoc(doc(eventCollectionRef, id));
       const event = eventDoc.data();
+      setEvent(event);
+      setEventLoading(false);
+      console.log(event);
       if (event) {
         const attendedStudents = event.attendees;
         setAttendedStudents(attendedStudents);
         const attendedStudentObjects = students.filter((student) => attendedStudents.includes(student.admissionNo));
         setAttendedStudentsObj(attendedStudentObjects);
+        const newFilteredAttendedStudents = attendedStudentObjects.map((student, index) => {
+          const { admissionNo } = student;
+          const studentData = students.find((s) => s.admissionNo === admissionNo);
+          if (studentData) {
+            return {
+              No: index + 1,
+              AdmissionNo: studentData.admissionNo,
+              Name: studentData.name,
+              RollNo: studentData.rollNo,
+              Department: studentData.department,
+              JoinedYear: getStudentYear(studentData.joinedYear),
+            };
+          }
+          return null;
+        }).filter((s) => s !== null) as Array<{
+          No: number;
+          AdmissionNo: string;
+          Name: string;
+          RollNo: string;
+          Department: string;
+          JoinedYear: string;
+        }>;
+        setPdfData(newFilteredAttendedStudents);
         setFilteredAttendedStudents(attendedStudentObjects)
         setLoading(false);
       }
@@ -331,6 +381,10 @@ function Event() {
   const openModal = () => {
     setHandleCreateStudent(true);
   }
+  const handleExport = () => {
+    setOpenExport(!openExport);
+  }
+
 
   const filteredStudentsAdmNo = students.filter((student) => {
     if (searchAdmNo === '') return null;
@@ -349,9 +403,9 @@ function Event() {
       if (selectedItems2 === 'department') {
         return a.department.localeCompare(b.department);
       } else if (selectedItems2 === 'year-desc') {
-        return b.year.localeCompare(a.year);
+        return b.joinedYear.localeCompare(a.joinedYear);
       } else if (selectedItems2 === 'year-asc') {
-        return a.year.localeCompare(b.year);
+        return a.joinedYear.localeCompare(b.joinedYear);
       } else {
         return 0;
       }
@@ -376,25 +430,50 @@ function Event() {
       getAttendedStudents();
     }
   }, [students]);
+
+
   return (
     <div className='flex flex-col gap-10 justify-start items-center h-full mt-20  mx-auto' >
-      <div>
-        <h1 className='font-bold text-green-900 text-[30px]'>
-          Event Name
-        </h1>
-        <p>
-          This is the event page
-        </p>
+      <div className='text-center flex flex-col items-center justify-center max-w-[300px] overflow-hidden'>
+        {eventLoading && eventLoading ? (
+          <div className='bg-slate-400 dark:bg-slate-200 animate-pulse w-60 h-12 rounded-md my-2' />
+        ) : (
+          <h1 className='font-bold text-green-900 text-[35px] max-w-[300px] text-wrap ' style={{ overflowWrap: 'anywhere' }}>
+            {event?.title || 'Event Name'}
+          </h1>
+        )}
+
+        {eventLoading && eventLoading ? (
+          <div className='bg-slate-400 dark:bg-slate-200  animate-pulse w-60 h-8 rounded-md my-2' />
+        ) : (
+          <p className='dark:text-slate-100 max-w-[300px] text-wrap' style={{ overflowWrap: 'anywhere' }}>
+            {event?.description || 'Event Description'}
+          </p>
+        )}
+
+        {event?.eventDate && (
+          <p className='text-slate-400 text-sm'>
+            ( {new Date(event?.eventDate?.toDate()).toDateString()} )
+          </p>
+        )}
       </div>
 
-      <div className='w-full'>
+      <div className='w-full flex flex-col gap-4'>
         <Button className='!bg-slate-300 w-full flex justify-between items-center gap-4 font-bold h-[50px] rounded-xl' onClick={openModal}>
           <p className='text-emerald-700'>
             Select Student
           </p>
           <IoMdArrowDropdown className='text-emerald-700' />
         </Button>
+
+        <Button className='!bg-slate-300 w-full flex justify-between items-center gap-4 font-bold h-[50px] rounded-xl' onClick={() => toast({ description: 'Feature not aviable now on working' })}>
+          <p className='text-emerald-700'>
+            Scan Student
+          </p>
+          <IoMdArrowDropdown className='text-emerald-700' />
+        </Button>
       </div>
+
 
       <div className='w-full flex flex-col gap-4 pb-8'>
         <div className="overflow-x-auto">
@@ -478,7 +557,7 @@ function Event() {
                         <td className="col-admissionNo whitespace-nowrap">{student.admissionNo}</td>
                         <td className="col-rollNo whitespace-nowrap">{student.rollNo}</td>
                         <td className="col-department whitespace-nowrap">{student.department}</td>
-                        <td className="col-year whitespace-nowrap">{student.year}</td>
+                        <td className="col-year whitespace-nowrap">{getStudentYear(student.joinedYear)}</td>
                         <td className='col-action whitespace-nowrap'>
                           <AlertDialog>
                             <AlertDialogTrigger>
@@ -496,7 +575,7 @@ function Event() {
                               </AlertDialogHeader>
                               <AlertDialogFooter>
                                 <AlertDialogCancel className='dark:text-white'>Cancel</AlertDialogCancel>
-                                <AlertDialogAction onClick={() => RemoveStudentFromList(student.id)}>Continue</AlertDialogAction>
+                                <AlertDialogAction onClick={() => RemoveStudentFromList(student.id ? student.id : student.admissionNo)}>Continue</AlertDialogAction>
                               </AlertDialogFooter>
                             </AlertDialogContent>
                           </AlertDialog>
@@ -514,17 +593,67 @@ function Event() {
           </div>
 
         </div>
-        <div className='flex gap-2 items-center justify-center'>
-          <Button onClick={() => handleClearAttendedStudents} className='!bg-slate-300 font-bold mt-6 !text-emerald-600'>Clear</Button>
-          <Button onClick={() => toast({description: 'This feature not aviable now'})} className='!bg-emerald-600 font-bold mt-6 !text-white'>Export</Button>
+        <div className='flex gap-4 items-center justify-center'>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button className='!bg-slate-300 font-bold mt-6 !text-emerald-600 min-w-[120px]'>Clear</Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle className='dark:text-white'>
+                  Are you sure you want to delete all students from this table?
+                </AlertDialogTitle>
+                <AlertDialogDescription>
+                  The All students will be removed from the list. You can add them again.The table will be clear and empty.
+                  so be careful.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel className='dark:text-white'>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={() => handleClearAttendedStudents}>Continue</AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+
+          <Button onClick={() => handleExport()} className='!bg-emerald-600 font-bold mt-6 !text-white min-w-[120px]'>Export</Button>
         </div>
+        <Dialog open={openExport} onOpenChange={handleExport}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>
+                <div className='!text-[30px] !font-bold mx-auto text-center my-8 dark:text-white'>
+                  Choose Export Type  <SmileIcon className='text-emerald-600 mx-2 h-8 w-8' style={{ display: 'inline-block' }} />
+                </div>
+              </DialogTitle>
+              <DialogDescription>
+                <p className=' text-center'>
+                  you can export the data to excel or pdf. Choose the type of export you want. use the button below to export the data.
+                  {/* <SmileIcon className='text-emerald-600 mx-2 h-6 w-5' style={{ display: 'inline-block' }} /> */}
+                </p>
+              </DialogDescription>
+            </DialogHeader>
+            {eventLoading && eventLoading ? (
+              <div className='bg-slate-300 animate-pulse w-[80%] h-16 rounded-md mx-auto mt-4' />
+            ) : (
+              PdfData.length > 0 ? (
+                <div className='flex flex-col md:flex-row items-center justify-center md:gap-4 w-full' onClick={() => setTimeout(handleExport, 300)}>
+                  <PrintTable data={PdfData} heading={event?.name || 'Event Data'} />
+                  <Button onClick={() => exportToExcel(PdfData, event?.title || 'EventData')} className='!bg-emerald-600 font-bold mt-6 !text-white md:my-3 w-full'>Export to Excel</Button>
+                </div>
+              ) : (
+                <Button onClick={handleExport} className='text-center dark:text-black font-semibold'>No data found</Button>
+              )
+            )}
+          </DialogContent>
+        </Dialog>
+
       </div>
 
       <Dialog open={handleCreateStudent} onOpenChange={closeModal}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              <div className='!text-[30px] !font-bold mx-auto text-center my-8 dark:text-white'>
+              <div className='!text-[30px] !font-bold mx-auto text-center my-4 dark:text-white'>
                 Choose Student
               </div>
             </DialogTitle>
@@ -545,7 +674,7 @@ function Event() {
                     <Input type="text" placeholder="Search Admission No" name="title" className='h-[50px]' value={searchAdmNo} onChange={(e) => setSearchAdmNo(e.target.value)} />
                   </div>
 
-                  <div className='min-h-[450px] max-h-[450px] overflow-auto p-4 border w-full my-2 rounded-md flex flex-col gap-3'>
+                  <div className='min-h-[415px] max-h-[450px] overflow-auto p-4 border w-full my-2 rounded-md flex flex-col gap-3'>
                     {filteredStudentsAdmNo.length ? (
                       filteredStudentsAdmNo.map((student) => (
                         <div key={student.admissionNo} className='bg-slate-100 p-2 px-4 rounded-md flex items-center justify-between hover:bg-slate-200 transition-all ease-in-out cursor-default'>
@@ -579,19 +708,19 @@ function Event() {
                         </div>
                       ))
                     ) : (
-                      <div className='text-center text-black'>No data found</div>
+                      <div className='text-center text-black dark:text-white font-semibold'>No data found</div>
                     )}
                   </div>
-                  <div className='flex gap-2 items-center justify-end'>
-                    <Button onClick={closeModal} className='!bg-slate-200 font-bold mt-4 !text-emerald-600'>Cancel</Button>
-                    <Button onClick={() => AddStudenttoList(selectedStudents)} className='!bg-emerald-600 font-bold mt-4 !text-white'>Submit</Button>
+                  <div className='flex gap-2 items-center justify-center pb-6'>
+                    <Button onClick={closeModal} className='!bg-slate-200 font-bold mt-4 !text-emerald-600 w-full'>Cancel</Button>
+                    <Button onClick={() => AddStudenttoList(selectedStudents)} className='!bg-emerald-600 font-bold mt-4 !text-white w-full'>Submit</Button>
                   </div>
                 </div>
               </TabsContent>
               <TabsContent value="createStudent" className='w-full'>
                 <div className='flex flex-col gap-5 w-full max-w-[320px] mx-auto mt-4'>
                   <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                       <FormField
                         control={form.control}
                         name="name"
@@ -720,9 +849,9 @@ function Event() {
                           </FormItem>
                         )}
                       />
-                      <div className='flex gap-2 items-center justify-end'>
-                        <Button type='button' onClick={closeModal} className='!bg-slate-200 font-bold mt-6 !text-emerald-600'>Cancel</Button>
-                        <Button type='submit' className='!bg-emerald-600 font-bold mt-6 !text-white'>Submit</Button>
+                      <div className='flex gap-2 items-center justify-center pb-6'>
+                        <Button type='button' onClick={closeModal} className='!bg-slate-200 font-bold mt-6 !text-emerald-600 w-full'>Cancel</Button>
+                        <Button type='submit' className='!bg-emerald-600 font-bold mt-6 !text-white w-full'>Submit</Button>
                       </div>
                     </form>
                   </Form>

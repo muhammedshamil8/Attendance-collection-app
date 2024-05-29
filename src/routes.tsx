@@ -20,10 +20,10 @@ import SignIn from "@/pages/Auth/user/sigin";
 // error routes
 import NotFound from "@/pages/Errors/NotFound";
 import UnAuth from "@/pages/Errors/unAuth";
-import Contact from "./pages/Auth/contact";
+import Contact from "./pages/contact";
 import Event from "./pages/User/Event/event";
 import Students from "./pages/Admin/Students/students";
-import About from "./pages/Auth/about";
+import About from "./pages/about";
 import ProfilePage from "./pages/User/Profile/profile";
 // import LandingPage from "./pages/landingPage";
 

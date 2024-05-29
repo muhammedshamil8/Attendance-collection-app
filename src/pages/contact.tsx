@@ -26,6 +26,8 @@ import { useToast } from '@/components/ui/use-toast';
 
 const Contact: React.FC = () => {
     const [email, setEmail] = useState('');
+    const [category, setCategory] = useState('');
+    const [message, setMessage] = useState('');
     // const [password, setPassword] = useState('');
     // const [showPassword, setShowPassword] = useState(false);
     // const [error, setError] = useState('');
@@ -91,6 +93,11 @@ const Contact: React.FC = () => {
             duration: 2000,
         });
     }
+    const handleClear = () => {
+        setEmail('')
+        setCategory('')
+        setMessage('')
+    }
 
     return (
         <div className='flex flex-col gap-10 justify-around items-center h-full min-h-[600px] max-h-screen '>
@@ -108,9 +115,12 @@ const Contact: React.FC = () => {
 
                 <div>
                     <label htmlFor="password" className='font-semibold text-sm dark:text-white'>Select Category</label>
-                    <Select >
+                    <Select 
+                    value={category}
+                    onValueChange={(value) => setCategory(value)}>
                         <SelectTrigger className="w-full  h-[50px] border dark:border-slate-900 focus:border-emerald-400 dark:focus:border-emerald-400">
-                            <SelectValue placeholder="Your Category"  />
+                            <SelectValue placeholder="Your Category" 
+                             />
                         </SelectTrigger>
                         <SelectContent>
                             <SelectItem value="light">Club</SelectItem>
@@ -122,11 +132,13 @@ const Contact: React.FC = () => {
                 </div>
                 <div>
                     <label htmlFor="message" className='font-semibold text-sm dark:text-white'>Your Message</label>
-                    <Textarea placeholder="Type your message here..." className='dark:text-white border dark:border-slate-900 focus:border-emerald-400 dark:focus:border-emerald-400 p-3' />
+                    <Textarea placeholder="Type your message here..." className='dark:text-white border dark:border-slate-900 focus:border-emerald-400 dark:focus:border-emerald-400 p-3' 
+                    value={message} 
+                    onChange={(e) => setMessage(e.target.value)}/>
                 </div>
                 <div className='flex gap-2 items-center justify-end'>
-                    <Button  className='!bg-slate-200 font-bold mt-6 !text-emerald-600'>Cancel</Button>
-                    <Button onClick={handleClick} className='!bg-emerald-600 font-bold mt-6 !text-white'>Submit</Button>
+                    <Button  className='!bg-slate-200 font-bold mt-6 !text-emerald-600 min-w-[120px]' onClick={handleClear}>Clear</Button>
+                    <Button onClick={handleClick} className='!bg-emerald-600 font-bold mt-6 !text-white min-w-[120px]'>Submit</Button>
                 </div>
 
             </div>
