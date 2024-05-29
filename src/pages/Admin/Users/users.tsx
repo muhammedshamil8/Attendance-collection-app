@@ -1,4 +1,4 @@
-import  { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { LuPlus } from "react-icons/lu";
 import { Button } from '@/components/ui/button';
 import {
@@ -33,9 +33,9 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 
-import { auth, db} from '@/config/firebase';
+import { auth, db } from '@/config/firebase';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { collection, doc,  setDoc, getDocs, Timestamp } from 'firebase/firestore';
+import { collection, doc, setDoc, getDocs, Timestamp } from 'firebase/firestore';
 import { useToast } from "@/components/ui/use-toast"
 
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -115,7 +115,11 @@ function users() {
   })
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
+    toast({
+      title: 'This feature not available',
+      description: 'This feature is not available at the moment',
+    });
+    return;
     try {
       const { user } = await createUserWithEmailAndPassword(auth, values.email, values.password);
       await setDoc(doc(UserCollectionRef, user.uid), {
@@ -280,9 +284,9 @@ function users() {
                 <DropdownMenuContent>
                   {/* <DropdownMenuLabel>My Account</DropdownMenuLabel> */}
                   <DropdownMenuSeparator />
-                  {Fields.map((item) => (
+                  {Fields.map((item, index) => (
                     <DropdownMenuCheckboxItem
-                      key={item.value}
+                      key={index}
                       checked={selectedItems.includes(item.value)}
                       onCheckedChange={() => handleItemSelect(item)}
                     >
@@ -312,23 +316,23 @@ function users() {
                   <tr>
                     <td colSpan={6} className='text-center '>
                       <div className='flex items-center justify-center'>
-                      <ImSpinner6 className='animate-spin h-8 w-8 text-gray-400 text-lg mx-2' /> Loading...
+                        <ImSpinner6 className='animate-spin h-8 w-8 text-gray-400 text-lg mx-2' /> Loading...
                       </div>
                     </td>
                   </tr>
                 ) : (
-                  filteredUsers.length ? (
+                  filteredUsers.length > 0 ? (
                     filteredUsers.map((user, index) => (
-                      <tr key={index}>
+                      <tr key={index + 1}>
                         <td className="col-id whitespace-nowrap">{index + 1}</td>
                         <td className="col-name whitespace-nowrap">{user.name}</td>
                         <td className="col-category whitespace-nowrap">{user.category}</td>
                         <td className="col-email whitespace-nowrap">{user.email}</td>
                         <td className='col-action whitespace-nowrap flex gap-1 items-center justify-center'>
-                          <AiFillEdit className='col-action mx-auto text-emerald-700 cursor-pointer hover:text-emerald-600 transition-all ease-in-out' onClick={() => toast({description: 'this feature on process'})}/>
+                          <AiFillEdit className='col-action mx-auto text-emerald-700 cursor-pointer hover:text-emerald-600 transition-all ease-in-out' onClick={() => toast({ description: 'this feature on process' })} />
                           <AlertDialog>
                             <AlertDialogTrigger>
-                          <AiFillDelete className='col-action mx-auto text-red-500 cursor-pointer hover:text-red-600 transition-all ease-in-out' />
+                              <AiFillDelete className='col-action mx-auto text-red-500 cursor-pointer hover:text-red-600 transition-all ease-in-out' />
                             </AlertDialogTrigger>
                             <AlertDialogContent>
                               <AlertDialogHeader>
@@ -342,7 +346,7 @@ function users() {
                               </AlertDialogHeader>
                               <AlertDialogFooter>
                                 <AlertDialogCancel className='dark:text-white'>Cancel</AlertDialogCancel>
-                                <AlertDialogAction onClick={() => toast({description: 'this feature on process'})}>Continue</AlertDialogAction>
+                                <AlertDialogAction onClick={() => toast({ description: 'this feature on process' })}>Continue</AlertDialogAction>
                               </AlertDialogFooter>
                             </AlertDialogContent>
                           </AlertDialog>
@@ -367,10 +371,10 @@ function users() {
       </div>
 
       <Dialog open={handleCreateUser} onOpenChange={closeModal}>
-        <DialogContent>
+        <DialogContent className='max-w-[480px]'>
           <DialogHeader>
             <DialogTitle>
-              <div className='!text-[30px] !font-bold mx-auto text-center my-8 dark:text-white'>
+              <div className='!text-[30px] !font-bold mx-auto text-center my-4 dark:text-white'>
                 Create User
               </div>
             </DialogTitle>
@@ -381,7 +385,7 @@ function users() {
           <div className='flex flex-col gap-5 w-full  mx-auto'>
             <div className='w-full'>
               <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                   <FormField
                     control={form.control}
                     name="name"
@@ -487,9 +491,9 @@ function users() {
                       </FormItem>
                     )}
                   />
-                  <div className='flex gap-2 items-center justify-end'>
-                    <Button type='button' onClick={closeModal} className='!bg-slate-200 font-bold mt-6 !text-emerald-600'>Cancel</Button>
-                    <Button type='submit' className='!bg-emerald-600 font-bold mt-6 !text-white'>Submit</Button>
+                  <div className='flex gap-2 items-center justify-center pb-4'>
+                    <Button type='button' onClick={closeModal} className='!bg-slate-200 font-bold mt-6 !text-emerald-600 w-full'>Cancel</Button>
+                    <Button type='submit' className='!bg-emerald-600 font-bold mt-6 !text-white w-full'>Submit</Button>
                   </div>
                 </form>
               </Form>

@@ -62,7 +62,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
-
+import getStudentYear from '@/lib/Year';
 
 const formSchema = z.object({
   name: z.string().nonempty({ message: "Name is required" }),
@@ -356,26 +356,6 @@ function Students() {
     }
   }
 
-  const getStudentYear = (joinedYear: string): string => {
-    const joinedYearInt = parseInt(joinedYear);
-    const currentYear = new Date().getFullYear();
-    const studentYear = currentYear - joinedYearInt + 1;
-    let yearDescription = "";
-
-    if (studentYear === 1) {
-      yearDescription = "1st year";
-    } else if (studentYear === 2) {
-      yearDescription = "2nd year";
-    } else if (studentYear === 3) {
-      yearDescription = "3rd year";
-    } else if (studentYear === 4) {
-      yearDescription = "4th year";
-    } else {
-      yearDescription = `graduate`;
-    }
-
-    return `${yearDescription}`;
-  }
 
   return (
     <div className='flex flex-col gap-10 justify-start items-center h-full mt-20  mx-auto' >
@@ -406,8 +386,8 @@ function Students() {
                 <DropdownMenuContent>
                   <DropdownMenuSeparator />
                   <DropdownMenuRadioGroup value={selectedItems2} onValueChange={setSelectedItems2}>
-                    {SortFields.map((item) => (
-                      <DropdownMenuRadioItem key={item.value} value={item.value}>
+                    {SortFields.map((item , index) => (
+                      <DropdownMenuRadioItem key={index} value={item.value}>
                         {item.label}
                       </DropdownMenuRadioItem>
                     ))}
@@ -466,7 +446,7 @@ function Students() {
                 ) : (
                   filteredStudents.length > 0 ? (
                     filteredStudents.map((student, index) => (
-                      <tr key={student.id}>
+                      <tr key={index}>
                         <td className='col-no whitespace-nowrap '>{index + 1}
                           {/* <pre>
                             {JSON.stringify(student)}
@@ -524,8 +504,8 @@ function Students() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              <div className='!text-[30px] !font-bold mx-auto text-center my-8 dark:text-white'>
-                Create Student
+              <div className='!text-[30px] !font-bold mx-auto text-center my-4 dark:text-white'>
+                Create New Student
               </div>
             </DialogTitle>
             {/* <DialogDescription>
@@ -536,7 +516,7 @@ function Students() {
             <div className='w-full'>
               <div className='flex flex-col gap-5 w-full max-w-[320px] mx-auto mt-4'>
                 <Form {...form}>
-                  <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+                  <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                     <FormField
                       control={form.control}
                       name="name"
@@ -665,9 +645,9 @@ function Students() {
                         </FormItem>
                       )}
                     />
-                    <div className='flex gap-2 items-center justify-end'>
-                      <Button type='button' onClick={closeModal} className='!bg-slate-200 font-bold mt-6 !text-emerald-600'>Cancel</Button>
-                      <Button type='submit' className='!bg-emerald-600 font-bold mt-6 !text-white'>Submit</Button>
+                    <div className='flex gap-2 items-center justify-center pb-4'>
+                      <Button type='button' onClick={closeModal} className='!bg-slate-200 font-bold mt-6 !text-emerald-600 w-full'>Cancel</Button>
+                      <Button type='submit' className='!bg-emerald-600 font-bold mt-6 !text-white w-full'>Submit</Button>
                     </div>
                   </form>
                 </Form>

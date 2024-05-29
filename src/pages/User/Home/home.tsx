@@ -49,16 +49,21 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
+import { IoIosSearch } from 'react-icons/io';
 
 const formSchema = z.object({
     title: z.string().min(2, {
         message: "Title must be at least 2 characters.",
+    }).max(25, {
+        message: "Title must be at most 25 characters.",
     }),
     description: z.string().min(2, {
         message: "Description must be at least 2 characters.",
+    }).max(500, {
+        message: "Description must be at most 500 characters.",
     }),
     eventDate: z.date({
-        message: "Event Date must be at least 2 characters.",
+        message: "Please select a valid date.",
     }),
     id: z.string().optional(),
 })
@@ -77,6 +82,8 @@ interface Event {
 
 const Home: React.FC = () => {
     const [events, setEvents] = useState<Event[]>([]);
+    const [filteredEvents, setFilteredEvents] = useState<Event[]>([]);
+    const [search, setSearch] = useState<string>('');
     const [handleCreateEvent, setHandleCreateEvent] = useState<boolean>(false);
     const eventsCollectionRef = collection(db, 'events');
     const UserCollectionRef = collection(db, 'users');
@@ -204,6 +211,10 @@ const Home: React.FC = () => {
         }
     }, [userID]);
 
+    useEffect(() => {
+        setFilteredEvents(events.filter((event) => event.title.toLowerCase().includes(search.toLowerCase())));
+    }, [search]);
+
     const getEvents = async () => {
         try {
             const userDocRef = doc(UserCollectionRef, userID!);
@@ -240,6 +251,7 @@ const Home: React.FC = () => {
                 };
             });
             setEvents(filteredData);
+            setFilteredEvents(filteredData);
             setLoading(false);
             console.log("Events:", filteredData);
         } catch (error: any) {
@@ -272,7 +284,7 @@ const Home: React.FC = () => {
     }, []);
 
     return (
-        <div className='flex flex-col gap-10 justify-start items-center h-full mt-20 max-w-[320px] mx-auto' ref={formRef}>
+        <div className='flex flex-col gap-10 justify-start items-center h-full mt-20 max-w-[320px] mx-auto mb-10' ref={formRef}>
             <div>
                 <h1 className='font-bold text-green-900 text-[30px]'>
                     Select Event
@@ -288,6 +300,11 @@ const Home: React.FC = () => {
                 </Button>
             </div>
 
+            <div className='w-full relative mb-4'>
+                <IoIosSearch className='absolute bottom-4 right-2 text-lg text-emerald-700' />
+                <Input type="search" placeholder="Search Event..." name="title" className='h-[50px] pr-8' value={search} onChange={(e) => setSearch(e.target.value)}/>
+            </div>
+
             <div className='w-full flex flex-col gap-4 '>
                 {loading && loading ? (
                     <>
@@ -296,14 +313,11 @@ const Home: React.FC = () => {
                             </div>
                         ))}
                     </>
-                ) : (events.length > 0 ? (
-                    events.map((event: Event) => (
-                        <div className="bg-white rounded-md shadow-md p-4 flex flex-col gap-3" key={event.id}>
-                            <div className="flex justify-between items-center">
-                                <h2 className="text-xl font-semibold text-gray-800">
-                                    {event.title}
-                                </h2>
-                                <div className="flex gap-2">
+                ) : (filteredEvents.length > 0 ? (
+                    filteredEvents.map((event: Event) => (
+                        <div className="bg-white rounded-md shadow-md p-4 flex flex-col gap-3 overflow-hidden" key={event.id}>
+                            <div className="flex justify-between  flex-col ">
+                                <div className="flex gap-2 justify-end w-full">
                                     <AiFillEdit
                                         className="text-blue-500 cursor-pointer"
                                         onClick={() => EditEvent(event.id, event)}
@@ -330,8 +344,12 @@ const Home: React.FC = () => {
                                         </AlertDialogContent>
                                     </AlertDialog>
                                 </div>
+                                <h2 className="text-xl font-semibold text-gray-800 truncate mt-2" style={{ overflowWrap: 'anywhere' }}>
+                                    {event.title}
+                                </h2>
+
                             </div>
-                            <p className="text-gray-600">
+                            <p className="text-gray-600 max-w-full text-wrap" style={{ overflowWrap: 'anywhere' }}>
                                 {event.description}
                             </p>
                             <p className="text-gray-600">
@@ -346,7 +364,7 @@ const Home: React.FC = () => {
                         </div>
                     ))
                 ) : (
-                    <div className='w-full rounded-md bg-emerald-600/10 p-2 flex flex-col text-center gap-2 min-h-24 animate-pulse justify-center items-center'>
+                    <div className='w-full rounded-md bg-emerald-600/10 p-2 flex flex-col text-center gap-2 min-h-28 animate-pulse justify-center items-center'>
                         <h2 className='text-lg  text-emerald-700 font-semibold'>
                             No Events
                         </h2>
@@ -378,7 +396,7 @@ const Home: React.FC = () => {
                                         <FormItem>
                                             <FormLabel >Event Name</FormLabel>
                                             <FormControl>
-                                                <Input className='h-[50px]' placeholder="title" {...field} />
+                                                <Input maxLength={25} className='h-[50px]' placeholder="title" {...field} />
                                             </FormControl>
                                             {/* <FormDescription>
                                         This is your public display name.
@@ -435,7 +453,9 @@ const Home: React.FC = () => {
                                         <FormItem>
                                             <FormLabel >Event Description</FormLabel>
                                             <FormControl>
-                                                <Textarea placeholder="About Event..." className='dark:text-white border dark:border-slate-900 focus:border-emerald-400 dark:focus:border-emerald-400 p-3' {...field} />
+                                                <Textarea
+                                                    maxLength={500}
+                                                    placeholder="About Event..." className='dark:text-white border dark:border-slate-900 focus:border-emerald-400 dark:focus:border-emerald-400 p-3' {...field} />
                                             </FormControl>
                                             {/* <FormDescription>
                                         This is your public display name.
