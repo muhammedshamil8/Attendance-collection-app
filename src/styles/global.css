@@ -46,6 +46,17 @@
   }
 } */
 
+.printable-table {
+  display: none;
+}
+
+@media print {
+  .printable-table {
+      display: block;
+  }
+}
+
+
 
 /* hamburger */
 .nav-icon {
