@@ -74,10 +74,11 @@ const AdminLayout: React.FC = () => {
         <AuthRoleRequire role='admin'>
             <div className='bg-zinc-100 dark:bg-slate-900 min-h-screen overflow-auto flex flex-col items-center w-full '>
 
-                <header className='w-full flex items-center justify-center gap-8 py-10 relative'>
+                <header className='w-full flex items-center justify-center  py-10 relative'>
                     <div className='absolute right-2 top-2'>
                         <ModeToggle />
                     </div>
+                    <div className='my-4 flex items-center justify-center gap-3 flex-wrap mx-auto w-full'>
                     {NavItems.map((item) => (
                         <div key={item.route} className='relative'>
                             <Button
@@ -91,6 +92,7 @@ const AdminLayout: React.FC = () => {
                             {pathname === item.route && <ActiveBadge />}
                         </div>
                     ))}
+                    </div>
                         <AlertDialog>
                             <AlertDialogTrigger >
                             <div className='absolute border left-2 top-2 bg-white dark:bg-black rounded-md h-10 w-10 flex items-center justify-center cursor-pointer hover:bg-slate-100 dark:hover:bg-gray-900'>
