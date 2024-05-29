@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { auth, db } from '@/config/firebase';
+import { auth } from '@/config/firebase';
 import { onAuthStateChanged, signInWithEmailAndPassword, signOut } from 'firebase/auth';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { IoEyeOffOutline, IoEyeOutline } from "react-icons/io5";
 import { useNavigate } from 'react-router-dom';
-import { collection, doc, getDoc } from 'firebase/firestore';
+// import { collection, doc, getDoc } from 'firebase/firestore';
 import { useToast } from '@/components/ui/use-toast';
 
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -34,21 +34,23 @@ const SignIn: React.FC = () => {
     const [showPassword, setShowPassword] = useState(false);
     const navigate = useNavigate();
     const { toast } = useToast();
-    const UserCollectionRef = collection(db, 'users');
+    // const UserCollectionRef = collection(db, 'users');
     const [loading, setLoading] = useState(false);
     const [isNewUser, setIsNewUser] = useState(true);
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, async (user) => {
             if (user) {
+                const idTokenResult = await user.getIdTokenResult();
+                const role = idTokenResult.claims.role;
                 if (isNewUser) {
                     // New user signing in for the first time, don't show "Already signed in" message
                     setIsNewUser(false);
                 } else {
                     // User is already signed in, show "Already signed in" message
-                    const userDocRef = doc(UserCollectionRef, user.uid);
-                    const userDocSnap = await getDoc(userDocRef);
-                    const role = userDocSnap.data()?.role;
+                    // const userDocRef = doc(UserCollectionRef, user.uid);
+                    // const userDocSnap = await getDoc(userDocRef);
+                    // const role = userDocSnap.data()?.role;
 
                     if (form.getValues('email') === '' && form.getValues('password') === '') {
                         toast({
@@ -61,6 +63,8 @@ const SignIn: React.FC = () => {
                         navigate('/dashboard');
                     } else if (role === 'user') {
                         navigate('/');
+                    }else {
+                        navigate('/contact');
                     }
                 }
             }
@@ -90,12 +94,16 @@ const SignIn: React.FC = () => {
             const userCredential = await signInWithEmailAndPassword(auth, values.email, values.password);
             const user = userCredential.user;
 
+            const idTokenResult = await user.getIdTokenResult();
+
+            const role = idTokenResult.claims.role;
+
             // Get the user's role
-            const userDocRef = doc(collection(db, 'users'), user.uid);
-            const userDocSnap = await getDoc(userDocRef);
-            // console.log('userDocSnap', userDocSnap.data());
-            const role = userDocSnap.data()?.role;
-            localStorage.setItem('ID', user.uid);
+            // const userDocRef = doc(collection(db, 'users'), user.uid);
+            // const userDocSnap = await getDoc(userDocRef);
+            // // console.log('userDocSnap', userDocSnap.data());
+            // const role = userDocSnap.data()?.role;
+            // localStorage.setItem('ID', user.uid);
 
             // Verify the user's role
             if (role === 'admin') {
@@ -152,7 +160,7 @@ const SignIn: React.FC = () => {
 
             <div className='text-center '>
                 <h1 className='text-[35px] font-bold dark:text-white'>
-                    Welcome!
+                  Attendance Application!
                 </h1>
                 <p className='text-gray-600 -mt-2 text-sm dark:text-gray-300'>Sign to your account</p>
             </div>
