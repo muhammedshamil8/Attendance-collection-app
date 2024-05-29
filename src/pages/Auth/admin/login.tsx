@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { auth, db } from '@/config/firebase';
+import { auth  } from '@/config/firebase';
 import { signInWithEmailAndPassword, signOut } from 'firebase/auth';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { IoEyeOffOutline, IoEyeOutline } from "react-icons/io5";
 import { useToast } from '@/components/ui/use-toast';
-import { doc, collection, getDoc } from 'firebase/firestore';
+// import { doc, collection, getDoc } from 'firebase/firestore';
 import { useNavigate } from 'react-router-dom';
 
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -72,11 +72,14 @@ const Login: React.FC = () => {
             const userCredential = await signInWithEmailAndPassword(auth, values.email, values.password);
             const user = userCredential.user;
 
+            const idTokenResult = await user.getIdTokenResult();
+
+            const role = idTokenResult.claims.role;
             // Get the user's role
-            const userDocRef = doc(collection(db, 'users'), user.uid);
-            const userDocSnap = await getDoc(userDocRef);
-            // console.log('userDocSnap', userDocSnap.data());
-            const role = userDocSnap.data()?.role;
+            // const userDocRef = doc(collection(db, 'users'), user.uid);
+            // const userDocSnap = await getDoc(userDocRef);
+            // // console.log('userDocSnap', userDocSnap.data());
+            // const role = userDocSnap.data()?.role;
 
             // Verify the user's role
             if (role === 'admin') {
@@ -123,44 +126,6 @@ const Login: React.FC = () => {
             setLoading(false);
         }
     }
-    // async function onSubmit(values: z.infer<typeof formSchema>) {
-    //     try {
-    //         const response = await fetch('http://localhost:5000/api/login', {
-    //             method: 'POST',
-    //             headers: {
-    //                 'Content-Type': 'application/json',
-    //             },
-    //             body: JSON.stringify(values),
-    //         });
-    //         const data = await response.json();
-    //         console.log('data', data);
-    //         // if (data.error) {
-    //         //     toast({
-    //         //         variant: 'destructive',
-    //         //         title: 'Error signing in',
-    //         //         description: data.error,
-    //         //         duration: 2000,
-    //         //     });
-    //         // } else {
-    //         //     toast({
-    //         //         variant: 'success',
-    //         //         title: 'Signed in',
-    //         //         description: 'You have successfully signed in',
-    //         //         duration: 2000,
-    //         //     });
-    //         //     navigate('/dashboard');
-    //         // }
-    //     } catch (error: any) {
-    //         console.error('Error signing in:', error);
-    //         toast({
-    //             variant: 'destructive',
-    //             title: 'Error signing in',
-    //             description: error.message,
-    //             duration: 2000,
-    //         });
-
-    //     }
-    // }
 
     const toggleShowPassword = () => {
         setShowPassword(!showPassword);
@@ -175,7 +140,7 @@ const Login: React.FC = () => {
         <div className='flex flex-col gap-10 justify-around items-center h-full min-h-[600px] max-h-screen '>
             <div className='text-center '>
                 <h1 className='text-[35px] font-bold dark:text-white'>
-                    Welcome!
+                    Attendance Application!
                 </h1>
                 <p className='text-gray-600 -mt-2 text-sm dark:text-gray-300'>Sign to your admin account</p>
             </div>

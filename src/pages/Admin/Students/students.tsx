@@ -139,6 +139,7 @@ function Students() {
     try {
       const docRef = doc(studentCollectionRef, values.admissionNo);
       await setDoc(docRef, {
+        id: values.admissionNo,
         ...values,
         createdAt: Timestamp.now(),
         updatedAt: Timestamp.now(),
@@ -427,8 +428,8 @@ function Students() {
                 <tr >
                   <th className="col-no tracking-wider">No</th>
                   <th className="col-name tracking-wider">Student Name</th>
-                  <th className="col-admissionNo tracking-wider">Admission no:</th>
-                  <th className="col-rollNo tracking-wider">Roll No:</th>
+                  <th className="col-admissionNo tracking-wider">Admission No</th>
+                  <th className="col-rollNo tracking-wider">Roll No</th>
                   <th className="col-department tracking-wider">Department</th>
                   <th className="col-year tracking-wider">Year</th>
                   <th className="col-action tracking-wider">Action</th>

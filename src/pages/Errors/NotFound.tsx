@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom"
+import '@/styles/error.scss'
 
 function NotFound() {
   const navigate = useNavigate();
@@ -7,9 +8,16 @@ function NotFound() {
     navigate(-1);
   }
   return (
-    <div className='bg-white dark:bg-gray-800 min-h-screen w-full flex items-center justify-center text-center flex-col'>
-      <p className='text-red-500 text-[40px] mx-auto'>Not Found 404</p>
-      <button className='bg-blue-500 text-white px-4 py-2 rounded-md mt-4' onClick={handleGoBack}>Go back</button>
+    <div className="body min-h-screen">
+    <div className="noise"></div>
+    <div className="overlay"></div>
+    <div className="terminal">
+      <h1>Error <span className="errorcode">404</span></h1>
+      <p className="output">The page you are looking for might have been removed, had its name changed or is temporarily unavailable.</p>
+      <p className="output">Please try to <a onClick={() => handleGoBack} className="cursor-pointer">go back</a> or <a href="#">return to the homepage</a>.</p>
+      <p className="output">Good luck.</p>
+      <p className="output">_</p>
+    </div>
     </div>
   )
 }

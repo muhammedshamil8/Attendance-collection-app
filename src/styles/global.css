@@ -57,7 +57,6 @@
 }
 
 
-
 /* hamburger */
 .nav-icon {
   display: flex;
@@ -118,7 +117,7 @@
 
 #custom-table td,
 #custom-table th {
-  padding: 10px 8px;
+  padding: 12px 8px;
 }
 
 #custom-table td {

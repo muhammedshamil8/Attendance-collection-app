@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { db, auth } from '@/config/firebase';
+import { db} from '@/config/firebase';
 import { collection, getDocs, addDoc, doc, Timestamp, deleteDoc } from 'firebase/firestore';
 import { useToast } from "@/components/ui/use-toast"
 import { AiFillDelete, AiFillEye } from "react-icons/ai";
@@ -24,7 +24,6 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form"
-import { onAuthStateChanged } from 'firebase/auth';
 import { ImSpinner6 } from "react-icons/im";
 
 import {
@@ -69,45 +68,7 @@ const Dashboard: React.FC = () => {
   const { toast } = useToast()
   const [CategoryLoading, setCategoryLoading] = useState<boolean>(true);
   const [DepartmentLoading, setDepartmentLoading] = useState<boolean>(true);
-  const [token, setToken] = useState<string>('');
-  const APIURL = import.meta.env.VITE_API_URL;
-
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        user.getIdToken().then((idToken) => {
-          setToken(idToken);
-        }
-        );
-      } else {
-      }
-    });
-
-    return () => unsubscribe();
-  }, []);
-
-  useEffect(() => {
-    if (token) {
-      fetchData();
-    }
-  }, [token]);
-
-  const fetchData = async () => {
-    try {
-      const response = await fetch(`${APIURL}/todos`, {
-        method: 'GET',
-        headers: {
-          Authorization: `Bearer ${token}`,
-        }
-      });
-      const data = await response.json();
-      console.log(data);
-    } catch (error: any) {
-      console.error(error);
-    }
-
-
-  }
+ 
 
 
   const Categoryform = useForm<z.infer<typeof formSchema>>({
@@ -253,8 +214,8 @@ const Dashboard: React.FC = () => {
   return (
     <div className='flex flex-col gap-10 justify-start items-center h-full mt-20 mb-10 max-w-[320px] mx-auto'>
       <div>
-        <h1 className='font-bold text-green-900 text-[30px]'>
-          Select Event
+        <h1 className='font-bold text-green-900 dark:text-emerald-400 text-[30px]'>
+          Admin Dashboard
         </h1>
       </div>
 

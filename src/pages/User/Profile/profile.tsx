@@ -57,9 +57,9 @@ const ProfilePage: React.FC = () => {
 
 
     return (
-        <div className="flex flex-col items-center justify-start mt-20 h-screen ">
+        <div className="flex flex-col items-center justify-start mt-20 min-h-screen ">
             {loading && loading ? (
-                 <div className="bg-slate-300 animate-pulse h-80 w-[300px]  rounded-lg shadow-md p-8" />
+                 <div className="bg-slate-300 animate-pulse h-[400px] w-[300px]  rounded-lg shadow-md p-8" />
             ) : (
                 <div className="bg-white rounded-lg shadow-md p-8 min-w-[300px] overflow-hidden">
                 <div className="flex items-center justify-center mb-4">
@@ -85,7 +85,7 @@ const ProfilePage: React.FC = () => {
                 </p>
                 <p className="text-gray-500"></p>
                 <div className="mt-8">
-                    <Button  className="w-full dark:bg-gray-900 font-semibold  dark:text-white" onClick={() => Navigate('/home/contact')}>
+                    <Button  className="w-full dark:bg-gray-900 font-semibold  dark:text-white  dark:hover:bg-emerald-700 transition-all ease-in-out" onClick={() => Navigate('/home/contact')}>
                         Contact Admin
                     </Button>
                 </div>
