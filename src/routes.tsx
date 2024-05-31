@@ -29,7 +29,9 @@ import Contact from "./pages/contact";
 import About from "./pages/about";
 // import LandingPage from "./pages/landingPage";
 import Test from "./pages/test";
-
+import CollectionForm from "./pages/collectionForm";
+import ResetPassword from "./pages/Auth/ResetPassword";
+import AccountRequest from "./pages/Admin/AccRequest/accrequest";
 const router = createBrowserRouter([
   {
     path: "/",
@@ -76,6 +78,10 @@ const router = createBrowserRouter([
       {
         path: 'students',
         element: <Students />
+      },
+      {
+        path: 'account-request',
+        element: <AccountRequest />
       }
     ]
   },
@@ -103,6 +109,14 @@ const router = createBrowserRouter([
         path: "/test",
         element: <Test />
       },
+      {
+        path: "/emeastudents-form",
+        element: <CollectionForm />
+      },
+      {
+        path: "/reset-password",
+        element: <ResetPassword />
+      }
     ]
   },
   {

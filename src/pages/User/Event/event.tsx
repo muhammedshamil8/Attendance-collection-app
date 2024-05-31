@@ -9,6 +9,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Input } from '@/components/ui/input';
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { AiFillDelete } from "react-icons/ai";
 import { IoMdArrowDropdown, IoIosArrowDown, IoIosSearch } from "react-icons/io";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -86,6 +87,7 @@ const formSchema = z.object({
   rollNo: z.string().nonempty({ message: "Roll no is required" }),
   department: z.string().nonempty({ message: "Department is required" }),
   joinedYear: z.string().nonempty({ message: "Joined Year is required" }).length(4, { message: "Year must be 4 digits" }),
+  section: z.string().nonempty({ message: "Section is required" }),
   id: z.string().optional(),
   // email: z.string().email({ message: "Invalid email" }).optional(),
   // phone: z.string()
@@ -99,6 +101,7 @@ interface Student {
   admissionNo: string;
   rollNo: string;
   department: string;
+  section: string;
   joinedYear: string;
   email?: string;
   phone?: string;
@@ -107,6 +110,7 @@ interface PdfData {
   No: number;
   AdmissionNo: string;
   Name: string;
+  section: string;
   RollNo: string;
   Department: string;
   JoinedYear: string;
@@ -147,6 +151,7 @@ function Event() {
       name: "",
       admissionNo: "",
       rollNo: "",
+      section: "",
       department: "",
       joinedYear: "",
       id: "",
@@ -295,11 +300,26 @@ function Event() {
       setEvent(event);
       setEventLoading(false);
       console.log(event);
+
       if (event) {
         const attendedStudents = event.attendees;
         setAttendedStudents(attendedStudents);
+
         const attendedStudentObjects = students.filter((student) => attendedStudents.includes(student.admissionNo));
+
+        // Sort attendedStudentObjects by department and then by joined year
+        attendedStudentObjects.sort((a, b) => {
+          // First, sort by department
+          const departmentComparison = a.department.localeCompare(b.department);
+          if (departmentComparison !== 0) {
+            return departmentComparison;
+          }
+          // If departments are the same, sort by joined year
+          return a.joinedYear.localeCompare(b.joinedYear);
+        });
+
         setAttendedStudentsObj(attendedStudentObjects);
+
         const newFilteredAttendedStudents = attendedStudentObjects.map((student, index) => {
           const { admissionNo } = student;
           const studentData = students.find((s) => s.admissionNo === admissionNo);
@@ -308,6 +328,7 @@ function Event() {
               No: index + 1,
               AdmissionNo: studentData.admissionNo,
               Name: studentData.name,
+              section: studentData.section,
               RollNo: studentData.rollNo,
               Department: studentData.department,
               JoinedYear: getStudentYear(studentData.joinedYear),
@@ -318,6 +339,7 @@ function Event() {
           No: number;
           AdmissionNo: string;
           Name: string;
+          section: string;
           RollNo: string;
           Department: string;
           JoinedYear: string;
@@ -330,7 +352,6 @@ function Event() {
       console.error(error);
     }
   }
-
 
   const Fields = [
     { label: "No", value: "col-no" },
@@ -447,23 +468,35 @@ function Event() {
 
   function filterAndSortStudents() {
     let filtered = AttendedStudentsObj;
+
+    // Apply search filter if searchName is provided
     if (searchName !== '') {
-      filtered = filtered.filter((student) => student.name.toLowerCase().includes(searchName.toLowerCase()));
-    } else {
-      filtered = AttendedStudentsObj;
+      filtered = filtered.filter((student) =>
+        student.name.toLowerCase().includes(searchName.toLowerCase()) ||
+        student?.admissionNo.toLowerCase().includes(searchName.toLowerCase()) ||
+        student?.department.toLowerCase().includes(searchName.toLowerCase())
+      );
     }
-    return setFilteredAttendedStudents(filtered.sort((a, b) => {
+
+    // Sort the filtered array
+    filtered.sort((a, b) => {
       if (selectedItems2 === 'department') {
-        return a.department.localeCompare(b.department);
+        // Sort by department
+        return a.department.localeCompare(b.department) || a.joinedYear.localeCompare(b.joinedYear);
       } else if (selectedItems2 === 'year-desc') {
+        // Sort by year descending
         return b.joinedYear.localeCompare(a.joinedYear);
       } else if (selectedItems2 === 'year-asc') {
+        // Sort by year ascending
         return a.joinedYear.localeCompare(b.joinedYear);
       } else {
         return 0;
       }
-    }));
+    });
+
+    setFilteredAttendedStudents(filtered);
   };
+
 
   useEffect(() => {
     filterAndSortStudents();
@@ -792,6 +825,56 @@ function Event() {
                       />
                       <FormField
                         control={form.control}
+                        name="admissionNo"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel >Admission No</FormLabel>
+                            <FormControl>
+                              <Input className='h-[50px]' placeholder="eg: - ABSC123" {...field} onChange={(e) => field.onChange(e.target.value.toUpperCase())} />
+                            </FormControl>
+                            {/* <FormDescription>
+                                        This is your public display name.
+                                    </FormDescription> */}
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="section"
+                        render={({ field }) => (
+                          <FormItem className="space-y-3">
+                            <FormLabel>
+                              Select Section
+                            </FormLabel>
+                            <FormControl>
+                              <RadioGroup
+                                onValueChange={field.onChange}
+                                defaultValue={field.value}
+                                className="flex flex-row gap-10 space-y-1"
+                              >
+                                <FormItem className="flex items-center space-x-3 space-y-0">
+                                  <FormControl>
+                                    <RadioGroupItem value="UG" />
+                                  </FormControl>
+                                  <FormLabel className="font-normal text-white">
+                                    UG
+                                  </FormLabel>
+                                </FormItem>
+                                <FormItem className="flex items-center space-x-3 space-y-0">
+                                  <FormControl>
+                                    <RadioGroupItem value="PG" />
+                                  </FormControl>
+                                  <FormLabel className="font-normal text-white">PG</FormLabel>
+                                </FormItem>
+                              </RadioGroup>
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
                         name="department"
                         render={({ field: { onChange, value } }) => (
                           <FormItem>
@@ -845,22 +928,7 @@ function Event() {
                           </FormItem>
                         )}
                       />
-                      <FormField
-                        control={form.control}
-                        name="admissionNo"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel >Admission No</FormLabel>
-                            <FormControl>
-                              <Input className='h-[50px]' placeholder="eg: - ABSC123" {...field} />
-                            </FormControl>
-                            {/* <FormDescription>
-                                        This is your public display name.
-                                    </FormDescription> */}
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+
                       <FormField
                         control={form.control}
                         name="rollNo"
@@ -932,7 +1000,7 @@ function Event() {
           </DialogHeader>
           <div>
             <BarcodeReader onDetected={handleDetected} />
-            <Input type="text" placeholder="Search Admission No" name="title" className='h-[50px] w-full mt-4' value={barcode} onChange={(e) => setBarcode(e.target.value)} />
+            <Input type="text" placeholder="Search Admission No" name="title" className='h-[50px] w-full mt-4' value={barcode} onChange={(e) => setBarcode(e.target.value.toUpperCase())} />
             <div className='flex gap-2 items-center justify-center pb-6'>
               <Button onClick={closeScanModal} className='!bg-slate-200 font-bold mt-4 !text-emerald-600 w-full'>Cancel</Button>
               <Button onClick={() => AddStudenttoList([barcode])} className='!bg-emerald-600 font-bold mt-4 !text-white w-full'>Submit</Button>

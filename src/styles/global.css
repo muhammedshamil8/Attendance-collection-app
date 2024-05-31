@@ -113,6 +113,7 @@
   font-family: Arial, Helvetica, sans-serif;
   border-collapse: collapse;
   width: 100%;
+  background-color: white;
 }
 
 #custom-table td,
@@ -122,6 +123,10 @@
 
 #custom-table td {
   border-top: 1px solid #9cb19da3;
+}
+
+#custom-table tr {
+  transition: all 0.3s ease-in-out;
 }
 
 #custom-table tr:nth-child(even) {

@@ -19,7 +19,7 @@ A simple event attendance collection app built with React, TypeScript, Vite, and
 1. **Clone the repository:**
 
     ```bash
-    git clone https://github.com/muhammedshamil8/event-attendance-app.git
+    git clone https://github.com/muhammedshamil8/Attendance-collection-app.git
     cd event-attendance-app
     ```
 
@@ -38,6 +38,10 @@ A simple event attendance collection app built with React, TypeScript, Vite, and
     ```bash
     npm run dev
     ```
+
+## Backend Code Repository
+
+The backend code for this project is available at [backend-repo-link](https://github.com/muhammedshamil8/Attendance-app-backend).
 
 ## License
 

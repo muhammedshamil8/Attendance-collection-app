@@ -115,6 +115,9 @@ const UserLayout: React.FC = ({ }) => {
                             <div className='line line-3 bg-emerald-600'></div>
                         </div>
                     </button>
+                    <h1 className='text-lg font-bold dark:text-white'>
+                        App Name
+                    </h1>
 
                     <Avatar onClick={() => navigate('/profile')} className='cursor-pointer'>
                         <AvatarImage src={UserProfile} />

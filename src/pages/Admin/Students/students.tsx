@@ -8,6 +8,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Input } from '@/components/ui/input';
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { AiFillEdit, AiFillDelete } from "react-icons/ai";
 import { IoIosArrowDown, IoIosSearch } from "react-icons/io";
 import {
@@ -63,6 +64,8 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import getStudentYear from '@/lib/Year';
+import { useAutoAnimate } from '@formkit/auto-animate/react'
+import useDebounce from '@/lib/debounce';
 
 const formSchema = z.object({
   name: z.string().nonempty({ message: "Name is required" }),
@@ -70,6 +73,7 @@ const formSchema = z.object({
   rollNo: z.string().nonempty({ message: "Roll no is required" }),
   department: z.string().nonempty({ message: "Department is required" }),
   joinedYear: z.string().nonempty({ message: "Joined Year is required" }).length(4, { message: "Year must be 4 digits" }),
+  section: z.string().nonempty({ message: "Section is required" }),
   id: z.string().optional(),
   // email: z.string().email({ message: "Invalid email" }).optional(),
   // phone: z.string()
@@ -83,6 +87,7 @@ interface Student {
   admissionNo: string;
   rollNo: string;
   department: string;
+  section: string;
   joinedYear: string;
   email?: string;
   phone?: string;
@@ -96,6 +101,7 @@ interface StudentForm {
   name: string;
   admissionNo: string;
   rollNo: string;
+  section: string;
   department: string;
   joinedYear: string;
   email?: string;
@@ -115,6 +121,8 @@ function Students() {
   const [Department, setDepartment] = useState<string[]>([]);
   const [method, setMethod] = useState<string>("POST");
   const { toast } = useToast();
+  const [parent,] = useAutoAnimate();
+  const debouncedSearchTerm = useDebounce(searchName, 300);
 
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -123,6 +131,7 @@ function Students() {
       name: "",
       admissionNo: "",
       rollNo: "",
+      section: "",
       department: "",
       joinedYear: "",
       id: "",
@@ -136,10 +145,19 @@ function Students() {
   }
 
   const createStudent = async (values: StudentForm) => {
+    if (values.id === '') {
+      values.id = values.admissionNo;
+    }
+    const alreadyAdded = students.some(student => student.admissionNo === values.admissionNo);
+    if (alreadyAdded) {
+      return toast({
+        variant: "destructive",
+        description: "Student admission no already added",
+      });
+    }
     try {
       const docRef = doc(studentCollectionRef, values.admissionNo);
       await setDoc(docRef, {
-        id: values.admissionNo,
         ...values,
         createdAt: Timestamp.now(),
         updatedAt: Timestamp.now(),
@@ -264,7 +282,7 @@ function Students() {
     console.log('filtered', filtered);
     console.log(students);
     if (searchName !== '') {
-      filtered = filtered.filter((student) => student?.name.toLowerCase().includes(searchName.toLowerCase()) || student?.admissionNo.toLowerCase().includes(searchName.toLowerCase()));
+      filtered = filtered.filter((student) => student?.name.toLowerCase().includes(searchName.toLowerCase()) || student?.admissionNo.toLowerCase().includes(searchName.toLowerCase()) || student?.department.toLowerCase().includes(searchName.toLowerCase()));
     } else {
       filtered = students;
       console.log('no search value');
@@ -287,7 +305,7 @@ function Students() {
 
   useEffect(() => {
     filterAndSortStudents();
-  }, [searchName, selectedItems2]);
+  }, [debouncedSearchTerm, selectedItems2]);
 
   useEffect(() => {
     getDepartment();
@@ -387,7 +405,7 @@ function Students() {
                 <DropdownMenuContent>
                   <DropdownMenuSeparator />
                   <DropdownMenuRadioGroup value={selectedItems2} onValueChange={setSelectedItems2}>
-                    {SortFields.map((item , index) => (
+                    {SortFields.map((item, index) => (
                       <DropdownMenuRadioItem key={index} value={item.value}>
                         {item.label}
                       </DropdownMenuRadioItem>
@@ -422,8 +440,8 @@ function Students() {
           </div>
 
 
-          <div className='border border-emerald-700 rounded-[20px] overflow-auto '>
-            <table className="min-w-full rounded-xl  " id='custom-table'>
+          <div className='border border-emerald-700 rounded-[20px] overflow-auto overflow-y-hidden '>
+            <table className="min-w-full rounded-xl  " id='custom-table' >
               <thead className=''>
                 <tr >
                   <th className="col-no tracking-wider">No</th>
@@ -435,7 +453,7 @@ function Students() {
                   <th className="col-action tracking-wider">Action</th>
                 </tr>
               </thead>
-              <tbody className=''>
+              <tbody className='' ref={parent}>
                 {loading && loading ? (
                   <tr>
                     <td colSpan={7} className='text-center '>
@@ -522,7 +540,7 @@ function Students() {
                       control={form.control}
                       name="name"
                       render={({ field }) => (
-                        <FormItem>
+                        <FormItem ref={parent}>
                           <FormLabel >Student Name</FormLabel>
                           <FormControl>
                             <Input className='h-[50px]' placeholder="eg: - NSS" {...field} />
@@ -536,9 +554,59 @@ function Students() {
                     />
                     <FormField
                       control={form.control}
+                      name="admissionNo"
+                      render={({ field }) => (
+                        <FormItem ref={parent}>
+                          <FormLabel >Admission No</FormLabel>
+                          <FormControl>
+                            <Input className='h-[50px]' placeholder="eg: - ABSC123" {...field} onChange={(e) => field.onChange(e.target.value.toUpperCase())} />
+                          </FormControl>
+                          {/* <FormDescription>
+                                        This is your public display name.
+                                    </FormDescription> */}
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="section"
+                      render={({ field }) => (
+                        <FormItem className="space-y-3">
+                          <FormLabel>
+                            Select Section
+                          </FormLabel>
+                          <FormControl>
+                            <RadioGroup
+                              onValueChange={field.onChange}
+                              defaultValue={field.value}
+                              className="flex flex-row gap-10 space-y-1"
+                            >
+                              <FormItem className="flex items-center space-x-3 space-y-0">
+                                <FormControl>
+                                  <RadioGroupItem value="UG" />
+                                </FormControl>
+                                <FormLabel className="font-normal text-white">
+                                  UG
+                                </FormLabel>
+                              </FormItem>
+                              <FormItem className="flex items-center space-x-3 space-y-0">
+                                <FormControl>
+                                  <RadioGroupItem value="PG" />
+                                </FormControl>
+                                <FormLabel className="font-normal text-white">PG</FormLabel>
+                              </FormItem>
+                            </RadioGroup>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
                       name="department"
                       render={({ field: { onChange, value } }) => (
-                        <FormItem>
+                        <FormItem ref={parent}>
                           <FormLabel>Select Department</FormLabel>
                           <FormControl>
                             <Popover open={open} onOpenChange={setOpen} >
@@ -589,27 +657,12 @@ function Students() {
                         </FormItem>
                       )}
                     />
-                    <FormField
-                      control={form.control}
-                      name="admissionNo"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel >Admission No</FormLabel>
-                          <FormControl>
-                            <Input className='h-[50px]' placeholder="eg: - ABSC123" {...field} />
-                          </FormControl>
-                          {/* <FormDescription>
-                                        This is your public display name.
-                                    </FormDescription> */}
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+
                     <FormField
                       control={form.control}
                       name="rollNo"
                       render={({ field }) => (
-                        <FormItem>
+                        <FormItem ref={parent}>
                           <FormLabel >Roll No</FormLabel>
                           <FormControl>
                             <Input className='h-[50px]' placeholder="eg: - 7" {...field} />
@@ -625,7 +678,7 @@ function Students() {
                       control={form.control}
                       name="joinedYear"
                       render={({ field }) => (
-                        <FormItem>
+                        <FormItem ref={parent}>
                           <FormLabel >Joined Year</FormLabel>
                           <FormControl>
                             <Input
@@ -663,3 +716,5 @@ function Students() {
 }
 
 export default Students
+
+
