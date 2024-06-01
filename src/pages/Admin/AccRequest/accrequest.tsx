@@ -1,16 +1,17 @@
 import { useEffect, useState } from 'react';
 import { Input } from '@/components/ui/input';
-import { AiFillEdit, AiFillDelete } from "react-icons/ai";
+import { AiFillDelete } from "react-icons/ai";
 import { IoIosArrowDown, IoIosSearch } from "react-icons/io";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-  DropdownMenuCheckboxItem,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
 } from "@/components/ui/dropdown-menu"
 import { auth, db } from '@/config/firebase';
-import { collection, getDocs, Timestamp } from 'firebase/firestore';
+import { collection, getDocs, Timestamp, doc, deleteDoc } from 'firebase/firestore';
 import { useToast } from "@/components/ui/use-toast"
 import { ImSpinner6 } from "react-icons/im";
 import {
@@ -25,33 +26,50 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { onAuthStateChanged } from 'firebase/auth';
-import { MdPersonAddDisabled } from "react-icons/md";
 import { useAutoAnimate } from '@formkit/auto-animate/react'
-import  useDebounce  from '@/lib/debounce';
+import useDebounce from '@/lib/debounce';
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet"
+import { FaEye } from "react-icons/fa";
+import { Button } from '@/components/ui/button';
+import { Badge } from "@/components/ui/badge"
 
 interface User {
   id: string;
   email: string;
-  category: string;
-  name: string;
+  team_name: string;
+  Nodal_Officer: string;
+  password: string;
   role: string;
-  status?: boolean;
-  createdAt?: string;
-  updatedAt?: string;
-  events?: string[];
+  message: string;
+  status: string;
+  subject: string;
+  Verification: string;
+  contact_number: string;
+  phone_number: string;
+  createdAt: string;
 }
 
 function AccountRequest() {
   const [searchName, setSearchName] = useState('')
   const [loading, setLoading] = useState(true);
-  const [Users, setUsers] = useState<User[]>([]);
-  const [filteredUsers, setFilteredUsers] = useState<User[]>(Users);
+  const [ReqUsers, setRequsers] = useState<User[]>([]);
+  const [filteredUsers, setFilteredUsers] = useState<User[]>(ReqUsers);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const { toast } = useToast()
-  const UserCollectionRef = collection(db, 'users');
+  const RequestCollectionRef = collection(db, 'NewAccountReq');
   const [token, setToken] = useState<string>('');
   const APIURL = import.meta.env.VITE_API_URL;
-  const [parent , ] = useAutoAnimate();
+  const [parent,] = useAutoAnimate();
   const debouncedSearchTerm = useDebounce(searchName, 300);
+  const [sheet, setSheet] = useState(false);
+  const [sortBox, setSortBox] = useState(false);
+  const [selectedItem, setSelectedItem] = useState<string>('');
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -66,19 +84,137 @@ function AccountRequest() {
     return () => unsubscribe();
   }, []);
 
-  async function onSubmit(values: any, ) {
+  const DeleteUser = async (id: string) => {
+    try {
+      //  by client sdk firebase and firesote delete user from collection 
+      await deleteDoc(doc(db, 'NewAccountReq', id));
+      toast({
+        variant: 'success',
+        description: 'User deleted successfully',
+      });
+      getUsers();
+    }
+    catch (error: any) {
+      console.error(error);
+      toast({
+        variant: 'destructive',
+        description: 'There was an error deleting the user',
+      });
+    }
+  }
+
+  const SortFields = [
+    'pending',
+    'verified',
+  ];
+
+  const SortData = (field: string) => {
+    if (field === 'pending') {
+      setFilteredUsers(ReqUsers.filter((user) => user.status === 'pending'));
+      return;
+    } else if (field === 'verified') {
+      setFilteredUsers(ReqUsers.filter((user) => user.status === 'verified'));
+      return;
+    } else {
+      setSortBox(false);
+      setSelectedItem('');
+      setFilteredUsers(ReqUsers);
+    }
+  };
+
+  const getUsers = async () => {
+    try {
+      const usersSnapshot = await getDocs(RequestCollectionRef);
+      const Requsers = usersSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })) as User[];
+      setRequsers(Requsers);
+      setLoading(false);
+      filterAndSortStudents();
+    } catch (error: any) {
+      console.error(error);
+    }
+  }
+
+  function filterAndSortStudents() {
+    let filtered = ReqUsers;
+    if (searchName !== '') {
+      filtered = filtered.filter((user) => user.team_name.toLowerCase().includes(searchName.toLowerCase()));
+    } else {
+      filtered = ReqUsers;
+    }
+    return setFilteredUsers(filtered);
+  };
+
+  useEffect(() => {
+    getUsers();
+  }, []);
+
+  useEffect(() => {
+    filterAndSortStudents();
+  }, [ReqUsers, debouncedSearchTerm]);
+
+  useEffect(() => {
+    if (selectedItem) {
+      SortData(selectedItem);
+    }
+  }, [selectedItem]);
+
+  const handleSheet = () => {
+    setSheet(!sheet);
+  }
+
+  const handleView = (user: User) => {
+    setSheet(!sheet);
+    setSelectedUser(user);
+    // console.log(user);
+  }
+
+  const handleSortBox = () => {
+    setSortBox(!sortBox);
+  }
+
+  const handleReject = async (user: User | null) => {
+    if (!user) return;
+    try {
+      const response = await fetch(`${APIURL}/admin/reject`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ email: user.email }),
+      });
+      const responseData = await response.json();
+      if (responseData) {
+        // console.log('responseData', responseData);
+      }
+      setSheet(false);
+      toast({
+        variant: 'success',
+        description: 'User Rejected Successfully',
+      });
+    } catch (error: any) {
+      console.error(error);
+      toast({
+        variant: 'destructive',
+        description: 'There was an error rejecting the user',
+      });
+    }
+  }
+
+  const handleAccept = async (user: User | null) => {
+    if (!user) return;
     try {
       const data = {
-        email: values.email,
-        password: values.password,
-        category: values.category,
-        name: values.name,
-        Head_name: values.Head_name,
-        role: values.role,
-        status: values.status,
+        email: user.email,
+        password: user.password,
+        team_name: user.team_name,
+        Nodal_Officer: user.Nodal_Officer,
+        phone_number: user.phone_number,
+        role: user.role,
+        status: 'verified',
         createdAt: Timestamp.now(),
       }
-      const response = await fetch(`${APIURL}/create-user`, {
+      const response = await fetch(`${APIURL}/admin/accept`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -86,10 +222,11 @@ function AccountRequest() {
         },
         body: JSON.stringify(data),
       });
-
       const responseData = await response.json();
-      console.log('responseData', responseData);
+      // console.log('responseData', responseData);
       if (response.ok) {
+        // await DeleteUser(user.id);
+        setSheet(false);
         toast({
           variant: 'success',
           description: responseData.message,
@@ -110,127 +247,17 @@ function AccountRequest() {
     }
   }
 
-  const DeleteUser = async (id: string) => {
-    try {
-      const response = await fetch(`${APIURL}/delete-user/${id}`, {
-        method: 'DELETE',
-        headers: {
-          Authorization: `Bearer ${token}`,
-        }
-      });
-      const data = await response.json();
-      console.log(data);
-      if (response.ok) {
-        toast({
-          variant: 'success',
-          description: data.message,
-        });
-        getUsers();
-      } else {
-        toast({
-          variant: 'destructive',
-          description: data.message,
-        });
-      }
-    }
-    catch (error: any) {
-      console.error(error);
-      toast({
-        variant: 'destructive',
-        description: error.message,
-      });
-    }
-  }
-
-  const Fields = [
-    { label: "No", value: "col-id" },
-    { label: "Name", value: "col-name" },
-    { label: "Category", value: "col-category" },
-    { label: "Email", value: "col-email" },
-    { label: "Action", value: "col-action" },
-  ];
-
-  const [selectedItems, setSelectedItems] = useState<string[]>([
-    "col-id",
-    "col-name",
-    "col-category",
-    "col-email",
-    "col-action",
-  ]);
-
-
-  const handleItemSelect = (item: { label: string, value: string }) => {
-    let updatedItems;
-    if (selectedItems.includes(item.value)) {
-      updatedItems = selectedItems.filter((value) => value !== item.value);
+  const getVerificationVariant = (verification: string) => {
+    if (verification === 'Rejected') {
+      return 'destructive';
+    } else if (verification === 'pending') {
+      return 'pending';
+    } else if (verification === 'verified') {
+      return 'active';
     } else {
-      updatedItems = [...selectedItems, item.value];
-    }
-    setSelectedItems(updatedItems);
-    updateSelectedItems(updatedItems);
-  }
-
-  const updateSelectedItems = (selectedItems: string[]) => {
-    const allItems = Fields.map(item => item.value);
-    const unselectedItems = allItems.filter(item => !selectedItems.includes(item));
-
-    // Hide unselected columns
-    unselectedItems.forEach((item) => {
-      const elements = document.querySelectorAll(`.${item}`);
-      elements.forEach(element => {
-        (element as HTMLElement).classList.add('hidden-column');
-      });
-    });
-
-    // Show selected columns
-    selectedItems.forEach((item) => {
-      const elements = document.querySelectorAll(`.${item}`);
-      elements.forEach(element => {
-        (element as HTMLElement).classList.remove('hidden-column');
-      });
-    });
-  }
-
-  const getUsers = async () => {
-    try {
-      const usersSnapshot = await getDocs(UserCollectionRef);
-      const filteredUsers = usersSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })) as User[];
-      const filteredUserRoleUsers = filteredUsers.filter((user) => user.role === 'user');
-      console.log('filteredUserRoleUsers', filteredUserRoleUsers);
-      setUsers(filteredUserRoleUsers);
-      setLoading(false);
-      filterAndSortStudents();
-    } catch (error: any) {
-      console.error(error);
-
+      return 'default';
     }
   }
-
-
-  function filterAndSortStudents() {
-    let filtered = Users;
-    if (searchName !== '') {
-      filtered = filtered.filter((user) => user.name.toLowerCase().includes(searchName.toLowerCase()));
-    } else {
-      filtered = Users;
-    }
-    return setFilteredUsers(filtered);
-  };
-
-  useEffect(() => {
-    getUsers();
-  }, []);
-
-  useEffect(() => {
-    updateSelectedItems(selectedItems);
-  }, []);
-
-  useEffect(() => {
-    filterAndSortStudents();
-  }, [Users, debouncedSearchTerm]);
-
-
-
   return (
     <div className='flex flex-col gap-10 justify-start items-center h-full mt-20  mx-auto' >
 
@@ -242,25 +269,20 @@ function AccountRequest() {
               <Input type="search" placeholder="Filter Users..." className='h-[50px]  bg-slate-300 pr-8 pl-4' value={searchName} onChange={(e) => setSearchName(e.target.value)} />
             </div>
             <div className='flex gap-2'>
-
-
-              <DropdownMenu>
-                <DropdownMenuTrigger className='outline-none border-none'>
-                  <div className='p-2 bg-emerald-700 flex gap-2 items-center justify-center text-white rounded-lg px-4'>Columns <IoIosArrowDown /></div>
+              <DropdownMenu open={sortBox} onOpenChange={handleSortBox}>
+                <DropdownMenuTrigger className='outline-none border-none '>
+                  <div className='p-2 bg-emerald-700 flex gap-2 items-center justify-center text-white rounded-lg px-4' onClick={() => setSortBox(!sortBox)}>Sort <IoIosArrowDown /></div>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
-                  {/* <DropdownMenuLabel>My Account</DropdownMenuLabel> */}
                   <DropdownMenuSeparator />
-                  {Fields.map((item, index) => (
-                    <DropdownMenuCheckboxItem
-                      key={index}
-                      checked={selectedItems.includes(item.value)}
-                      onCheckedChange={() => handleItemSelect(item)}
-                    >
-                      {item.label}
-                    </DropdownMenuCheckboxItem>
-                  ))}
-                  {/* <DropdownMenuItem>Subscription</DropdownMenuItem> */}
+                  <DropdownMenuRadioGroup value={selectedItem} onValueChange={setSelectedItem}>
+                    {SortFields.map((item) => (
+                      <DropdownMenuRadioItem key={item} value={item}>
+                        {item}
+                      </DropdownMenuRadioItem>
+                    ))}
+                  </DropdownMenuRadioGroup>
+                  <Button onClick={() => SortData('')} className=' font-bold mt-4 border bg-white text-gray-700 dark:text-white dark:bg-gray-900 w-full p-0 hover:text-white dark:hover:bg-gray-800'>Clear</Button>
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
@@ -272,9 +294,10 @@ function AccountRequest() {
               <thead className=''>
                 <tr >
                   <th className="col-id tracking-wider">No</th>
-                  <th className="col-name tracking-wider">Name</th>
-                  <th className="col-category tracking-wider">Category</th>
-                  <th className="col-email tracking-wider">Email</th>
+                  <th className="col-name tracking-wider">Team Name</th>
+                  <th className="col-category tracking-wider">Nodal Officer</th>
+                  <th className="col-email tracking-wider">status</th>
+                  <th className="col-email tracking-wider">Verification</th>
                   <th className="col-action tracking-wider">Action</th>
                 </tr>
               </thead>
@@ -292,11 +315,20 @@ function AccountRequest() {
                     filteredUsers.map((user, index) => (
                       <tr key={index + 1}>
                         <td className="col-id whitespace-nowrap">{index + 1}</td>
-                        <td className="col-name whitespace-nowrap">{user.name}</td>
-                        <td className="col-category whitespace-nowrap">{user.category}</td>
-                        <td className="col-email whitespace-nowrap">{user.email}</td>
+                        <td className="col-name whitespace-nowrap">{user.team_name}</td>
+                        <td className="col-category whitespace-nowrap">{user.Nodal_Officer}</td>
+                        <td className="col-email whitespace-nowrap ">
+                          <Badge variant={`${getVerificationVariant(user.Verification)}`}>
+                            {user.Verification}
+                          </Badge>
+                        </td>
+                        <td className={`col-email whitespace-nowrap text-medium ${user.status === 'pending' ? 'text-amber-400' : 'text-green-600'} `}>
+                          <Badge variant={`${user.status === 'pending' ? 'pending' : 'active'}`} style={{ overflowWrap: 'anywhere' }}>
+                            {user.status}
+                          </Badge>
+                        </td>
                         <td className='col-action whitespace-nowrap flex gap-1 items-center justify-center h-full w-full'>
-                        <AiFillEdit className='col-action mx-auto text-emerald-700 cursor-pointer hover:text-emerald-600 transition-all ease-in-out' onClick={() => toast({ description: 'this feature on process' })} />
+                          <FaEye className='col-action mx-auto text-emerald-700 cursor-pointer hover:text-emerald-600 transition-all ease-in-out' onClick={() => handleView(user)} />
                           <AlertDialog>
                             <AlertDialogTrigger>
                               <AiFillDelete className='col-action mx-auto text-red-500 cursor-pointer hover:text-red-600 transition-all ease-in-out' />
@@ -304,21 +336,20 @@ function AccountRequest() {
                             <AlertDialogContent>
                               <AlertDialogHeader>
                                 <AlertDialogTitle className='dark:text-white'>
-                                  Are you sure you want to delete this user?
+                                  Are you sure you want to delete this account request?
                                 </AlertDialogTitle>
                                 <AlertDialogDescription>
-                                  This action cannot be undone. it will delete the user permanently.
-                                  so be sure before you continue. the user & user all data will be lost.
-                                  you can disable the user if you want to keep the data.
+                                  The user will be deleted from the system and will not be able to login.
+                                  and also not sent any email to the user.you can't undo this action.
+                                  So be sure before you continue.
                                 </AlertDialogDescription>
                               </AlertDialogHeader>
                               <AlertDialogFooter>
                                 <AlertDialogCancel className='dark:text-white'>Cancel</AlertDialogCancel>
-                                <AlertDialogAction onClick={() => DeleteUser(user.id)}>Continue</AlertDialogAction>
+                                <AlertDialogAction onClick={() => DeleteUser(user.email)}>Continue</AlertDialogAction>
                               </AlertDialogFooter>
                             </AlertDialogContent>
                           </AlertDialog>
-                          <MdPersonAddDisabled className='col-action mx-auto text-emerald-700 cursor-pointer hover:text-gray-500 transition-all ease-in-out' onClick={() => toast({ description: 'this disable feature on working' })} />
                         </td>
                       </tr>
                     ))
@@ -334,7 +365,123 @@ function AccountRequest() {
 
         </div>
       </div>
-    </div>
+
+
+      <Sheet open={sheet} onOpenChange={handleSheet}>
+        <SheetContent side={'right'}>
+          <SheetHeader>
+            <SheetTitle>
+              Account Request Details
+            </SheetTitle>
+            <SheetDescription>
+              View the details of the user account request and accept or reject the request.
+            </SheetDescription>
+          </SheetHeader>
+          <div className='px-4 py-4'>
+
+            <dl className='grid grid-cols-1 gap-4 my-6'>
+              <div className='flex items-center'>
+                <dt className='text-gray-600 dark:text-gray-400'>Team Name</dt>
+                <dd className='ml-2 text-gray-800 dark:text-gray-200'>{selectedUser?.team_name}</dd>
+              </div>
+              <div className='flex items-center'>
+                <dt className='text-gray-600 dark:text-gray-400'>Nodal Officer</dt>
+                <dd className='ml-2 text-gray-800 dark:text-gray-200'>{selectedUser?.Nodal_Officer}</dd>
+              </div>
+              <div className='flex items-center'>
+                <dt className='text-gray-600 dark:text-gray-400'>Request Date</dt>
+                <dd className='ml-2 text-gray-800 dark:text-gray-200'>{selectedUser?.createdAt}</dd>
+              </div>
+              <div className='flex items-center'>
+                <dt className='text-gray-600 dark:text-gray-400'>Email</dt>
+                <dd className='ml-2 text-gray-800 dark:text-gray-200'>{selectedUser?.email}</dd>
+              </div>
+              <div className='flex items-center'>
+                <dt className='text-gray-600 dark:text-gray-400'>Phone Number</dt>
+                <dd className='ml-2 text-gray-800 dark:text-gray-200'>{selectedUser?.phone_number}</dd>
+              </div>
+              <div className='flex items-center'>
+                <dt className='text-gray-600 dark:text-gray-400'>Role</dt>
+                <dd className='ml-2 text-gray-800 dark:text-gray-200'>{selectedUser?.role}</dd>
+              </div>
+              {selectedUser?.contact_number && (
+                <div className='flex items-center'>
+                  <dt className='text-gray-600 dark:text-gray-400'>Contact number</dt>
+                  <dd className='ml-2 text-gray-800 dark:text-gray-200'>{selectedUser?.contact_number}</dd>
+                </div>
+              )}
+              <div className='flex items-center'>
+                <dt className='text-gray-600 dark:text-gray-400'>Password</dt>
+                <dd className='ml-2 text-gray-800 dark:text-gray-200'>{
+                  selectedUser?.password.split('').map((_char, index) => {
+                    return <span key={index}>*</span>
+                  })
+                }</dd>
+              </div>
+              <div className='flex items-center'>
+                <dt className='text-gray-600 dark:text-gray-400'>Verification</dt>
+                <dd className='ml-2 text-gray-800 dark:text-gray-200'>{selectedUser?.Verification}</dd>
+              </div>
+              <div className='flex items-center'>
+                <dt className='text-gray-600 dark:text-gray-400'>Message</dt>
+                <dd className='ml-2 text-gray-800 dark:text-gray-200'>{selectedUser?.message}</dd>
+              </div>
+            </dl>
+            <div className='flex items-center justify-around'>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button className='bg-emerald-700 text-white dark:text-white dark:bg-emerald-700 min-w-[120px] hover:bg-emerald-800 dark:hover:bg-emerald-800'>Accept</Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle className='dark:text-white'>
+                      Are you sure you want to accept this user?
+                    </AlertDialogTitle>
+                    <AlertDialogDescription>
+                      The user will be added to the system and will be able to login.
+                      and also sent a accept email to the user. So be sure before you continue.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel className='dark:text-white'>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={() => handleAccept(selectedUser)}>Continue</AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button className='bg-red-500 text-white dark:text-white dark:bg-red-500 min-w-[120px] hover:bg-red-700 dark:hover:bg-red-700'>Reject</Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle className='dark:text-white'>
+                      Are you sure you want to Reject this user?
+                    </AlertDialogTitle>
+                    <AlertDialogDescription>
+                      The user will be rejected and will not be able to login.
+                      and also sent a reject email to the user. So be sure before you continue.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel className='dark:text-white'>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={() => handleReject(selectedUser)}>Continue</AlertDialogAction>
+                  </AlertDialogFooter>
+
+                </AlertDialogContent>
+              </AlertDialog>
+
+            </div>
+          </div>
+          <p className='text-gray-600 dark:text-gray-300 p-4 border-l-4 border-blue-500 bg-blue-100 dark:bg-slate-900'>
+            If you need clarification on the user request, you can contact the user by email or phone number.
+          </p>
+        </SheetContent>
+      </Sheet>
+      <p className='text-gray-600 dark:text-gray-300 p-4 border-l-4 border-blue-500 bg-blue-100 dark:bg-slate-800'>
+        The Status is when user request sent , we sent a verification code to their email and when they verify the code then the status is changed to verified. Others are pending.
+        So before accepting pending request be sure that the user is genuine.
+      </p>
+    </div >
   )
 }
 
