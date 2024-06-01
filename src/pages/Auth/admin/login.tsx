@@ -86,7 +86,7 @@ const Login: React.FC = () => {
 
             // Verify the user's role
             if (role === 'admin') {
-                console.log('Admin signed in:', user);
+                // console.log('Admin signed in:', user);
                 toast({
                     variant: 'success',
                     title: 'Signed in',
@@ -97,7 +97,7 @@ const Login: React.FC = () => {
 
             } else if (role === 'user') {
                 // Grant access to user features
-                console.log('User signed in:', user);
+                // console.log('User signed in:', user);
                 toast({
                     variant: 'destructive',
                     title: 'Access denied',
@@ -143,7 +143,7 @@ const Login: React.FC = () => {
         <div className='flex flex-col gap-10 justify-around items-center h-full min-h-[600px] max-h-screen '>
             <div className='text-center '>
                 <h1 className='text-[35px] font-bold dark:text-white'>
-                    Attendance Application!
+                    Mark!t<span className='text-[12px] text-emerald-700'>by IEDCEMEA</span>
                 </h1>
                 <p className='text-gray-600 -mt-2 text-sm dark:text-gray-300'>Sign to your admin account</p>
             </div>

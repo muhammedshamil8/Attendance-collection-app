@@ -27,6 +27,7 @@ import {
     DialogTitle,
 } from "@/components/ui/dialog"
 import { LoadingButton } from '@/components/ui/loading-button';
+import { useAutoAnimate } from '@formkit/auto-animate/react';
 
 const formSchema = z.object({
     email: z.string().email({
@@ -51,7 +52,10 @@ const SignIn: React.FC = () => {
     const [loading, setLoading] = useState(false);
     const [isNewUser, setIsNewUser] = useState(true);
     const [restForm, setRestForm] = useState(false);
+    const [message, setMessage] = useState('');
+    const [parent] = useAutoAnimate();
 
+    
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, async (user) => {
             if (user) {
@@ -119,6 +123,7 @@ const SignIn: React.FC = () => {
                         title: 'Password reset email sent',
                         description: 'Check your email to reset your password',
                     });
+                    setMessage('Check your email to reset your password');
                 })
                 .catch((error) => {
                     const errorCode = error.code;
@@ -214,7 +219,7 @@ const SignIn: React.FC = () => {
 
             <div className='text-center '>
                 <h1 className='text-[35px] font-bold dark:text-white'>
-                    Attendance Application!
+                    Mark!t<span className='text-[12px] text-emerald-700'>by IEDCEMEA</span>
                 </h1>
                 <p className='text-gray-600 -mt-2 text-sm dark:text-gray-300'>Sign to your account</p>
             </div>
@@ -275,10 +280,14 @@ const SignIn: React.FC = () => {
             </p>
 
             <Dialog open={restForm} onOpenChange={handleResetForm}>
-                <DialogContent>
-                    <DialogHeader>
-                        <DialogTitle className='dark:text-white'>Forgot Password</DialogTitle>
+                <DialogContent >
+                    <DialogHeader className='text-center mx-auto'>
+                        <div ref={parent}>
+                        <DialogTitle className='dark:text-white text-center'>Forgot Password</DialogTitle>
                         <DialogDescription>Enter your email address to reset your password</DialogDescription>
+                        {message && <p className='text-emerald-500'>{message}</p>}
+                        </div>
+
                     </DialogHeader>
                     <div>
                         <Form {...formRest}>
