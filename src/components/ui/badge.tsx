@@ -8,6 +8,10 @@ const badgeVariants = cva(
   {
     variants: {
       variant: {
+        pending:
+          "border-transparent bg-amber-500 text-slate-50 hover:bg-yellow-500/80 dark:bg-amber-600 dark:text-slate-50 dark:hover:bg-amber-900/80",
+        active:
+          "border-transparent bg-emerald-500 text-slate-50 hover:bg-emerald-500/80 dark:bg-emerald-900 dark:text-slate-50 dark:hover:bg-emerald-900/80",
         default:
           "border-transparent bg-slate-900 text-slate-50 hover:bg-slate-900/80 dark:bg-slate-50 dark:text-slate-900 dark:hover:bg-slate-50/80",
         secondary:

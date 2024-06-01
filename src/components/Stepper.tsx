@@ -10,7 +10,7 @@ interface StepProps {
 const Step: React.FC<StepProps> = ({ stepNumber, label, isActive, isCompleted }) => {
   return (
     <div className="flex items-center">
-      <div className={`flex items-center justify-center h-10 w-10 rounded-full ${isCompleted ? 'bg-green-500' : isActive ? 'bg-emerald-500' : 'bg-gray-300'} text-white`}>
+      <div className={`flex items-center justify-center h-10 w-10 rounded-full ${isCompleted ? 'bg-green-500' : isActive ? 'bg-emerald-500' : 'bg-gray-400'} text-white`}>
         {isCompleted ? '✓' : stepNumber}
       </div>
       <div className={`ml-2 text-sm font-medium ${isActive ? 'text-emerald-600' : 'text-gray-600'}`}>
