@@ -9,6 +9,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Input } from '@/components/ui/input';
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { AiFillDelete } from "react-icons/ai";
 import { IoMdArrowDropdown, IoIosArrowDown, IoIosSearch } from "react-icons/io";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -39,7 +40,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox"
 import { useParams } from 'react-router-dom';
 import { Timestamp, collection, doc, getDoc, getDocs, setDoc, arrayUnion, arrayRemove } from 'firebase/firestore';
-import { db } from '@/config/firebase';
+import { auth, db } from '@/config/firebase';
 
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
@@ -79,6 +80,7 @@ import PrintTable from '@/components/Pdf';
 import getStudentYear from '@/lib/Year';
 import exportToExcel from '@/lib/Excel';
 import BarcodeReader from '@/components/BarcodeReader';
+import { onAuthStateChanged } from 'firebase/auth';
 
 const formSchema = z.object({
   name: z.string().nonempty({ message: "Name is required" }),
@@ -86,6 +88,7 @@ const formSchema = z.object({
   rollNo: z.string().nonempty({ message: "Roll no is required" }),
   department: z.string().nonempty({ message: "Department is required" }),
   joinedYear: z.string().nonempty({ message: "Joined Year is required" }).length(4, { message: "Year must be 4 digits" }),
+  section: z.string().nonempty({ message: "Section is required" }),
   id: z.string().optional(),
   // email: z.string().email({ message: "Invalid email" }).optional(),
   // phone: z.string()
@@ -99,6 +102,7 @@ interface Student {
   admissionNo: string;
   rollNo: string;
   department: string;
+  section: string;
   joinedYear: string;
   email?: string;
   phone?: string;
@@ -107,6 +111,7 @@ interface PdfData {
   No: number;
   AdmissionNo: string;
   Name: string;
+  section: string;
   RollNo: string;
   Department: string;
   JoinedYear: string;
@@ -133,6 +138,8 @@ function Event() {
   const [AttendedStudentsObj, setAttendedStudentsObj] = useState<Student[]>([]);
   const { id } = useParams();
   const [event, setEvent] = useState<any>({});
+  const [token, setToken] = useState<string>('');
+  const APIURL = import.meta.env.VITE_API_URL;
   const [eventLoading, setEventLoading] = useState(true);
   const [scanModal, setScanModal] = useState(false);
   const [barcode, setBarcode] = useState<string>('');
@@ -141,12 +148,27 @@ function Event() {
     setBarcode(result);
   };
 
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        user.getIdToken().then((idToken) => {
+          setToken(idToken);
+        }
+        );
+      } else {
+      }
+    });
+    return () => unsubscribe();
+  }, []);
+
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
       admissionNo: "",
       rollNo: "",
+      section: "",
       department: "",
       joinedYear: "",
       id: "",
@@ -167,23 +189,37 @@ function Event() {
       });
     }
     try {
-      const docRef = doc(studentCollectionRef, values.admissionNo);
-      await setDoc(docRef, {
-        ...values,
-        createdAt: Timestamp.now(),
-        updatedAt: Timestamp.now(),
-        active: true,
-      }).then(async () => {
+
+      const response = await fetch(`${APIURL}/user/create-student/add-to-event`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          ...values,
+          event_id: id,
+          createdAt: Timestamp.now(),
+          updatedAt: Timestamp.now(),
+          active: true,
+        }),
+      });
+      const data = await response.json();
+      // console.log(data);
+      if (response.ok) {
         toast({
           variant: "success",
           description: "Student added successfully",
         })
         await getStudents()
-        setSelectedStudents([values.admissionNo]);
-        AddStudenttoList([values.admissionNo]);
         setHandleCreateStudent(false);
         form.reset();
-      });
+      } else {
+        toast({
+          variant: "destructive",
+          description: data.message,
+        })
+      }
     } catch (error: any) {
       toast({
         variant: "destructive",
@@ -217,10 +253,10 @@ function Event() {
         description: "Student admission no already added",
       });
     }
-    console.log(ids);
-    console.log(students);
+    // console.log(ids);
+    // console.log(students);
     const validStudents = ids.filter((id) => students.some((student) => student.id === id));
-    console.log(validStudents);
+    // console.log(validStudents);
     if (validStudents.length !== ids.length) {
       return toast({
         variant: "destructive",
@@ -242,7 +278,7 @@ function Event() {
       closeModal();
       setSelectedStudents([]);
       setSearchAdmNo('');
-      console.log('Student added successfully');
+      // console.log('Student added successfully');
     } catch (error: any) {
       console.error(error);
     }
@@ -265,7 +301,7 @@ function Event() {
         description: "Student removed successfully",
       });
       getAttendedStudents();
-      console.log('Student removed successfully');
+      // console.log('Student removed successfully');
     } catch (error: any) {
       console.error(error);
     }
@@ -282,7 +318,7 @@ function Event() {
         description: "All students removed successfully",
       });
       getAttendedStudents();
-      console.log('All students removed successfully');
+      // console.log('All students removed successfully');
     } catch (error: any) {
       console.error(error);
     }
@@ -294,12 +330,27 @@ function Event() {
       const event = eventDoc.data();
       setEvent(event);
       setEventLoading(false);
-      console.log(event);
+      // console.log(event);
+
       if (event) {
         const attendedStudents = event.attendees;
         setAttendedStudents(attendedStudents);
+
         const attendedStudentObjects = students.filter((student) => attendedStudents.includes(student.admissionNo));
+
+        // Sort attendedStudentObjects by department and then by joined year
+        attendedStudentObjects.sort((a, b) => {
+          // First, sort by department
+          const departmentComparison = a.department.localeCompare(b.department);
+          if (departmentComparison !== 0) {
+            return departmentComparison;
+          }
+          // If departments are the same, sort by joined year
+          return a.joinedYear.localeCompare(b.joinedYear);
+        });
+
         setAttendedStudentsObj(attendedStudentObjects);
+
         const newFilteredAttendedStudents = attendedStudentObjects.map((student, index) => {
           const { admissionNo } = student;
           const studentData = students.find((s) => s.admissionNo === admissionNo);
@@ -308,6 +359,7 @@ function Event() {
               No: index + 1,
               AdmissionNo: studentData.admissionNo,
               Name: studentData.name,
+              section: studentData.section,
               RollNo: studentData.rollNo,
               Department: studentData.department,
               JoinedYear: getStudentYear(studentData.joinedYear),
@@ -318,6 +370,7 @@ function Event() {
           No: number;
           AdmissionNo: string;
           Name: string;
+          section: string;
           RollNo: string;
           Department: string;
           JoinedYear: string;
@@ -330,7 +383,6 @@ function Event() {
       console.error(error);
     }
   }
-
 
   const Fields = [
     { label: "No", value: "col-no" },
@@ -447,23 +499,35 @@ function Event() {
 
   function filterAndSortStudents() {
     let filtered = AttendedStudentsObj;
+
+    // Apply search filter if searchName is provided
     if (searchName !== '') {
-      filtered = filtered.filter((student) => student.name.toLowerCase().includes(searchName.toLowerCase()));
-    } else {
-      filtered = AttendedStudentsObj;
+      filtered = filtered.filter((student) =>
+        student.name.toLowerCase().includes(searchName.toLowerCase()) ||
+        student?.admissionNo.toLowerCase().includes(searchName.toLowerCase()) ||
+        student?.department.toLowerCase().includes(searchName.toLowerCase())
+      );
     }
-    return setFilteredAttendedStudents(filtered.sort((a, b) => {
+
+    // Sort the filtered array
+    filtered.sort((a, b) => {
       if (selectedItems2 === 'department') {
-        return a.department.localeCompare(b.department);
+        // Sort by department
+        return a.department.localeCompare(b.department) || a.joinedYear.localeCompare(b.joinedYear);
       } else if (selectedItems2 === 'year-desc') {
+        // Sort by year descending
         return b.joinedYear.localeCompare(a.joinedYear);
       } else if (selectedItems2 === 'year-asc') {
+        // Sort by year ascending
         return a.joinedYear.localeCompare(b.joinedYear);
       } else {
         return 0;
       }
-    }));
+    });
+
+    setFilteredAttendedStudents(filtered);
   };
+
 
   useEffect(() => {
     filterAndSortStudents();
@@ -773,7 +837,7 @@ function Event() {
               <TabsContent value="createStudent" className='w-full'>
                 <div className='flex flex-col gap-5 w-full max-w-[320px] mx-auto mt-4'>
                   <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3">
                       <FormField
                         control={form.control}
                         name="name"
@@ -786,6 +850,56 @@ function Event() {
                             {/* <FormDescription>
                                         This is your public display name.
                                     </FormDescription> */}
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="admissionNo"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel >Admission No</FormLabel>
+                            <FormControl>
+                              <Input className='h-[50px]' placeholder="eg: - ABSC123" {...field} onChange={(e) => field.onChange(e.target.value.toUpperCase())} />
+                            </FormControl>
+                            {/* <FormDescription>
+                                        This is your public display name.
+                                    </FormDescription> */}
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="section"
+                        render={({ field }) => (
+                          <FormItem className="space-y-3">
+                            <FormLabel>
+                              Select Section
+                            </FormLabel>
+                            <FormControl>
+                              <RadioGroup
+                                onValueChange={field.onChange}
+                                defaultValue={field.value}
+                                className="flex flex-row gap-10 space-y-1"
+                              >
+                                <FormItem className="flex items-center space-x-3 space-y-0">
+                                  <FormControl>
+                                    <RadioGroupItem value="UG" />
+                                  </FormControl>
+                                  <FormLabel className="font-normal dark:text-white">
+                                    UG
+                                  </FormLabel>
+                                </FormItem>
+                                <FormItem className="flex items-center space-x-3 space-y-0">
+                                  <FormControl>
+                                    <RadioGroupItem value="PG" />
+                                  </FormControl>
+                                  <FormLabel className="font-normal dark:text-white">PG</FormLabel>
+                                </FormItem>
+                              </RadioGroup>
+                            </FormControl>
                             <FormMessage />
                           </FormItem>
                         )}
@@ -845,22 +959,7 @@ function Event() {
                           </FormItem>
                         )}
                       />
-                      <FormField
-                        control={form.control}
-                        name="admissionNo"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel >Admission No</FormLabel>
-                            <FormControl>
-                              <Input className='h-[50px]' placeholder="eg: - ABSC123" {...field} />
-                            </FormControl>
-                            {/* <FormDescription>
-                                        This is your public display name.
-                                    </FormDescription> */}
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+
                       <FormField
                         control={form.control}
                         name="rollNo"
@@ -932,7 +1031,7 @@ function Event() {
           </DialogHeader>
           <div>
             <BarcodeReader onDetected={handleDetected} />
-            <Input type="text" placeholder="Search Admission No" name="title" className='h-[50px] w-full mt-4' value={barcode} onChange={(e) => setBarcode(e.target.value)} />
+            <Input type="text" placeholder="Search Admission No" name="title" className='h-[50px] w-full mt-4' value={barcode} onChange={(e) => setBarcode(e.target.value.toUpperCase())} />
             <div className='flex gap-2 items-center justify-center pb-6'>
               <Button onClick={closeScanModal} className='!bg-slate-200 font-bold mt-4 !text-emerald-600 w-full'>Cancel</Button>
               <Button onClick={() => AddStudenttoList([barcode])} className='!bg-emerald-600 font-bold mt-4 !text-white w-full'>Submit</Button>

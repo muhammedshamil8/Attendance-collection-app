@@ -9,6 +9,7 @@ import UserLayout from "@/layouts/userLayout";
 import Dashboard from "@/pages/Admin/Dashboard/dashboard";
 import Users from "@/pages/Admin/Users/users";
 import Students from "./pages/Admin/Students/students";
+import AccountRequest from "./pages/Admin/AccRequest/accrequest";
 
 
 // user routes
@@ -16,9 +17,11 @@ import Home from "@/pages/User/Home/home";
 import Event from "./pages/User/Event/event";
 import ProfilePage from "./pages/User/Profile/profile";
 import AuthContact from "./pages/User/Contact/contact";
+
 // auth routes
 import Login from "@/pages/Auth/admin/login";
 import SignIn from "@/pages/Auth/user/sigin";
+import Action from "./pages/Auth/Action";
 
 // error routes
 import NotFound from "@/pages/Errors/NotFound";
@@ -27,8 +30,9 @@ import UnAuth from "@/pages/Errors/unAuth";
 // other routes
 import Contact from "./pages/contact";
 import About from "./pages/about";
-// import LandingPage from "./pages/landingPage";
 import Test from "./pages/test";
+import CollectionForm from "./pages/collectionForm";
+// import LandingPage from "./pages/landingPage";
 
 const router = createBrowserRouter([
   {
@@ -48,7 +52,7 @@ const router = createBrowserRouter([
         element: <Event />
       },
       {
-        path: '/about',
+        path: '/home/about',
         element: <About />
       },
       {
@@ -76,6 +80,10 @@ const router = createBrowserRouter([
       {
         path: 'students',
         element: <Students />
+      },
+      {
+        path: 'account-request',
+        element: <AccountRequest />
       }
     ]
   },
@@ -102,6 +110,14 @@ const router = createBrowserRouter([
       {
         path: "/test",
         element: <Test />
+      },
+      {
+        path: "/emeastudents-form",
+        element: <CollectionForm />
+      },
+      {
+        path: "/action",
+        element: <Action />
       },
     ]
   },

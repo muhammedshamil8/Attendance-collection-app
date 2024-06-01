@@ -39,7 +39,7 @@ const BarcodeReader: React.FC<BarcodeReaderProps> = ({ onDetected }) => {
 
       Quagga.onDetected((data) => {
         const code = data.codeResult.code;
-        console.log('Barcode detected and processed:', code);
+        // console.log('Barcode detected and processed:', code);
         if (code !== null) {
           onDetected(code);
           setScanning(false); // stop scanning when a code is detected

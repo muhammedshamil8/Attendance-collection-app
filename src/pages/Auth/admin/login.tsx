@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { auth  } from '@/config/firebase';
+import { auth } from '@/config/firebase';
 import { signInWithEmailAndPassword, signOut } from 'firebase/auth';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -29,12 +29,15 @@ const formSchema = z.object({
         message: "Password must be at least 6 characters.",
     }),
 })
+import { useAutoAnimate } from '@formkit/auto-animate/react'
 
 const Login: React.FC = () => {
     const [showPassword, setShowPassword] = useState(false);
     const navigate = useNavigate();
     const { toast } = useToast();
     const [loading, setLoading] = useState(false);
+    const [parent] = useAutoAnimate();
+
     // const UserCollectionRef = collection(db, 'users');
 
     // useEffect(() => {
@@ -83,7 +86,7 @@ const Login: React.FC = () => {
 
             // Verify the user's role
             if (role === 'admin') {
-                console.log('Admin signed in:', user);
+                // console.log('Admin signed in:', user);
                 toast({
                     variant: 'success',
                     title: 'Signed in',
@@ -94,7 +97,7 @@ const Login: React.FC = () => {
 
             } else if (role === 'user') {
                 // Grant access to user features
-                console.log('User signed in:', user);
+                // console.log('User signed in:', user);
                 toast({
                     variant: 'destructive',
                     title: 'Access denied',
@@ -140,7 +143,7 @@ const Login: React.FC = () => {
         <div className='flex flex-col gap-10 justify-around items-center h-full min-h-[600px] max-h-screen '>
             <div className='text-center '>
                 <h1 className='text-[35px] font-bold dark:text-white'>
-                    Attendance Application!
+                    Mark!t<span className='text-[12px] text-emerald-700'>by IEDCEMEA</span>
                 </h1>
                 <p className='text-gray-600 -mt-2 text-sm dark:text-gray-300'>Sign to your admin account</p>
             </div>
@@ -152,7 +155,7 @@ const Login: React.FC = () => {
             </div>
             <div className='flex flex-col gap-5 w-full max-w-[320px]'>
                 <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8" ref={parent}>
                         <FormField
                             control={form.control}
                             name="email"
@@ -173,7 +176,9 @@ const Login: React.FC = () => {
                             control={form.control}
                             name="password"
                             render={({ field }) => (
-                                <FormItem>
+                                <FormItem
+                                    ref={parent}
+                                >
                                     <FormLabel>Password</FormLabel>
                                     <FormControl>
                                         <div className='relative'>

@@ -23,7 +23,7 @@ const AuthRoleRequire: React.FC<AuthRoleRequireProps> = ({ role, children }) => 
             if (user) {
                 const idTokenResult = await user.getIdTokenResult();
                 const authRole = idTokenResult.claims.role;
-                console.log('User role:', idTokenResult.claims.role);
+                // console.log('User role:', idTokenResult.claims.role);
                 if (role === 'user') {
                     if (authRole === 'admin') {
                         toast({

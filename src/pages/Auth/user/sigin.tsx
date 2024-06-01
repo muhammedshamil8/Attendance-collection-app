@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { auth } from '@/config/firebase';
-import { onAuthStateChanged, signInWithEmailAndPassword, signOut } from 'firebase/auth';
+import { getAuth, onAuthStateChanged, sendPasswordResetEmail, signInWithEmailAndPassword, signOut } from 'firebase/auth';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { IoEyeOffOutline, IoEyeOutline } from "react-icons/io5";
@@ -19,7 +19,15 @@ import {
     FormLabel,
     FormMessage,
 } from "@/components/ui/form"
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+} from "@/components/ui/dialog"
 import { LoadingButton } from '@/components/ui/loading-button';
+import { useAutoAnimate } from '@formkit/auto-animate/react';
 
 const formSchema = z.object({
     email: z.string().email({
@@ -30,6 +38,12 @@ const formSchema = z.object({
     }),
 })
 
+const formSchemaRest = z.object({
+    email: z.string().email({
+        message: "Invalid email address.",
+    }),
+})
+
 const SignIn: React.FC = () => {
     const [showPassword, setShowPassword] = useState(false);
     const navigate = useNavigate();
@@ -37,7 +51,11 @@ const SignIn: React.FC = () => {
     // const UserCollectionRef = collection(db, 'users');
     const [loading, setLoading] = useState(false);
     const [isNewUser, setIsNewUser] = useState(true);
+    const [restForm, setRestForm] = useState(false);
+    const [message, setMessage] = useState('');
+    const [parent] = useAutoAnimate();
 
+    
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, async (user) => {
             if (user) {
@@ -63,7 +81,7 @@ const SignIn: React.FC = () => {
                         navigate('/dashboard');
                     } else if (role === 'user') {
                         navigate('/');
-                    }else {
+                    } else {
                         navigate('/contact');
                     }
                 }
@@ -87,6 +105,43 @@ const SignIn: React.FC = () => {
             password: "",
         },
     })
+    const formRest = useForm<z.infer<typeof formSchemaRest>>({
+        resolver: zodResolver(formSchemaRest),
+        defaultValues: {
+            email: "",
+        },
+    });
+
+    async function onSubmitReset(values: z.infer<typeof formSchemaRest>) {
+        try {
+            setLoading(true);
+            const auth = getAuth();
+            await sendPasswordResetEmail(auth, values.email)
+                .then(() => {
+                    toast({
+                        variant: 'success',
+                        title: 'Password reset email sent',
+                        description: 'Check your email to reset your password',
+                    });
+                    setMessage('Check your email to reset your password');
+                })
+                .catch((error) => {
+                    const errorCode = error.code;
+                    const errorMessage = error.message;
+                    console.error('Error sending password reset email:', errorMessage);
+                    console.error('Error code:', errorCode);
+                });
+        } catch (error: any) {
+            console.error('Error sending password reset email:', error);
+            toast({
+                variant: 'destructive',
+                title: 'Error sending password reset email',
+                description: error.message,
+            });
+        } finally {
+            setLoading(false);
+        }
+    }
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
         try {
@@ -154,13 +209,17 @@ const SignIn: React.FC = () => {
         form.setValue('email', 'user@gmail.com');
         form.setValue('password', 'password');
     }
+
+    const handleResetForm = () => {
+        setRestForm(!restForm);
+    }
     return (
         <div className='flex flex-col gap-10 justify-around items-center h-full min-h-[600px] max-h-screen '>
 
 
             <div className='text-center '>
                 <h1 className='text-[35px] font-bold dark:text-white'>
-                  Attendance Application!
+                    Mark!t<span className='text-[12px] text-emerald-700'>by IEDCEMEA</span>
                 </h1>
                 <p className='text-gray-600 -mt-2 text-sm dark:text-gray-300'>Sign to your account</p>
             </div>
@@ -205,7 +264,7 @@ const SignIn: React.FC = () => {
                                     </FormControl>
                                     <FormMessage />
                                     <div>
-                                        <p className='text-emerald-600 underline text-sm font-medium mt-1'>Forgot password?</p>
+                                        <p className='text-emerald-600 underline text-sm font-medium mt-1 cursor-pointer' onClick={handleResetForm}>Forgot password?</p>
                                     </div>
                                 </FormItem>
                             )}
@@ -220,7 +279,44 @@ const SignIn: React.FC = () => {
                 Don't have an account? <button onClick={handleContact} className='underline text-emerald-700'>contact admin</button>
             </p>
 
-            
+            <Dialog open={restForm} onOpenChange={handleResetForm}>
+                <DialogContent >
+                    <DialogHeader className='text-center mx-auto'>
+                        <div ref={parent}>
+                        <DialogTitle className='dark:text-white text-center'>Forgot Password</DialogTitle>
+                        <DialogDescription>Enter your email address to reset your password</DialogDescription>
+                        {message && <p className='text-emerald-500'>{message}</p>}
+                        </div>
+
+                    </DialogHeader>
+                    <div>
+                        <Form {...formRest}>
+                            <form className="space-y-8" onSubmit={formRest.handleSubmit(onSubmitReset)}>
+                                <FormField
+                                    control={formRest.control}
+                                    name="email"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Email</FormLabel>
+                                            <FormControl>
+                                                <Input type="email" className='h-[50px]' placeholder="Email" {...field} />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                <LoadingButton className='!bg-emerald-600 font-bold mt-6 !text-white w-full' loading={loading} type="submit">Reset Password</LoadingButton>
+                                <p onClick={handleResetForm} className='w-full text-center'>
+                                    <span className='underline dark:text-white cursor-pointer '>
+                                        I remember my password
+                                    </span>
+                                </p>
+                            </form>
+                        </Form>
+                    </div>
+                </DialogContent>
+            </Dialog>
+
         </div>
     );
 };

@@ -2,7 +2,7 @@ import { ModeToggle } from '@/components/mode-toggle';
 import React, { useCallback } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { FaHome , FaUsers } from "react-icons/fa";
+import { FaHome , FaUserPlus, FaUsers } from "react-icons/fa";
 import { PiStudentBold } from "react-icons/pi";
 import { LogOut } from 'lucide-react';
 import ActiveBadge from '@/components/ActiveBadge';
@@ -45,6 +45,11 @@ const AdminLayout: React.FC = () => {
             icon: <PiStudentBold />,
             route: '/dashboard/students'
         },
+        {
+            name: 'Account Request',
+            icon: <FaUserPlus />,
+            route: '/dashboard/account-request'
+        }
     ];
 
     const handleNavigate = useCallback((route: string) => {

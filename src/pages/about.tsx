@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useAutoAnimate } from '@formkit/auto-animate/react'
 import { IoIosArrowDown, IoIosArrowUp } from "react-icons/io";
+import { FaLinkedinIn , FaInstagram ,  } from "react-icons/fa";
+import { IoMailOutline } from "react-icons/io5";
 
 interface Story {
     title: string;
@@ -37,7 +39,7 @@ const About: React.FC = () => {
     ]);
 
     return (
-        <div className="bg-gray-900 text-white p-8 pb-2 m-4 flex flex-col justify-between min-h-screen">
+        <div className="text-black dark:text-white p-8 pb-2 m-4 flex flex-col justify-between min-h-screen mb-20">
             <div>
             <h1 className="text-4xl font-bold mb-4">About This App</h1>
             <p className="text-lg mb-4">
@@ -61,10 +63,10 @@ const About: React.FC = () => {
                 nunc nunc aliquam nunc, id consectetur felis nunc vel nunc.
             </p>
             <div className='mt-10'>
-                <h3 className='text-left text-white font-semibold text-lg'>FAQs</h3>
+                <h3 className='text-left dark:text-white font-semibold text-lg'>FAQs</h3>
                 {Accordion.map((item, index) => (
                     <div key={index} className="">
-                        <h2 className='p-2 font-semibold cursor-pointer hover:underline transition-all ease-in-out flex items-center justify-between border-b border-gray-300 dark:border-b dark:border-gray-700'
+                        <h2 className='p-2 font-semibold cursor-pointer hover:underline transition-all ease-in-out flex items-center justify-between border-b border-gray-300 dark:border-b dark:border-gray-700 text-lg'
                             onClick={() => setAccordion(Accordion.map((s, i) => i === index ? { ...s, showStory: !s.showStory } : s))}>
                             {item.title}?
                             {item.showStory ? <IoIosArrowUp /> : <IoIosArrowDown />}
@@ -75,7 +77,15 @@ const About: React.FC = () => {
             </div>
             </div>
 
-            <p className='text-center mt-20'>
+            
+
+            <p className='flex gap-2 mx-auto mt-10'>
+                <FaLinkedinIn className='text-xl m-2 text-gray-500 cursor-pointer hover:text-gray-700 transition-all ease-in-out' onClick={() => window.open('https://www.linkedin.com/in/zamil-ahamed-1b1b3b1b1/')} />
+                <FaInstagram className='text-xl m-2 text-gray-600 cursor-pointer hover:text-gray-700 transition-all ease-in-out' onClick={() => window.open('https://www.instagram.com/zamilahamed/')} />
+                <IoMailOutline className='text-xl m-2 text-gray-600 cursor-pointer hover:text-gray-700 transition-all ease-in-out' onClick={() => window.open('mailto:emeaiedc@gmail.com')} />
+            </p>
+
+            <p className='text-center mt-10'>
                 crafted with <span className='text-red-600'>❤</span> by <a href="https://zamil.me" className='hover:underline'>...Me...</a>
             </p>
         </div>

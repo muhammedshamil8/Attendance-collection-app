@@ -11,7 +11,6 @@ const Test: React.FC = () => {
   return (
     <div>
       <h1 className='text-center font-semibold m-4'>testing Page</h1>
-     
     </div>
   );
 };
