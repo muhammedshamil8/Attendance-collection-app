@@ -45,6 +45,7 @@ const Action: React.FC = () => {
 
     const handleAction = async (mode: string, oobCode: string) => {
         setOobCode(oobCode);
+        setLoading(true);
         switch (mode) {
             case 'resetPassword':
                 try {
@@ -57,6 +58,8 @@ const Action: React.FC = () => {
             case 'verifyEmail':
                 try {
                     await applyActionCode(auth, oobCode);
+                    setDone(true);
+                    setLoading(false);
                     setStatus('Email verified successfully!');
                     setTimeout(() => {
                         navigate('/signin');
@@ -68,6 +71,8 @@ const Action: React.FC = () => {
             case 'recoverEmail':
                 try {
                     await applyActionCode(auth, oobCode);
+                    setDone(true);
+                    setLoading(false);
                     setStatus('Email recovery successful!');
                     setTimeout(() => {
                         navigate('/signin');
@@ -82,6 +87,7 @@ const Action: React.FC = () => {
     };
 
     const handlePasswordReset = async (e: React.FormEvent) => {
+        setLoading(true);
         e.preventDefault();
         if (!newPassword || !confirmPassword) {
             setStatus('Please enter your new password.');
@@ -96,6 +102,8 @@ const Action: React.FC = () => {
         if (oobCode) {
             try {
                 await confirmPasswordReset(auth, oobCode, newPassword);
+                setLoading(false);
+                setDone(true);
                 setStatus('Password reset successfully!');
                 setTimeout(() => {
                     navigate('/signin');
@@ -153,10 +161,10 @@ const Action: React.FC = () => {
                 <DialogContent className='min-h-[300px] flex flex-col items-center justify-center text-center'>
                     {loading && loading ? (
                         <DialogHeader>
-                            <DialogTitle>
+                            <DialogTitle className='text-center'>
                                 Loading...
                             </DialogTitle>
-                            <DialogDescription>
+                            <DialogDescription className='text-center'>
                                 Sending your message...
                             </DialogDescription>
                         </DialogHeader>
@@ -165,7 +173,7 @@ const Action: React.FC = () => {
                             {done && done ? (
                                 <DialogHeader>
                                     <img src={SuccessImg} alt="delete" className="w-36 h-36 mx-auto mt-4" />
-                                    <DialogDescription>
+                                    <DialogDescription className='text-center'>
                                         Submission Successful
                                     </DialogDescription>
                                     <DialogFooter>
@@ -177,7 +185,7 @@ const Action: React.FC = () => {
                                     <DialogTitle>
                                         <img src={ErrorImg} alt="delete" className="w-36 h-36 mx-auto mt-4" />
                                     </DialogTitle>
-                                    <DialogDescription>
+                                    <DialogDescription className='text-center'>
                                         Submission Error
                                     </DialogDescription>
                                     <DialogFooter>

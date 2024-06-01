@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { db} from '@/config/firebase';
+import { db } from '@/config/firebase';
 import { collection, getDocs, addDoc, doc, Timestamp, deleteDoc } from 'firebase/firestore';
 import { useToast } from "@/components/ui/use-toast"
 import { AiFillDelete, AiFillEye } from "react-icons/ai";
@@ -65,20 +65,23 @@ const Dashboard: React.FC = () => {
   })
 
   async function onSubmitDepartment(values: z.infer<typeof formSchema2>) {
-    console.log(values);
+    // console.log(values);
     const data = {
       department: values.department,
       createdAt: Timestamp.now(),
     }
     try {
       const department = await addDoc(departmentCollectionRef, data);
-      console.log('Department created successfully', department);
+      // console.log('Department created successfully', department);
       getDepartment();
       toast({
         variant: "success",
         description: "Department created successfully",
       })
-      setHandlecreateDepartment(false);
+      if (department) {
+        setHandlecreateDepartment(false);
+        Departmentform.reset();
+      }
     } catch (error: any) {
       console.error(error);
     }
@@ -109,7 +112,7 @@ const Dashboard: React.FC = () => {
           createdAt: data.createdAt,
         }
       });
-      console.log(departments);
+      // console.log(departments);
       departments.sort((a, b) => a.department.localeCompare(b.department));
       setDepartment(departments);
       setDepartmentLoading(false);
@@ -173,7 +176,7 @@ const Dashboard: React.FC = () => {
                 <AlertDialogContent>
                   <AlertDialogHeader>
                     <AlertDialogTitle className='dark:text-white'>
-                       Are you sure you want to delete this department?
+                      Are you sure you want to delete this department?
                     </AlertDialogTitle>
                     <AlertDialogDescription>
                       This action cannot be undone. it will delete the department permanently.

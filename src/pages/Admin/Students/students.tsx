@@ -279,25 +279,25 @@ function Students() {
 
   function filterAndSortStudents() {
     let filtered = students;
-    console.log('filtered', filtered);
-    console.log(students);
+    // console.log('filtered', filtered);
+    // console.log(students);
     if (searchName !== '') {
       filtered = filtered.filter((student) => student?.name.toLowerCase().includes(searchName.toLowerCase()) || student?.admissionNo.toLowerCase().includes(searchName.toLowerCase()) || student?.department.toLowerCase().includes(searchName.toLowerCase()));
     } else {
       filtered = students;
-      console.log('no search value');
+      // console.log('no search value');
     }
     return setFilteredStudents(filtered.sort((a, b) => {
       if (selectedItems2 === 'department') {
-        console.log('department');
+        // console.log('department');
         return a.department.localeCompare(b.department);
       } else if (selectedItems2 === 'year-desc') {
-        console.log('year-desc');
+        // console.log('year-desc');
         return b.joinedYear.localeCompare(a.joinedYear);
       } else if (selectedItems2 === 'year-asc') {
         return a.joinedYear.localeCompare(b.joinedYear);
       } else {
-        console.log('no sort value');
+        // console.log('no sort value');
         return 0;
       }
     }));
@@ -319,7 +319,7 @@ function Students() {
   const handleDeleteStudnet = async (id: string) => {
     try {
       await deleteDoc(doc(studentCollectionRef, id));
-      console.log('id', id);
+      // console.log('id', id);
       toast({
         variant: "success",
         description: "Student deleted successfully",
@@ -333,7 +333,7 @@ function Students() {
     }
   }
   const handleEditStudent = (student: Student) => {
-    console.log('student', student);
+    // console.log('student', student);
     try {
       form.setValue('name', student.name);
       form.setValue('admissionNo', student.admissionNo);

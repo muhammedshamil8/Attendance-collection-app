@@ -150,21 +150,21 @@ const Contact: React.FC = () => {
                     duration: 2000,
                 });
                 return;
-            }else if (values.phone_number === '' || values.phone_number?.length !== 10  || Number.isNaN(Number(values.phone_number))) {
+            } else if (values.phone_number === '' || values.phone_number?.length !== 10 || Number.isNaN(Number(values.phone_number))) {
                 toast({
                     variant: 'destructive',
                     title: 'Message Not Sent',
                     description: 'Please enter a valid phone number',
                 })
                 return;
-            }else if (values.contact_number && values.contact_number?.length !== 10) {
+            } else if (values.contact_number && values.contact_number?.length !== 10) {
                 toast({
                     variant: 'destructive',
                     title: 'Message Not Sent',
                     description: 'Please enter a valid contact number',
                 })
                 return;
-            }else {
+            } else {
                 setShowDialog(true);
             }
             // console.log(values);
@@ -183,7 +183,9 @@ const Contact: React.FC = () => {
             });
 
             const data = await response.json();
-            // console.log(data);
+            if (data) {
+                // console.log(data);
+            }
 
             if (response.ok) {
                 setLoading(false);
@@ -240,7 +242,9 @@ const Contact: React.FC = () => {
                 }),
             });
             const data = await result.json();
-            // console.log(data);
+            if (data) {
+                // console.log(data);
+            }
             if (result.ok) {
                 setDone(true);
                 toast({

@@ -76,7 +76,7 @@ interface Event {
     eventDate: Timestamp;
     title: string;
     userID: string;
-    userCategory: string;
+    team_name: string;
     createdAt: Timestamp;
 }
 
@@ -115,10 +115,10 @@ const Home: React.FC = () => {
     const createEvent = async (values: any) => {
         const userDocRef = doc(UserCollectionRef, userID!);
         const userDocSnap = await getDoc(userDocRef);
-        const category = userDocSnap.data()?.category;
+        const team_name = userDocSnap.data()?.team_name;
         const data = {
             userID: userID,
-            userCategory: category,
+            team_name,
             title: values.title,
             description: values.description,
             eventDate: values.eventDate,
@@ -143,8 +143,8 @@ const Home: React.FC = () => {
 
 
     const addEventToUser = async (userID?: string, eventID?: string, UserCollectionRef?: any) => {
-        console.log("Adding event to user's events...");
-        console.log("User ID:", userID, "Event ID:", eventID, "User Collection Ref:", UserCollectionRef);
+        // console.log("Adding event to user's events...");
+        // console.log("User ID:", userID, "Event ID:", eventID, "User Collection Ref:", UserCollectionRef);
         if (!userID || !eventID) {
             console.error("User ID or Event ID missing.");
             return;
@@ -157,7 +157,7 @@ const Home: React.FC = () => {
                 const eventRef = doc(eventsCollectionRef, eventID);
                 const updatedEvents = [...userDocSnap.data()?.events, eventRef];
                 await updateDoc(userRef, { events: updatedEvents });
-                console.log("Event added to user's events successfully.");
+                // console.log("Event added to user's events successfully.");
                 getEvents();
             } else {
                 console.error("User not found.");
@@ -169,7 +169,7 @@ const Home: React.FC = () => {
 
     const deleteEvent = async (id: string) => {
         try {
-            console.log('Deleting movie:', id);
+            // console.log('Deleting movie:', id);
             // Delete movie from Firestore
             await deleteDoc(doc(db, 'events', id));
             toast({
@@ -206,7 +206,7 @@ const Home: React.FC = () => {
 
     useEffect(() => {
         if (userID) {
-            console.log('User ID:', userID);
+            // console.log('User ID:', userID);
             getEvents();
         }
     }, [userID]);
@@ -246,14 +246,14 @@ const Home: React.FC = () => {
                     eventDate: eventData.eventDate || "",
                     title: eventData.title || "",
                     userID: eventData.userID || "",
-                    userCategory: eventData.userCategory || "",
+                    team_name: eventData.team_name || "",
                     createdAt: eventData.createdAt || "",
                 };
             });
             setEvents(filteredData);
             setFilteredEvents(filteredData);
             setLoading(false);
-            console.log("Events:", filteredData);
+            // console.log("Events:", filteredData);
         } catch (error: any) {
             console.error(error);
         }
@@ -264,10 +264,13 @@ const Home: React.FC = () => {
     }
     const openModal = (method: string) => {
         setMethod(method);
+        if (method === "POST") {
+            form.reset();
+        }
         setHandleCreateEvent(true);
     }
     function handleOpenEvent(id: string) {
-        console.log('Event clicked');
+        // console.log('Event clicked');
         navigate(`/event/${id}`);
     }
 

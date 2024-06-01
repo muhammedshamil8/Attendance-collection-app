@@ -40,7 +40,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox"
 import { useParams } from 'react-router-dom';
 import { Timestamp, collection, doc, getDoc, getDocs, setDoc, arrayUnion, arrayRemove } from 'firebase/firestore';
-import { db } from '@/config/firebase';
+import { auth, db } from '@/config/firebase';
 
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
@@ -80,6 +80,7 @@ import PrintTable from '@/components/Pdf';
 import getStudentYear from '@/lib/Year';
 import exportToExcel from '@/lib/Excel';
 import BarcodeReader from '@/components/BarcodeReader';
+import { onAuthStateChanged } from 'firebase/auth';
 
 const formSchema = z.object({
   name: z.string().nonempty({ message: "Name is required" }),
@@ -137,6 +138,8 @@ function Event() {
   const [AttendedStudentsObj, setAttendedStudentsObj] = useState<Student[]>([]);
   const { id } = useParams();
   const [event, setEvent] = useState<any>({});
+  const [token, setToken] = useState<string>('');
+  const APIURL = import.meta.env.VITE_API_URL;
   const [eventLoading, setEventLoading] = useState(true);
   const [scanModal, setScanModal] = useState(false);
   const [barcode, setBarcode] = useState<string>('');
@@ -144,6 +147,20 @@ function Event() {
   const handleDetected = (result: string) => {
     setBarcode(result);
   };
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        user.getIdToken().then((idToken) => {
+          setToken(idToken);
+        }
+        );
+      } else {
+      }
+    });
+    return () => unsubscribe();
+  }, []);
+
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -172,23 +189,37 @@ function Event() {
       });
     }
     try {
-      const docRef = doc(studentCollectionRef, values.admissionNo);
-      await setDoc(docRef, {
-        ...values,
-        createdAt: Timestamp.now(),
-        updatedAt: Timestamp.now(),
-        active: true,
-      }).then(async () => {
+
+      const response = await fetch(`${APIURL}/user/create-student/add-to-event`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          ...values,
+          event_id: id,
+          createdAt: Timestamp.now(),
+          updatedAt: Timestamp.now(),
+          active: true,
+        }),
+      });
+      const data = await response.json();
+      // console.log(data);
+      if (response.ok) {
         toast({
           variant: "success",
           description: "Student added successfully",
         })
         await getStudents()
-        setSelectedStudents([values.admissionNo]);
-        AddStudenttoList([values.admissionNo]);
         setHandleCreateStudent(false);
         form.reset();
-      });
+      } else {
+        toast({
+          variant: "destructive",
+          description: data.message,
+        })
+      }
     } catch (error: any) {
       toast({
         variant: "destructive",
@@ -222,10 +253,10 @@ function Event() {
         description: "Student admission no already added",
       });
     }
-    console.log(ids);
-    console.log(students);
+    // console.log(ids);
+    // console.log(students);
     const validStudents = ids.filter((id) => students.some((student) => student.id === id));
-    console.log(validStudents);
+    // console.log(validStudents);
     if (validStudents.length !== ids.length) {
       return toast({
         variant: "destructive",
@@ -247,7 +278,7 @@ function Event() {
       closeModal();
       setSelectedStudents([]);
       setSearchAdmNo('');
-      console.log('Student added successfully');
+      // console.log('Student added successfully');
     } catch (error: any) {
       console.error(error);
     }
@@ -270,7 +301,7 @@ function Event() {
         description: "Student removed successfully",
       });
       getAttendedStudents();
-      console.log('Student removed successfully');
+      // console.log('Student removed successfully');
     } catch (error: any) {
       console.error(error);
     }
@@ -287,7 +318,7 @@ function Event() {
         description: "All students removed successfully",
       });
       getAttendedStudents();
-      console.log('All students removed successfully');
+      // console.log('All students removed successfully');
     } catch (error: any) {
       console.error(error);
     }
@@ -299,7 +330,7 @@ function Event() {
       const event = eventDoc.data();
       setEvent(event);
       setEventLoading(false);
-      console.log(event);
+      // console.log(event);
 
       if (event) {
         const attendedStudents = event.attendees;
@@ -806,7 +837,7 @@ function Event() {
               <TabsContent value="createStudent" className='w-full'>
                 <div className='flex flex-col gap-5 w-full max-w-[320px] mx-auto mt-4'>
                   <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3">
                       <FormField
                         control={form.control}
                         name="name"
@@ -857,7 +888,7 @@ function Event() {
                                   <FormControl>
                                     <RadioGroupItem value="UG" />
                                   </FormControl>
-                                  <FormLabel className="font-normal text-white">
+                                  <FormLabel className="font-normal dark:text-white">
                                     UG
                                   </FormLabel>
                                 </FormItem>
@@ -865,7 +896,7 @@ function Event() {
                                   <FormControl>
                                     <RadioGroupItem value="PG" />
                                   </FormControl>
-                                  <FormLabel className="font-normal text-white">PG</FormLabel>
+                                  <FormLabel className="font-normal dark:text-white">PG</FormLabel>
                                 </FormItem>
                               </RadioGroup>
                             </FormControl>

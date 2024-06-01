@@ -14,7 +14,7 @@ import {
     DialogHeader,
 } from "@/components/ui/dialog"
 import ErrorImg from "@/assets/error.svg"
-import SuccessImg from "@/assets/success.svg"
+// import SuccessImg from "@/assets/success.svg"
 import { IoEyeOffOutline, IoEyeOutline } from "react-icons/io5";
 
 const useQuery = () => {
