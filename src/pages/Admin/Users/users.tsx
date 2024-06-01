@@ -48,19 +48,12 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { onAuthStateChanged } from 'firebase/auth';
-import { MdPersonAddDisabled } from "react-icons/md";
+import { MdPerson, MdPersonAddDisabled } from "react-icons/md";
 
 import { useAutoAnimate } from '@formkit/auto-animate/react'
-import  useDebounce  from '@/lib/debounce';
+import useDebounce from '@/lib/debounce';
 
-const formSchema = z.object({
-  email: z.string().email({ message: 'Invalid email address' }),
-  password: z.string().min(6, { message: 'Password must be at least 6 characters' }),
-  team_name: z.string().min(3, { message: 'Name must be at least 3 characters' }),
-  role: z.string(),
-  status: z.boolean(),
-  Nodal_Officer: z.string().nonempty({ message: 'Head name required' }),
-})
+
 
 
 interface User {
@@ -86,9 +79,19 @@ function users() {
   const UserCollectionRef = collection(db, 'users');
   const [token, setToken] = useState<string>('');
   const APIURL = import.meta.env.VITE_API_URL;
-  const [parent , ] = useAutoAnimate();
+  const [parent,] = useAutoAnimate();
   const debouncedSearchTerm = useDebounce(searchName, 300);
+  const [method, setMethod] = useState('POST');
+  const [updateuserId, setUpdateUserId] = useState('');
 
+  const formSchema = z.object({
+    email: z.string().email({ message: 'Invalid email address' }),
+    password: method === 'POST' ? z.string().min(6, { message: 'Password must be at least 6 characters' }) : z.string().optional(),
+    team_name: z.string().min(3, { message: 'Name must be at least 3 characters' }),
+    role: z.string(),
+    status: z.boolean(),
+    Nodal_Officer: z.string().nonempty({ message: 'Head name required' }),
+  })
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -104,28 +107,6 @@ function users() {
     return () => unsubscribe();
   }, []);
 
-  useEffect(() => {
-    if (token) {
-      fetchData();
-    }
-  }, [token]);
-
-  const fetchData = async () => {
-    try {
-      const response = await fetch(`${APIURL}/todos`, {
-        method: 'GET',
-        headers: {
-          Authorization: `Bearer ${token}`,
-        }
-      });
-      const data = await response.json();
-      console.log(data);
-    } catch (error: any) {
-      console.error(error);
-    }
-  }
-
-
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -138,7 +119,26 @@ function users() {
     },
   })
 
+  const EditUser = (id: string, user: User) => {
+    setUpdateUserId(id);
+    form.setValue('email', user.email);
+    form.setValue('team_name', user.team_name);
+    form.setValue('Nodal_Officer', user.Nodal_Officer);
+    openModal('PUT')
+  }
+
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    if (method === 'POST') {
+      CreateUser(values);
+    } else if (method === 'PUT') {
+      if (updateuserId)
+        UpdateUser(updateuserId, values);
+    } else {
+      // console.log('User ID not found');
+    }
+  }
+
+  const CreateUser = async (values: z.infer<typeof formSchema>) => {
     try {
       const data = {
         email: values.email,
@@ -149,7 +149,7 @@ function users() {
         status: values.status,
         createdAt: Timestamp.now(),
       }
-      const response = await fetch(`${APIURL}/create-user`, {
+      const response = await fetch(`${APIURL}/admin/create-user`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -159,7 +159,7 @@ function users() {
       });
 
       const responseData = await response.json();
-      console.log('responseData', responseData);
+      // console.log('responseData', responseData);
       if (response.ok) {
         toast({
           variant: 'success',
@@ -187,14 +187,14 @@ function users() {
 
   const DeleteUser = async (id: string) => {
     try {
-      const response = await fetch(`${APIURL}/delete-user/${id}`, {
+      const response = await fetch(`${APIURL}/admin/delete-user/${id}`, {
         method: 'DELETE',
         headers: {
           Authorization: `Bearer ${token}`,
         }
       });
       const data = await response.json();
-      console.log(data);
+      // console.log(data);
       if (response.ok) {
         toast({
           variant: 'success',
@@ -214,6 +214,115 @@ function users() {
         variant: 'destructive',
         description: error.message,
       });
+    }
+  }
+
+  const DisableUser = async (id: string) => {
+    try {
+      const response = await fetch(`${APIURL}/admin/disable-user/${id}`, {
+        method: 'PATCH',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        }
+      });
+      const data = await response.json();
+      // console.log(data);
+      if (response.ok) {
+        toast({
+          variant: 'success',
+          description: data.message,
+        });
+        getUsers();
+      } else {
+        toast({
+          variant: 'destructive',
+          description: data.message,
+        });
+      }
+    }
+    catch (error: any) {
+      console.error(error);
+      toast({
+        variant: 'destructive',
+        description: error.message,
+      });
+    }
+  }
+
+  const EnableUser = async (id: string) => {
+    try {
+      const response = await fetch(`${APIURL}/admin/enable-user/${id}`, {
+        method: 'PATCH',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        }
+      });
+      const data = await response.json();
+      // console.log(data);
+      if (response.ok) {
+        toast({
+          variant: 'success',
+          description: data.message,
+        });
+        getUsers();
+      } else {
+        toast({
+          variant: 'destructive',
+          description: data.message,
+        });
+      }
+    }
+    catch (error: any) {
+      console.error(error);
+      toast({
+        variant: 'destructive',
+        description: error.message,
+      });
+    }
+  }
+
+  const UpdateUser = async (id: string, values: z.infer<typeof formSchema>) => {
+    try {
+      const Datas = {
+        email: values.email,
+        team_name: values.team_name,
+        Nodal_Officer: values.Nodal_Officer,
+        role: values.role,
+        status: values.status,
+        updatedAt: Timestamp.now(),
+      }
+      const response = await fetch(`${APIURL}/admin/update-user/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(Datas),
+      });
+      const data = await response.json();
+      // console.log(data);
+      if (response.ok) {
+        toast({
+          variant: 'success',
+          description: data.message,
+        });
+        getUsers();
+      } else {
+        toast({
+          variant: 'destructive',
+          description: data.message,
+        });
+      }
+    }
+    catch (error: any) {
+      console.error(error);
+      toast({
+        variant: 'destructive',
+        description: error.message,
+      });
+    } finally {
+      form.reset();
+      closeModal();
     }
   }
 
@@ -271,7 +380,7 @@ function users() {
       const usersSnapshot = await getDocs(UserCollectionRef);
       const filteredUsers = usersSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })) as User[];
       const filteredUserRoleUsers = filteredUsers.filter((user) => user.role === 'user');
-      console.log('filteredUserRoleUsers', filteredUserRoleUsers);
+      // console.log('filteredUserRoleUsers', filteredUserRoleUsers);
       setUsers(filteredUserRoleUsers);
       setLoading(false);
       filterAndSortStudents();
@@ -284,7 +393,16 @@ function users() {
   const closeModal = () => {
     setHandleCreateUser(false);
   }
-  const openModal = () => {
+  const openModal = (method: string) => {
+    setMethod(method);
+    if (method === 'POST') {
+      form.setValue('email', '');
+      form.setValue('password', '');
+      form.setValue('team_name', '');
+      form.setValue('Nodal_Officer', '');
+      form.setValue('role', 'user');
+      form.setValue('status', true);
+    }
     setHandleCreateUser(true);
   }
 
@@ -317,7 +435,7 @@ function users() {
   return (
     <div className='flex flex-col gap-10 justify-start items-center h-full mt-20  mx-auto' >
       <div className='w-full'>
-        <Button className='!bg-slate-300 w-full flex justify-between items-center gap-4 font-bold h-[50px] rounded-xl' onClick={openModal}>
+        <Button className='!bg-slate-300 w-full flex justify-between items-center gap-4 font-bold h-[50px] rounded-xl' onClick={() => openModal('POST')}>
           <p className='text-emerald-700'>
             Add User
           </p>
@@ -371,7 +489,7 @@ function users() {
                   <th className="col-action tracking-wider">Action</th>
                 </tr>
               </thead>
-              <tbody className='' ref={parent}>
+              <tbody ref={parent}>
                 {loading && loading ? (
                   <tr>
                     <td colSpan={6} className='text-center '>
@@ -389,10 +507,12 @@ function users() {
                         <td className="col-officer whitespace-nowrap">{user.Nodal_Officer}</td>
                         <td className="col-email whitespace-nowrap">{user.email}</td>
                         <td className='col-action whitespace-nowrap flex gap-1 items-center justify-center h-full w-full'>
-                        <AiFillEdit className='col-action mx-auto text-emerald-700 cursor-pointer hover:text-emerald-600 transition-all ease-in-out' onClick={() => toast({ description: 'this feature on process' })} />
+                          <AiFillEdit className='col-action mx-auto text-emerald-700 cursor-pointer hover:text-emerald-600 transition-all ease-in-out' onClick={() => EditUser(user.id, user)} />
                           <AlertDialog>
                             <AlertDialogTrigger>
-                              <AiFillDelete className='col-action mx-auto text-red-500 cursor-pointer hover:text-red-600 transition-all ease-in-out' />
+                              <>
+                                <AiFillDelete className='col-action mx-auto text-red-500 cursor-pointer hover:text-red-600 transition-all ease-in-out' />
+                              </>
                             </AlertDialogTrigger>
                             <AlertDialogContent>
                               <AlertDialogHeader>
@@ -411,7 +531,51 @@ function users() {
                               </AlertDialogFooter>
                             </AlertDialogContent>
                           </AlertDialog>
-                          <MdPersonAddDisabled className='col-action mx-auto text-emerald-700 cursor-pointer hover:text-gray-500 transition-all ease-in-out' onClick={() => toast({ description: 'this disable feature on working' })} />
+                          {user.status ? (
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <>
+                                <MdPerson className='col-action mx-auto text-emerald-700 cursor-pointer hover:text-gray-500 transition-all ease-in-out' />
+                                </>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle className='dark:text-white'>
+                                    Are you sure you want to disable this user?
+                                  </AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    This action will disable the user. the user will not be able to login.
+                                    you can enable the user again if you want to.
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel className='dark:text-white'>Cancel</AlertDialogCancel>
+                                  <AlertDialogAction onClick={() => DisableUser(user.id)}>Continue</AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                          ) : (
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <MdPersonAddDisabled className='col-action mx-auto text-emerald-700 cursor-pointer hover:text-gray-500 transition-all ease-in-out' />
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle className='dark:text-white'>
+                                    Are you sure you want to enable this user?
+                                  </AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    This action will enable the user. the user will be able to login.
+                                    you can disable the user again if you want to.
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel className='dark:text-white'>Cancel</AlertDialogCancel>
+                                  <AlertDialogAction onClick={() => EnableUser(user.id)}>Continue</AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                          )}
                         </td>
                       </tr>
                     ))
@@ -464,7 +628,7 @@ function users() {
                       </FormItem>
                     )}
                   />
-                   <FormField
+                  <FormField
                     control={form.control}
                     name="Nodal_Officer"
                     render={({ field }) => (
@@ -496,24 +660,26 @@ function users() {
                       </FormItem>
                     )}
                   />
-                  <FormField
-                    control={form.control}
-                    name="password"
-                    render={({ field }) => (
-                      <FormItem ref={parent}>
-                        <FormLabel>Password</FormLabel>
-                        <FormControl>
-                          <div className='relative'>
-                            <Input type={showPassword ? 'text' : 'password'} className='h-[50px]' placeholder="Password" {...field} />
-                            <div className='absolute right-4 top-4 cursor-pointer dark:text-white' onClick={toggleShowPassword}>
-                              {showPassword ? <IoEyeOutline /> : <IoEyeOffOutline />}
+                  {method === 'POST' && (
+                    <FormField
+                      control={form.control}
+                      name="password"
+                      render={({ field }) => (
+                        <FormItem ref={parent}>
+                          <FormLabel>Password</FormLabel>
+                          <FormControl>
+                            <div className='relative'>
+                              <Input type={showPassword ? 'text' : 'password'} className='h-[50px]' placeholder="Password" {...field} />
+                              <div className='absolute right-4 top-4 cursor-pointer dark:text-white' onClick={toggleShowPassword}>
+                                {showPassword ? <IoEyeOutline /> : <IoEyeOffOutline />}
+                              </div>
                             </div>
-                          </div>
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  )}
                   <div className='flex gap-2 items-center justify-center pb-4'>
                     <Button type='button' onClick={closeModal} className='!bg-slate-200 font-bold mt-6 !text-emerald-600 w-full'>Cancel</Button>
                     <Button type='submit' className='!bg-emerald-600 font-bold mt-6 !text-white w-full'>Submit</Button>
