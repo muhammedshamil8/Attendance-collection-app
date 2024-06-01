@@ -17,10 +17,11 @@ import {
     DialogDescription,
     DialogFooter,
     DialogHeader,
+    DialogTitle,
 } from "@/components/ui/dialog"
 import ErrorImg from "@/assets/error.svg"
 import { useToast } from '@/components/ui/use-toast';
-// import SuccessImg from "@/assets/succes.svg"
+import SuccessImg from "@/assets/succes.svg"
 
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '@/config/firebase';
@@ -37,6 +38,7 @@ import {
     FormMessage,
 } from "@/components/ui/form"
 import { useAutoAnimate } from '@formkit/auto-animate/react'
+import { set } from 'date-fns';
 
 const formSchema = z.object({
     email: z.string().optional(),
@@ -48,21 +50,21 @@ const formSchema = z.object({
 const Contact: React.FC = () => {
     const [email, setEmail] = useState('');
     const [showDialog, setShowDialog] = useState(false);
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
     const [done, setDone] = useState(false);
     const { toast } = useToast();
     const [parent] = useAutoAnimate({});
     const APIURL = import.meta.env.VITE_API_URL;
-    const [token, setToken] = useState('');
+    // const [token, setToken] = useState('');
 
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (user) => {
             if (user) {
                 setEmail(user.email ? user.email : '')
-                user.getIdToken().then((idToken) => {
-                    setToken(idToken);
-                });
+                // user.getIdToken().then((idToken) => {
+                //     setToken(idToken);
+                // });
             }
         });
 
@@ -79,27 +81,37 @@ const Contact: React.FC = () => {
     })
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
+        setLoading(true);
         try {
-            const response = await fetch(`${APIURL}/create-user`, {
+            if (values.email === '' || values.subject === '' || values.message === '') {
+                toast({
+                    variant: 'destructive',
+                    title: 'Message Not Sent',
+                    description: 'Please fill all the required fields',
+                    duration: 2000,
+                });
+                return;
+            }
+            setShowDialog(true);
+            const response = await fetch(`${APIURL}/contact`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    Authorization: `Bearer ${token}`,
                 },
                 body: JSON.stringify(values),
             });
-            setShowDialog(true);
             if (response.ok) {
                 setDone(true);
+                setLoading(false);
                 toast({
                     variant: 'success',
                     title: 'Message Sent',
                     description: 'Your message has been sent successfully',
                     duration: 2000,
                 });
-                form.reset();
             } else {
                 setDone(false);
+                setLoading(false);
                 toast({
                     variant: 'destructive',
                     title: 'Message Not Sent',
@@ -107,17 +119,22 @@ const Contact: React.FC = () => {
                     duration: 2000,
                 });
             }
-        } catch (error: any) {
-            setDone(false);
+            form.reset();
+        } catch (error) {
+            setLoading(false);
+
             toast({
                 variant: 'destructive',
                 title: 'Message Not Sent',
                 description: 'Your message could not be sent. Please try again later',
                 duration: 2000,
             });
-            console.error(error)
+            console.error(error);
         } finally {
-            setLoading(false)
+            setLoading(false);
+            setTimeout(() => {
+                handleDialogClose();
+            }, 5000);
         }
     }
 
@@ -222,19 +239,44 @@ const Contact: React.FC = () => {
                 </Form>
             </div>
 
-            <Dialog open={showDialog} onOpenChange={handleDialogClose}>
-                <DialogContent>
-                    <DialogHeader>
-                        {/* <DialogTitle>Are you absolutely sure?</DialogTitle> */}
-                        <img src={ErrorImg} alt="delete" className="w-36 h-36 mx-auto mt-4" />
-                        {/* <img src={SuccessImg} alt="delete" className="w-36 h-36 mx-auto mt-4" /> */}
-                        <DialogDescription>
-                            Submission Error
-                        </DialogDescription>
-                        <DialogFooter>
-                            <Button onClick={handleDialogClose} className='!bg-red-600 font-bold mt-6 !text-white w-fit mx-auto h-[30px] px-10'>oops!</Button>
-                        </DialogFooter>
-                    </DialogHeader>
+            <Dialog open={showDialog} onOpenChange={handleDialogClose} >
+                <DialogContent className='min-h-[300px]'>
+                    {loading && loading ? (
+                        <DialogHeader>
+                            <DialogTitle className='text-center'>
+                                Loading...
+                            </DialogTitle>
+                            <DialogDescription className='text-center'>
+                                Sending your message...
+                            </DialogDescription>
+                        </DialogHeader>
+                    ) : (
+                        <>
+                            {done && done ? (
+                                <DialogHeader>
+                                    <img src={SuccessImg} alt="delete" className="w-36 h-36 mx-auto mt-4" />
+                                    <DialogDescription className='text-center'>
+                                        Message Sent Successfully
+                                    </DialogDescription>
+                                    <DialogFooter>
+                                        <Button onClick={handleDialogClose} className='!bg-emerald-600 font-bold mt-6 !text-white w-fit mx-auto h-[30px] px-10'>Done</Button>
+                                    </DialogFooter>
+                                </DialogHeader>
+                            ) : (
+                                <DialogHeader>
+                                    <DialogTitle>
+                                        <img src={ErrorImg} alt="delete" className="w-36 h-36 mx-auto mt-4" />
+                                    </DialogTitle>
+                                    <DialogDescription className='text-center'>
+                                        Submission Error
+                                    </DialogDescription>
+                                    <DialogFooter>
+                                        <Button onClick={handleDialogClose} className='!bg-red-600 font-bold mt-6 !text-white w-fit mx-auto h-[30px] px-10'>oops!</Button>
+                                    </DialogFooter>
+                                </DialogHeader>
+                            )}
+                        </>
+                    )}
                 </DialogContent>
             </Dialog>
         </div>
