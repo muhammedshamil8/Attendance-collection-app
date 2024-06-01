@@ -72,7 +72,7 @@ const UserLayout: React.FC = ({ }) => {
         {
             name: 'About',
             icon: <FaGrinStars />,
-            route: '/about'
+            route: '/home/about'
         },
         {
             name: 'Contact',
@@ -115,8 +115,8 @@ const UserLayout: React.FC = ({ }) => {
                             <div className='line line-3 bg-emerald-600'></div>
                         </div>
                     </button>
-                    <h1 className='text-lg font-bold dark:text-white'>
-                        App Name
+                    <h1 className='text-xl font-bold dark:text-white'>
+                        Mark!t
                     </h1>
 
                     <Avatar onClick={() => navigate('/profile')} className='cursor-pointer'>
@@ -131,7 +131,7 @@ const UserLayout: React.FC = ({ }) => {
                     <Sheet open={sidebar} onOpenChange={closeSideBar}>
                         <SheetContent className='flex flex-col h-full justify-between'>
                             <SheetHeader>
-                                <SheetTitle>App Name!</SheetTitle>
+                                <SheetTitle>Mark!t</SheetTitle>
                                 {/* <SheetDescription>
                                 This action cannot be undone. This will permanently delete your account
                                 and remove your data from our servers.
