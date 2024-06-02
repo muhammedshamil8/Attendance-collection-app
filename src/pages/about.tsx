@@ -68,7 +68,7 @@ const About: React.FC = () => {
 
             <p className='flex gap-2 mx-auto mt-10'>
                 <FaLinkedinIn className='text-xl m-2 text-gray-500 cursor-pointer hover:text-gray-700 transition-all ease-in-out' onClick={() => window.open('https://www.linkedin.com/company/iedcemea')} />
-                <FaInstagram className='text-xl m-2 text-gray-600 cursor-pointer hover:text-gray-700 transition-all ease-in-out' onClick={() => window.open('https://www.instagram.com/zamilahamed/')} />
+                <FaInstagram className='text-xl m-2 text-gray-600 cursor-pointer hover:text-gray-700 transition-all ease-in-out' onClick={() => window.open('https://www.instagram.com/iedcemea/')} />
                 <IoMailOutline className='text-xl m-2 text-gray-600 cursor-pointer hover:text-gray-700 transition-all ease-in-out' onClick={() => window.open('mailto:emeaiedc@gmail.com')} />
             </p>
 

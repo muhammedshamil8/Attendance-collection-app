@@ -609,7 +609,7 @@ function Event() {
           <div className='bg-slate-400 dark:bg-slate-200  animate-pulse w-60 h-8 rounded-md my-2' />
         ) : (
           <p className='dark:text-slate-100 max-w-[500px] text-wrap' style={{ overflowWrap: 'anywhere' }}>
-            {event?.description || 'Event Description'}
+            {event?.description || 'Event Not Found'}
           </p>
         )}
 
