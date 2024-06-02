@@ -123,7 +123,7 @@ const router = createBrowserRouter([
     ]
   },
   {
-    path: 'offline.html',
+    path: '/assets',
     element: <Navigate to='/' />
   },
   {
