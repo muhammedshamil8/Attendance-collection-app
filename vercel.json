@@ -8,8 +8,12 @@
   ],
   "rewrites": [
     {
+      "source": "/(.*)",
+      "destination": "/"
+    },
+    {
       "source": "sw.js",
-      "destination": "sw.js"
+      "destination": "/sw.js"
     }
   ]
 }
