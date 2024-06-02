@@ -2,7 +2,8 @@ import React, { useEffect, useRef, useState } from 'react';
 import { db, auth } from '@/config/firebase';
 import { collection, getDocs, addDoc, doc, getDoc, DocumentReference, updateDoc, documentId, query, where, Timestamp, orderBy, deleteDoc } from 'firebase/firestore';
 import { useToast } from "@/components/ui/use-toast"
-import { AiFillEdit, AiFillDelete, } from "react-icons/ai";
+// import { AiFillEdit, } from "react-icons/ai";
+import { RiDeleteBinLine } from "react-icons/ri";
 import { Button } from '@/components/ui/button';
 import { LuPlus } from "react-icons/lu";
 import {
@@ -36,7 +37,7 @@ import {
     FormMessage,
 } from "@/components/ui/form"
 import { onAuthStateChanged } from 'firebase/auth';
-
+import { ImSpinner6 } from "react-icons/im";
 
 import {
     AlertDialog,
@@ -50,6 +51,7 @@ import {
     AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { IoIosSearch } from 'react-icons/io';
+import { LoadingButton } from '@/components/ui/loading-button';
 
 const formSchema = z.object({
     title: z.string().min(2, {
@@ -93,7 +95,8 @@ const Home: React.FC = () => {
     const navigate = useNavigate();
     const [userID, setUserID] = useState<string | null>(auth.currentUser ? auth.currentUser.uid : null);
     const [loading, setLoading] = useState<boolean>(true);
-
+    const [Submitloading, setSubmitLoading] = useState<boolean>(false);
+    const [DeleteLoading, setDeleteLoading] = useState<boolean>(false);
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -106,14 +109,25 @@ const Home: React.FC = () => {
     })
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
+        setSubmitLoading(true);
         try {
             method === "POST" ? await createEvent(values) : await updateEvent(values);
         } catch (error) {
+            setSubmitLoading(false);
             console.error(error);
         }
     }
     const createEvent = async (values: any) => {
-        const userDocRef = doc(UserCollectionRef, userID!);
+        if (!userID) {
+            console.error('User ID missing.');
+            toast({
+                variant: 'destructive',
+                description: "User ID missing.",
+            })
+            setSubmitLoading(false);
+            return;
+        }
+        const userDocRef = doc(UserCollectionRef, userID);
         const userDocSnap = await getDoc(userDocRef);
         const team_name = userDocSnap.data()?.team_name;
         const data = {
@@ -129,14 +143,16 @@ const Home: React.FC = () => {
         try {
             const eventRef = await addDoc(eventsCollectionRef, data);
             const eventID = eventRef.id;
-            await addEventToUser(userID!, eventID, UserCollectionRef);
+            await addEventToUser(userID, eventID, UserCollectionRef);
             toast({
                 variant: 'success',
                 description: "Event created successfully",
             })
+            setSubmitLoading(false);
             closeModal();
             form.reset();
         } catch (error: any) {
+            setSubmitLoading(false);
             console.error(error);
         }
     }
@@ -168,6 +184,7 @@ const Home: React.FC = () => {
     };
 
     const deleteEvent = async (id: string) => {
+        setDeleteLoading(true);
         try {
             // console.log('Deleting movie:', id);
             // Delete movie from Firestore
@@ -177,7 +194,9 @@ const Home: React.FC = () => {
                 description: "Event deleted successfully",
             })
             getEvents();
+            setDeleteLoading(false);
         } catch (error: any) {
+            setDeleteLoading(false);
             console.error(error);
         }
     }
@@ -195,6 +214,11 @@ const Home: React.FC = () => {
     const updateEvent = async (values: any) => {
         if (!values.id) {
             console.error('Event ID missing.');
+            toast({
+                variant: 'destructive',
+                description: "Event ID missing.",
+            })
+            setSubmitLoading(false);
             return;
         }
         // Update Event in Firestore
@@ -202,6 +226,7 @@ const Home: React.FC = () => {
         getEvents();
         // console.log('Updating event:', values);
         closeModal();
+        setSubmitLoading(false);
     }
 
     useEffect(() => {
@@ -287,7 +312,18 @@ const Home: React.FC = () => {
     }, []);
 
     return (
-        <div className='flex flex-col gap-10 justify-start items-center h-full mt-20 max-w-[320px] mx-auto mb-10 min-h-screen' ref={formRef}>
+        <div className='flex flex-col gap-10 justify-start items-center h-full mt-20 max-w-[360px] mx-auto mb-10 min-h-screen' ref={formRef}>
+
+            {DeleteLoading && (
+                <div className='fixed top-0 left-0 w-full h-full bg-black/50 flex items-center justify-center z-50'>
+                    <div className='bg-white p-4 rounded-lg shadow-md flex flex-col gap-4'>
+                        <div className='w-full flex items-center justify-center gap-4'>
+                            <ImSpinner6 className="animate-spin h-6 w-6 text-emerald-600" />
+                            <h1 className='text-emerald-600 font-bold'>Deleting Event...</h1>
+                        </div>
+                    </div>
+                </div>
+            )}
             <div>
                 <h1 className='font-bold text-green-900 dark:text-emerald-400 text-[30px]'>
                     Select Event
@@ -318,52 +354,68 @@ const Home: React.FC = () => {
                     </>
                 ) : (filteredEvents.length > 0 ? (
                     filteredEvents.map((event: Event) => (
-                        <div className="bg-white rounded-md shadow-md p-4 flex flex-col gap-3 overflow-hidden dark:bg-slate-300" key={event.id}>
+                        <div className="bg-emerald-600/10 dark:bg-emerald-200/20 rounded-xl shadow-md p-4 flex flex-col gap-3 overflow-hidden " key={event.id}>
                             <div className="flex justify-between  flex-col ">
-                                <div className="flex gap-4 justify-end w-full">
-                                    <AiFillEdit
-                                        className="text-blue-500 cursor-pointer"
-                                        onClick={() => EditEvent(event.id, event)}
-                                    />
-
-                                    <AlertDialog>
-                                        <AlertDialogTrigger>
-                                            <AiFillDelete className="text-red-500 cursor-pointer" />
-                                        </AlertDialogTrigger>
-                                        <AlertDialogContent>
-                                            <AlertDialogHeader>
-                                                <AlertDialogTitle className='dark:text-white'>
-                                                    Are you sure you want to delete this Event?
-                                                </AlertDialogTitle>
-                                                <AlertDialogDescription>
-                                                    This action cannot be undone. it will delete the Event permanently.
-                                                    so be sure before you continue.
-                                                </AlertDialogDescription>
-                                            </AlertDialogHeader>
-                                            <AlertDialogFooter>
-                                                <AlertDialogCancel className='dark:text-white'>Cancel</AlertDialogCancel>
-                                                <AlertDialogAction onClick={() => deleteEvent(event.id)}>Continue</AlertDialogAction>
-                                            </AlertDialogFooter>
-                                        </AlertDialogContent>
-                                    </AlertDialog>
-                                </div>
-                                <h2 className="text-xl font-semibold text-gray-800 truncate mt-2" style={{ overflowWrap: 'anywhere' }}>
+                                <h2 className="text-xl font-bold text-emerald-600 dark:text-slate-100 truncate mt-2 text-center" style={{ overflow: 'hidden', overflowWrap: 'anywhere', display: '-webkit-box', WebkitBoxOrient: 'vertical', WebkitLineClamp: 2 }}>
                                     {event.title}
                                 </h2>
 
                             </div>
-                            <p className="text-gray-600 max-w-full text-wrap" style={{ overflowWrap: 'anywhere' }}>
+                            <p className="text-emerald-600 text-center font-medium dark:text-slate-300">
+                                ( {event.eventDate?.toDate().toDateString()} )
+                            </p>
+                            <p className="text-gray-600 max-w-full text-wrap text-center font-medium dark:text-slate-200" style={{ overflow: 'hidden', overflowWrap: 'anywhere', display: '-webkit-box', WebkitBoxOrient: 'vertical', WebkitLineClamp: 2 }}>
                                 {event.description}
                             </p>
-                            <p className="text-gray-600">
-                                {event.eventDate?.toDate().toDateString()}
-                            </p>
-                            <button
-                                className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 px-4 rounded-md transition-all ease-in-out"
-                                onClick={() => handleOpenEvent(event.id)}
-                            >
-                                View Details
-                            </button>
+
+                            <div className="flex gap-3 justify-center w-full">
+                                <button
+                                    className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 px-4 rounded-xl transition-all ease-in-out"
+                                    onClick={() => handleOpenEvent(event.id)}
+                                >
+                                    <div className='flex items-center justify-center gap-2 text-sm'>
+                                        View Details
+                                        {/* <Eye
+                                    className="text-white cursor-pointer h-5"
+                                /> */}
+                                    </div>
+                                </button>
+                                <button
+                                    className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2  px-4 rounded-xl transition-all ease-in-out"
+                                    onClick={() => EditEvent(event.id, event)}
+                                >
+                                    <div className='flex items-center justify-center gap-2 text-sm'>
+                                        Edit Event
+                                        {/* <AiFillEdit
+                                    className="text-white cursor-pointer"
+                                /> */}
+                                    </div>
+
+                                </button>
+
+
+                                <AlertDialog>
+                                    <AlertDialogTrigger>
+                                        <RiDeleteBinLine className="text-emerald-500 cursor-pointer transition-all ease-in-out hover:text-red-500" />
+                                    </AlertDialogTrigger>
+                                    <AlertDialogContent>
+                                        <AlertDialogHeader>
+                                            <AlertDialogTitle className='dark:text-white'>
+                                                Are you sure you want to delete this Event?
+                                            </AlertDialogTitle>
+                                            <AlertDialogDescription>
+                                                This action cannot be undone. it will delete the Event permanently.
+                                                so be sure before you continue.
+                                            </AlertDialogDescription>
+                                        </AlertDialogHeader>
+                                        <AlertDialogFooter>
+                                            <AlertDialogCancel className='dark:text-white'>Cancel</AlertDialogCancel>
+                                            <AlertDialogAction onClick={() => deleteEvent(event.id)}>Continue</AlertDialogAction>
+                                        </AlertDialogFooter>
+                                    </AlertDialogContent>
+                                </AlertDialog>
+                            </div>
+
                         </div>
                     ))
                 ) : (
@@ -469,7 +521,7 @@ const Home: React.FC = () => {
                                 />
                                 <div className='flex gap-2 items-center justify-center pb-4'>
                                     <Button type='button' onClick={closeModal} className='!bg-slate-200 font-bold mt-6 !text-emerald-600 w-full'>Cancel</Button>
-                                    <Button type='submit' className='!bg-emerald-600 font-bold mt-6 !text-white w-full'>Submit</Button>
+                                    <LoadingButton className='bg-emerald-600 font-bold mt-6 !text-white w-full transition-all ease-in-out hover:bg-emerald-700' loading={Submitloading} type="submit">Submit</LoadingButton>
                                 </div>
 
                             </form>
@@ -477,6 +529,7 @@ const Home: React.FC = () => {
                     </div>
                 </DialogContent>
             </Dialog>
+
         </div>
 
     );
