@@ -42,6 +42,7 @@ import {
 import ErrorImg from "@/assets/error.svg"
 import SuccessImg from "@/assets/succes.svg"
 import { ImSpinner6 } from "react-icons/im";
+import { LoadingButton } from '@/components/ui/loading-button';
 
 const formSchema = z.object({
     name: z.string().nonempty({ message: "Name is required" }),
@@ -58,7 +59,7 @@ interface Student {
     name: string;
     admissionNo: string;
     active: boolean;
-  }
+}
 
 function CollectionForm() {
     const [open, setOpen] = useState(false);
@@ -68,6 +69,7 @@ function CollectionForm() {
     const [students, setStudnets] = useState<Student[]>([]);
     const [openResultBox, setOpenResultBox] = useState(false);
     const [loading, setLoading] = useState(true);
+    const [Submitloading, setSubmitLoading] = useState(false);
     const [loadingDepartment, setLoadingDepartment] = useState(true);
     const [done, setDone] = useState<boolean | null>(null);
     const { toast } = useToast();
@@ -93,6 +95,7 @@ function CollectionForm() {
             description: 'Please contact the admin to turn on the feature',
         });
         return;
+        setSubmitLoading(true);
         try {
             if (values.id === '') {
                 values.id = values.admissionNo;
@@ -127,26 +130,27 @@ function CollectionForm() {
             })
         } finally {
             setLoading(false);
+            setSubmitLoading(false);
         }
     }
 
     const getStudents = async () => {
         try {
-          const usersSnapshot = await getDocs(studentCollectionRef);
-          const filteredUsers = usersSnapshot.docs.map((doc) => ({ 
-            id: doc.id, 
-            name: doc.data().name,
-            admissionNo: doc.data().admissionNo,
-            active: doc.data().active,
-         })) as Student[];
-          setStudnets(filteredUsers);
-          setLoading(false);
-          // filterAndSortStudents();
+            const usersSnapshot = await getDocs(studentCollectionRef);
+            const filteredUsers = usersSnapshot.docs.map((doc) => ({
+                id: doc.id,
+                name: doc.data().name,
+                admissionNo: doc.data().admissionNo,
+                active: doc.data().active,
+            })) as Student[];
+            setStudnets(filteredUsers);
+            setLoading(false);
+            // filterAndSortStudents();
         } catch (error: any) {
-          console.error(error);
-    
+            console.error(error);
+
         }
-      }
+    }
 
     const getDepartment = async () => {
         try {
@@ -365,7 +369,7 @@ function CollectionForm() {
                                 />
                                 <div className='flex gap-2 items-center justify-center pb-4'>
                                     <Button type='button' onClick={() => handleClearForm()} className='!bg-slate-200 font-bold mt-6 !text-emerald-600 w-full'>Clear</Button>
-                                    <Button type='submit' className='!bg-emerald-600 font-bold mt-6 !text-white w-full'>Submit</Button>
+                                    <LoadingButton type="submit" className='bg-emerald-600 font-bold mt-6  !text-white w-full transition-all ease-in-out hover:bg-emerald-700' loading={Submitloading}>Submit</LoadingButton>
                                 </div>
                             </form>
                         </Form>
