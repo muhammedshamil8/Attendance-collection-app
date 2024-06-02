@@ -55,7 +55,7 @@ const SignIn: React.FC = () => {
     const [message, setMessage] = useState('');
     const [parent] = useAutoAnimate();
 
-    
+
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, async (user) => {
             if (user) {
@@ -219,14 +219,12 @@ const SignIn: React.FC = () => {
 
             <div className='text-center '>
                 <h1 className='text-[35px] font-bold dark:text-white'>
-                    Mark!t<span className='text-[12px] text-emerald-700'>by IEDCEMEA</span>
+                   Welcome!
                 </h1>
                 <p className='text-gray-600 -mt-2 text-sm dark:text-gray-300'>Sign to your account</p>
             </div>
             <div className='bg-slate-200 rounded-md py-3 px-6'>
                 <p className='underline text-center'>For testing</p>
-                <p>Email: user@gmail.com</p>
-                <p>Password: password</p>
                 <Button onClick={handleFilldata} className='w-full my-2 text-white font-semibold'>Click to Fill </Button>
             </div>
             <div className='flex flex-col gap-5 w-full max-w-[320px]'>
@@ -269,11 +267,19 @@ const SignIn: React.FC = () => {
                                 </FormItem>
                             )}
                         />
-                        <LoadingButton className='!bg-emerald-600 font-bold mt-6 !text-white w-full' loading={loading} type="submit">Login</LoadingButton>
-
+                        <LoadingButton className='bg-emerald-600 font-bold mt-6 !text-white w-full transition-all ease-in-out hover:bg-emerald-700' loading={loading} type="submit">Login</LoadingButton>
                     </form>
                 </Form>
+
+
             </div>
+            <div className='text-center'>
+                <h1 className='text-[32px] font-bold text-emerald-600'>
+                    MARK !T
+                </h1>
+                <span className='text-[12px] dark:text-white'>By IEDC EMEA</span>
+            </div>
+
 
             <p className='text-sm dark:text-white'>
                 Don't have an account? <button onClick={handleContact} className='underline text-emerald-700'>contact admin</button>
@@ -283,9 +289,9 @@ const SignIn: React.FC = () => {
                 <DialogContent >
                     <DialogHeader className='text-center mx-auto'>
                         <div ref={parent}>
-                        <DialogTitle className='dark:text-white text-center'>Forgot Password</DialogTitle>
-                        <DialogDescription>Enter your email address to reset your password</DialogDescription>
-                        {message && <p className='text-emerald-500'>{message}</p>}
+                            <DialogTitle className='dark:text-white text-center'>Forgot Password</DialogTitle>
+                            <DialogDescription>Enter your email address to reset your password</DialogDescription>
+                            {message && <p className='text-emerald-500'>{message}</p>}
                         </div>
 
                     </DialogHeader>

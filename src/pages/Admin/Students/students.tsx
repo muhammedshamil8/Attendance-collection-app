@@ -66,6 +66,7 @@ import {
 import getStudentYear from '@/lib/Year';
 import { useAutoAnimate } from '@formkit/auto-animate/react'
 import useDebounce from '@/lib/debounce';
+import { LoadingButton } from '@/components/ui/loading-button';
 
 const formSchema = z.object({
   name: z.string().nonempty({ message: "Name is required" }),
@@ -123,7 +124,8 @@ function Students() {
   const { toast } = useToast();
   const [parent,] = useAutoAnimate();
   const debouncedSearchTerm = useDebounce(searchName, 300);
-
+  const [submitLoading, setSubmitLoading] = useState(false);
+  const [DeleteLoading, setDeleteLoading] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -141,15 +143,18 @@ function Students() {
   })
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    setSubmitLoading(true);
     method === "POST" ? createStudent(values) : updateStudent(values);
   }
 
   const createStudent = async (values: StudentForm) => {
     if (values.id === '') {
       values.id = values.admissionNo;
+
     }
     const alreadyAdded = students.some(student => student.admissionNo === values.admissionNo);
     if (alreadyAdded) {
+      setSubmitLoading(false);
       return toast({
         variant: "destructive",
         description: "Student admission no already added",
@@ -168,6 +173,7 @@ function Students() {
         description: "Student added successfully",
       })
       getStudents();
+      setSubmitLoading(false);
       setHandleCreateStudent(false);
       form.reset();
     } catch (error: any) {
@@ -175,6 +181,7 @@ function Students() {
         variant: "destructive",
         description: error.message,
       })
+      setSubmitLoading(false);
     }
   }
 
@@ -317,6 +324,7 @@ function Students() {
   }
 
   const handleDeleteStudnet = async (id: string) => {
+    setDeleteLoading(true);
     try {
       await deleteDoc(doc(studentCollectionRef, id));
       // console.log('id', id);
@@ -325,11 +333,13 @@ function Students() {
         description: "Student deleted successfully",
       })
       getStudents();
+      setDeleteLoading(false);
     } catch (error: any) {
       toast({
         variant: "destructive",
         description: error.message,
       })
+      setDeleteLoading(false);
     }
   }
   const handleEditStudent = (student: Student) => {
@@ -355,6 +365,7 @@ function Students() {
   const updateStudent = async (student: StudentForm) => {
     try {
       if (!student.id) {
+        setSubmitLoading(false);
         throw new Error("Student id is missing");
       }
       await updateDoc(doc(studentCollectionRef, student.id), {
@@ -367,17 +378,33 @@ function Students() {
       })
       setHandleCreateStudent(false);
       getStudents();
+      setSubmitLoading(false);
     } catch (error: any) {
       toast({
         variant: "destructive",
         description: error.message,
       })
+      setSubmitLoading(false);
     }
   }
 
 
   return (
     <div className='flex flex-col gap-10 justify-start items-center h-full mt-20  mx-auto' >
+
+      {DeleteLoading && (
+        <div className='fixed top-0 left-0 w-full h-full bg-black/50 flex items-center justify-center z-50'>
+          <div className='bg-white p-4 rounded-lg shadow-md flex flex-col gap-4'>
+            <div className='w-full flex items-center justify-center gap-4'>
+              <ImSpinner6 className="animate-spin h-6 w-6 text-emerald-600" />
+              <h1 className='text-emerald-600 font-bold'>Deleting Students from list...</h1>
+            </div>
+          </div>
+        </div>
+      )}
+
+
+
       <div className='w-full'>
         <Button className='!bg-slate-300 w-full flex justify-between items-center gap-4 font-bold h-[50px] rounded-xl' onClick={() => openModal('POST')}>
           <p className='text-emerald-700'>
@@ -701,7 +728,7 @@ function Students() {
                     />
                     <div className='flex gap-2 items-center justify-center pb-4'>
                       <Button type='button' onClick={closeModal} className='!bg-slate-200 font-bold mt-6 !text-emerald-600 w-full'>Cancel</Button>
-                      <Button type='submit' className='!bg-emerald-600 font-bold mt-6 !text-white w-full'>Submit</Button>
+                      <LoadingButton className='bg-emerald-600 font-bold mt-6 !text-white w-full transition-all ease-in-out hover:bg-emerald-700' loading={submitLoading} type="submit">Submit</LoadingButton>
                     </div>
                   </form>
                 </Form>

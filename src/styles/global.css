@@ -52,7 +52,7 @@
 
 @media print {
   .printable-table {
-      display: block;
+    display: block;
   }
 }
 
@@ -132,6 +132,7 @@
 #custom-table tr:nth-child(even) {
   background-color: #6ee1b73d;
 }
+
 #custom-table tr:nth-child(odd) {
   background-color: #f2f2f2;
 }
@@ -177,4 +178,31 @@ input::-webkit-inner-spin-button {
 /* Firefox */
 input[type=number] {
   -moz-appearance: textfield;
+}
+
+
+/* Set the width and height of the scrollbar */
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+/* Track styles */
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  /* or any other color you want */
+}
+
+/* Handle styles */
+::-webkit-scrollbar-thumb {
+  background:  #519075;
+  /* emerald green */
+  border-radius: 6px;
+  /* roundness of the handle */
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: #519075;
+  /* lighter shade of green */
 }

@@ -38,6 +38,7 @@ import {
     FormMessage,
 } from "@/components/ui/form"
 import { useAutoAnimate } from '@formkit/auto-animate/react'
+import { LoadingButton } from '@/components/ui/loading-button';
 
 const formSchema = z.object({
     email: z.string().optional(),
@@ -53,6 +54,7 @@ const Contact: React.FC = () => {
     const [done, setDone] = useState(false);
     const { toast } = useToast();
     const [parent] = useAutoAnimate({});
+    const [Submitloading, setSubmitLoading] = useState(false);
     const APIURL = import.meta.env.VITE_API_URL;
     // const [token, setToken] = useState('');
 
@@ -81,6 +83,7 @@ const Contact: React.FC = () => {
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
         setLoading(true);
+        setSubmitLoading(true);
         try {
             if (values.email === '' || values.subject === '' || values.message === '') {
                 toast({
@@ -89,6 +92,7 @@ const Contact: React.FC = () => {
                     description: 'Please fill all the required fields',
                     duration: 2000,
                 });
+                setSubmitLoading(false);
                 return;
             }
             setShowDialog(true);
@@ -101,6 +105,8 @@ const Contact: React.FC = () => {
             });
             if (response.ok) {
                 setDone(true);
+                setSubmitLoading(false);
+
                 setLoading(false);
                 toast({
                     variant: 'success',
@@ -109,6 +115,8 @@ const Contact: React.FC = () => {
                     duration: 2000,
                 });
             } else {
+                setSubmitLoading(false);
+
                 setDone(false);
                 setLoading(false);
                 toast({
@@ -120,6 +128,8 @@ const Contact: React.FC = () => {
             }
             form.reset();
         } catch (error) {
+            setSubmitLoading(false);
+
             setLoading(false);
 
             toast({
@@ -130,6 +140,8 @@ const Contact: React.FC = () => {
             });
             console.error(error);
         } finally {
+            setSubmitLoading(false);
+
             setLoading(false);
             setTimeout(() => {
                 handleDialogClose();
@@ -232,7 +244,7 @@ const Contact: React.FC = () => {
                         />
                         <div className='flex gap-2 items-center justify-end'>
                             <Button className='!bg-slate-200 font-bold mt-6 !text-emerald-600 min-w-[120px]' onClick={handleClear}>Clear</Button>
-                            <Button type="submit" className='!bg-emerald-600 font-bold mt-6 !text-white min-w-[120px]'>Submit</Button>
+                            <LoadingButton type="submit" className='bg-emerald-600 font-bold mt-6 !text-white min-w-[120px] transition-all ease-in-out hover:bg-emerald-700' loading={Submitloading}>Submit</LoadingButton>
                         </div>
                     </form>
                 </Form>

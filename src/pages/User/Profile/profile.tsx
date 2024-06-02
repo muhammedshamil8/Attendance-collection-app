@@ -11,6 +11,7 @@ import { useAutoAnimate } from '@formkit/auto-animate/react'
 import { useToast } from '@/components/ui/use-toast';
 import { Edit } from 'lucide-react';
 import { Badge } from "@/components/ui/badge"
+import { LoadingButton } from '@/components/ui/loading-button';
 
 interface FormDataType {
     email: string;
@@ -31,7 +32,8 @@ const ProfilePage: React.FC = () => {
     const { toast } = useToast();
     const [token, setToken] = useState<string | null>(null);
     const APIURL = import.meta.env.VITE_API_URL;
-
+    const [Submitloading, setSubmitLoading] = useState(false);
+    const [submitPassLoading, setSubmitPassLoading] = useState(false);
 
     // form state for profile
     const [formState, setFormState] = useState<FormDataType>({
@@ -100,12 +102,14 @@ const ProfilePage: React.FC = () => {
         // console.log(formState);
         e.preventDefault();
         if (!token) return;
+        setSubmitLoading(true);
         if (!formState.email || !formState.team_name || !formState.Nodal_Officer) {
             toast({
                 variant: 'destructive',
                 title: 'Error',
                 description: 'Please fill all the fields',
             })
+            setSubmitLoading(false);
             return;
         }
         try {
@@ -124,8 +128,10 @@ const ProfilePage: React.FC = () => {
                     description: 'Profile updated successfully'
                 });
                 fetchUser();
+                setSubmitLoading(false);
             } else {
                 setError('Failed to update profile');
+                setSubmitLoading(false);
                 toast({
                     variant: 'destructive',
                     title: 'Error',
@@ -133,6 +139,7 @@ const ProfilePage: React.FC = () => {
                 });
             }
         } catch (error) {
+            setSubmitLoading(false);
             setError('Failed to update profile');
         }
     }
@@ -140,12 +147,14 @@ const ProfilePage: React.FC = () => {
     async function onUpdatePass(e: React.MouseEvent<HTMLButtonElement>) {
         e.preventDefault();
         if (!token) return;
+        setSubmitPassLoading(true);
         if (!formStatePass.newPass || !formStatePass.confirmPass) {
             toast({
                 variant: 'destructive',
                 title: 'Error',
                 description: 'Please fill all the fields',
             })
+            setSubmitPassLoading(false);
             return;
         } else if (formStatePass.newPass.length < 6) {
             toast({
@@ -153,6 +162,7 @@ const ProfilePage: React.FC = () => {
                 title: 'Error',
                 description: 'Password must be at least 6 characters',
             })
+            setSubmitPassLoading(false);
             return;
         } else if (formStatePass.newPass !== formStatePass.confirmPass) {
             toast({
@@ -160,6 +170,7 @@ const ProfilePage: React.FC = () => {
                 title: 'Error',
                 description: 'New Password and Confirm Password does not match',
             })
+            setSubmitPassLoading(false);
             return;
         }
         //  else if (formStatePass.oldPass === formStatePass.newPass) {
@@ -188,12 +199,14 @@ const ProfilePage: React.FC = () => {
                     title: 'Success',
                     description: 'Password updated successfully'
                 });
+                setSubmitPassLoading(false);
             } else {
                 toast({
                     variant: 'destructive',
                     title: 'Error',
                     description: 'Failed to update password'
                 });
+                setSubmitPassLoading(false);
             }
         } catch (error: any) {
             toast({
@@ -201,6 +214,7 @@ const ProfilePage: React.FC = () => {
                 title: 'Error',
                 description: error.message
             });
+            setSubmitPassLoading(false);
         }
     }
 
@@ -246,7 +260,7 @@ const ProfilePage: React.FC = () => {
                             <Input
                                 type="text"
                                 placeholder="Enter Team Name"
-                                className={`font-bold mb-2  h-[50px] text-wrap ${edit ? 'border-b-2 border-emerald-400' : 'border-none text-center'}`}
+                                className={`font-bold mb-2  h-[50px] text-wrap ${edit ? 'border-b-1 border-emerald-400' : 'border-none text-center'}`}
                                 value={formState.team_name}
                                 onChange={(e) => setFormState({ ...formState, team_name: e.target.value })}
                                 disabled={!edit} />
@@ -257,22 +271,20 @@ const ProfilePage: React.FC = () => {
                                 placeholder="Enter Nodal Officer"
                                 value={formState.Nodal_Officer}
                                 onChange={(e) => setFormState({ ...formState, Nodal_Officer: e.target.value })}
-                                className={`my-4 h-[50px] ${edit ? 'border-b-2 border-emerald-400' : 'border-none '}`}
+                                className={`my-4 h-[50px] ${edit ? 'border-b-1 border-emerald-400' : 'border-none '}`}
                                 disabled={!edit} />
                         </p>
                         <p>
                             <Input
                                 type="email"
                                 placeholder="Enter Email"
-                                className={`my-4 h-[50px] ${edit ? 'border-b-2 border-emerald-400' : 'border-none '}`}
+                                className={`my-4 h-[50px] ${edit ? 'border-b-1  border-emerald-400' : 'border-none '}`}
                                 value={formState.email}
                                 onChange={(e) => setFormState({ ...formState, email: e.target.value })}
                                 disabled={!edit} />
                         </p>
                         {edit && (
-                            <Button className="w-full my-4 mb-8 dark:bg-emerald-600 bg-emerald-600 font-semibold  dark:text-white text-white hover:bg-emerald-900  dark:hover:bg-emerald-900 transition-all ease-in-out mt-4" onClick={(e: React.MouseEvent<HTMLButtonElement>) => onSubmit(e)}>
-                                Save Changes
-                            </Button>
+                            <LoadingButton className='bg-emerald-600 font-bold my-4 mb-8  mt-4 !text-white w-full transition-all ease-in-out hover:bg-emerald-700' loading={Submitloading} onClick={(e: React.MouseEvent<HTMLButtonElement>) => onSubmit(e)}> Save Changes</LoadingButton>
                         )}
                         <p>
 
@@ -304,10 +316,7 @@ const ProfilePage: React.FC = () => {
                                     value={formStatePass.confirmPass}
                                     onChange={(e) => setFormStatePass({ ...formStatePass, confirmPass: e.target.value })}
                                 />
-                                <Button className="w-full dark:bg-gray-900 font-semibold  dark:text-white  dark:hover:bg-emerald-700 transition-all ease-in-out mt-4"
-                                    onClick={(e: React.MouseEvent<HTMLButtonElement>) => onUpdatePass(e)}>
-                                    Submit Password
-                                </Button>
+                                 <LoadingButton className='bg-emerald-600 font-bold mt-4 !text-white w-full transition-all ease-in-out hover:bg-emerald-700' loading={submitPassLoading}  onClick={(e: React.MouseEvent<HTMLButtonElement>) => onUpdatePass(e)}>Submit Password</LoadingButton>
                             </div>
                         )}
 
