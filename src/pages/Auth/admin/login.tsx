@@ -143,14 +143,12 @@ const Login: React.FC = () => {
         <div className='flex flex-col gap-10 justify-around items-center h-full min-h-[600px] max-h-screen '>
             <div className='text-center '>
                 <h1 className='text-[35px] font-bold dark:text-white'>
-                    Mark!t<span className='text-[12px] text-emerald-700'>by IEDCEMEA</span>
+                    Welcome!
                 </h1>
                 <p className='text-gray-600 -mt-2 text-sm dark:text-gray-300'>Sign to your admin account</p>
             </div>
             <div className='bg-slate-200 rounded-md py-3 px-6'>
                 <p className='underline text-center'>For testing</p>
-                <p>Email: admin@gmail.com</p>
-                <p>Password: password</p>
                 <Button onClick={handleFilldata} className='w-full my-2 text-white font-semibold'>Click to Fill </Button>
             </div>
             <div className='flex flex-col gap-5 w-full max-w-[320px]'>
@@ -200,6 +198,14 @@ const Login: React.FC = () => {
 
                     </form>
                 </Form>
+
+
+            </div>
+            <div className='text-center'>
+                <h1 className='text-[32px] font-bold text-emerald-600'>
+                    MARK !T
+                </h1>
+                <span className='text-[12px] dark:text-white'>By IEDC EMEA</span>
             </div>
             <p className='text-sm dark:text-white'>
                 Are you a user? <button onClick={() => navigate('/signin')} className='underline text-emerald-700'>Sign in</button>
