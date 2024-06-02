@@ -447,8 +447,8 @@ function AccountRequest() {
                 <dd className='ml-2 text-gray-800 dark:text-gray-200'>{selectedUser?.Verification}</dd>
               </div>
               <div className='flex items-center'>
-                <dt className='text-gray-600 dark:text-gray-400'>Message</dt>
-                <dd className='ml-2 text-gray-800 dark:text-gray-200'>{selectedUser?.message}</dd>
+                <dt className='text-gray-600 dark:text-gray-400'>Message</dt> :<br />
+                <dd className='ml-2 text-gray-800 dark:text-gray-200 text-left'>{selectedUser?.message}</dd>
               </div>
             </dl>
             <div className='flex items-center justify-around'>
@@ -499,10 +499,7 @@ function AccountRequest() {
           <p className='text-gray-600 dark:text-gray-300 p-4 border-l-4 border-blue-500 bg-blue-100 dark:bg-slate-900'>
             If you need clarification on the user request, you can contact the user by email or phone number.
             If you are sure that the user is genuine, you can accept the request. <br />
-            <span className='flex items-center justify-start gap-2'>
-              if your are not sure <a href={`https://wa.me/${selectedUser?.phone_number}`} className='inline before:content-[""] after:content-[""] cursor-pointer'> <FaWhatsapp className='text-green-500 dark:text-green-500' /></a> contact the user.
-            </span>
-
+            if your are not sure <div onClick={() => window.open(`https://wa.me/${selectedUser?.phone_number}`)} className='cursor-pointer'> <FaWhatsapp className='text-green-500 dark:text-green-500' /></div> contact the user.
           </p>
         </SheetContent>
       </Sheet>

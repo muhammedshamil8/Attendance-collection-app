@@ -243,7 +243,7 @@ const Contact: React.FC = () => {
                             )}
                         />
                         <div className='flex gap-2 items-center justify-end'>
-                            <Button className='!bg-slate-200 font-bold mt-6 !text-emerald-600 min-w-[120px]' onClick={handleClear}>Clear</Button>
+                            <Button className='!bg-slate-300 font-bold mt-6 !text-emerald-600 min-w-[120px]' onClick={handleClear}>Clear</Button>
                             <LoadingButton type="submit" className='bg-emerald-600 font-bold mt-6 !text-white min-w-[120px] transition-all ease-in-out hover:bg-emerald-700' loading={Submitloading}>Submit</LoadingButton>
                         </div>
                     </form>
