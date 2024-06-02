@@ -1,11 +1,8 @@
-{
+  {
   "rewrites": [
     {
-      "source": "./service-worker.ts",
-      "destination": "/service-worker.ts",
-      "headers": {
-        "Content-Type": "application/javascript"
-      }
+      "source": "/(.*)",
+      "destination": "/"
     }
   ]
 }
