@@ -1,12 +1,11 @@
 {
-    "rewrites": [
-      {
-        "source": "/src/service-worker.ts",
-        "destination": "/src/service-worker.ts",
-        "headers": {
-          "Content-Type": "application/javascript"
-        }
+  "rewrites": [
+    {
+      "source": "./service-worker.ts",
+      "destination": "/service-worker.ts",
+      "headers": {
+        "Content-Type": "application/javascript"
       }
-    ]
-  }
-  
+    }
+  ]
+}
