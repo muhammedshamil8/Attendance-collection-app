@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { useState, useEffect } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
 import { getDoc, doc } from 'firebase/firestore';
-import { FaRegUser } from "react-icons/fa";
+// import { FaRegUser } from "react-icons/fa";
 import { useNavigate } from 'react-router-dom';
 import { Input } from '@/components/ui/input';
 import { useAutoAnimate } from '@formkit/auto-animate/react'
@@ -12,7 +12,7 @@ import { useToast } from '@/components/ui/use-toast';
 import { Edit } from 'lucide-react';
 import { Badge } from "@/components/ui/badge"
 import { LoadingButton } from '@/components/ui/loading-button';
-
+import UserImage from '@/assets/user.jpg';
 interface FormDataType {
     email: string;
     team_name: string;
@@ -236,49 +236,55 @@ const ProfilePage: React.FC = () => {
             {loading && loading ? (
                 <div className="bg-slate-300 animate-pulse h-[460px] w-[360px]  rounded-lg shadow-md p-8" />
             ) : (
-                <div className="bg-white rounded-lg shadow-md p-8 min-w-[360px] overflow-hidden relative">
-                    <div>
-                        <Edit onClick={handleEdit} className="absolute top-4 right-4 cursor-pointer" />
+                <div className=" rounded-2xl p-8 min-w-[360px] overflow-hidden relative">
+                    <div className="absolute top-[120px] right-6 z-20 cursor-pointer" onClick={handleEdit}  >
+                        <Edit />
                     </div>
-                    <div className='absolute top-4 left-4 '>
+                    <div className='absolute top-[120px] z-20 left-6 '>
                         <Badge variant={'active'} style={{ overflowWrap: 'anywhere' }}> {user?.status ? 'active' : 'status'}</Badge>
                     </div>
                     <div className="flex items-center justify-center mb-4">
-                        <Avatar className='h-40 w-40'>
+                        <Avatar className='h-40 w-40 z-20 border-2 border-slate-200 dark:border-slate-900 '>
                             {user1.photoURL ? (
                                 <AvatarImage src={user1.photoURL} alt="Profile Avatar" className="w-16 h-16 rounded-full  " />
                             ) : (
                                 <AvatarFallback>
-                                    <FaRegUser className='w-16 h-16 dark:text-white' />
+                                    {/* <FaRegUser className='w-16 h-16 dark:text-white' /> */}
+                                    <img src={UserImage} className='object-cover w-full h-full' alt='user' />
                                 </AvatarFallback>
                             )}
                         </Avatar>
                     </div>
-                    <div className='flex flex-col w-full ' ref={parent}>
+                    <div className='bg-white absolute bottom-0 top-[100px] left-0 right-0 rounded-t-[60px]' />
+                    <div className='flex flex-col w-full  ' ref={parent}>
                         <p>
 
                             <Input
                                 type="text"
                                 placeholder="Enter Team Name"
-                                className={`font-bold mb-2  h-[50px] text-wrap ${edit ? 'border-b-1 border-emerald-400' : 'border-none text-center'}`}
+                                className={`font-bold mb-2 dark:bg-slate-100 dark:text-black h-[50px] text-wrap ${edit ? 'border-b-1 border-emerald-400' : 'border-none text-center'}`}
                                 value={formState.team_name}
                                 onChange={(e) => setFormState({ ...formState, team_name: e.target.value })}
                                 disabled={!edit} />
                         </p>
                         <p>
+                            <label className='text-sm font-semibold text-gray-500 dark:text-gray-400' htmlFor='nodalOfficer'>Nodal Officer</label>
                             <Input
+                                id='nodalOfficer'
                                 type="text"
                                 placeholder="Enter Nodal Officer"
                                 value={formState.Nodal_Officer}
                                 onChange={(e) => setFormState({ ...formState, Nodal_Officer: e.target.value })}
-                                className={`my-4 h-[50px] ${edit ? 'border-b-1 border-emerald-400' : 'border-none '}`}
+                                className={`my-4 h-[50px] dark:bg-slate-100 dark:text-black ${edit ? 'border-b-1 border-emerald-400' : 'border-none '}`}
                                 disabled={!edit} />
                         </p>
+                        <label className='text-sm font-semibold text-gray-500 dark:text-gray-400' htmlFor='email'>Email</label>
                         <p>
-                            <Input
+                            <Input  
+                                id='email'
                                 type="email"
                                 placeholder="Enter Email"
-                                className={`my-4 h-[50px] ${edit ? 'border-b-1  border-emerald-400' : 'border-none '}`}
+                                className={`my-4 h-[50px] dark:bg-slate-100 dark:text-black ${edit ? 'border-b-1  border-emerald-400' : 'border-none '}`}
                                 value={formState.email}
                                 onChange={(e) => setFormState({ ...formState, email: e.target.value })}
                                 disabled={!edit} />
@@ -316,7 +322,7 @@ const ProfilePage: React.FC = () => {
                                     value={formStatePass.confirmPass}
                                     onChange={(e) => setFormStatePass({ ...formStatePass, confirmPass: e.target.value })}
                                 />
-                                 <LoadingButton className='bg-emerald-600 font-bold mt-4 !text-white w-full transition-all ease-in-out hover:bg-emerald-700' loading={submitPassLoading}  onClick={(e: React.MouseEvent<HTMLButtonElement>) => onUpdatePass(e)}>Submit Password</LoadingButton>
+                                <LoadingButton className='bg-emerald-600 font-bold mt-4 !text-white w-full transition-all ease-in-out hover:bg-emerald-700' loading={submitPassLoading} onClick={(e: React.MouseEvent<HTMLButtonElement>) => onUpdatePass(e)}>Submit Password</LoadingButton>
                             </div>
                         )}
 

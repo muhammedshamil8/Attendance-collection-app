@@ -396,7 +396,7 @@ const Home: React.FC = () => {
 
                                 <AlertDialog>
                                     <AlertDialogTrigger>
-                                        <RiDeleteBinLine className="text-emerald-500 cursor-pointer transition-all ease-in-out hover:text-red-500" />
+                                        <RiDeleteBinLine className="text-emerald-500 cursor-pointer transition-all ease-in-out hover:text-red-500 text-xl" />
                                     </AlertDialogTrigger>
                                     <AlertDialogContent>
                                         <AlertDialogHeader>

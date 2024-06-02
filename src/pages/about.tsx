@@ -4,6 +4,7 @@ import { IoIosArrowDown, IoIosArrowUp } from "react-icons/io";
 import { FaInstagram, } from "react-icons/fa";
 import { IoMailOutline } from "react-icons/io5";
 import { SlSocialLinkedin } from "react-icons/sl";
+import AboutImage from '@/assets/amico.png'
 interface FAQ {
     question: string;
     isOpen: boolean;
@@ -64,21 +65,21 @@ const About: React.FC = () => {
             isOpen: false,
             answer: (
                 <div>
-                    You can reach out to the contributors through their LinkedIn profiles. Click to reach 
+                    You can reach out to the contributors through their LinkedIn profiles. Click to reach
                     <span
                         className='text-emerald-600 cursor-pointer hover:underline px-1'
                         onClick={() => window.open('https://www.linkedin.com/in/dayyan-ali/')}
                     >
                         Dayyan Ali
                     </span>
-                    , to reach 
+                    , to reach
                     <span
                         className='text-emerald-600 cursor-pointer hover:underline px-1'
                         onClick={() => window.open('https://www.linkedin.com/in/hasil-k/')}
                     >
-                         Hasil K
+                        Hasil K
                     </span>
-                    , to reach 
+                    , to reach
                     <span
                         className='text-emerald-600 cursor-pointer hover:underline mx-1'
                         onClick={() => window.open('https://www.linkedin.com/in/muhammed-shamil-65878227a/')}
@@ -96,8 +97,20 @@ const About: React.FC = () => {
     return (
         <div className="text-black dark:text-white p-2  m-2 flex flex-col justify-between min-h-screen mb-20">
             <div>
+                <h1 className='flex flex-col mt-4'>
+                    <span className='text-emerald-600 text-2xl font-black tracking-wider'>MARK !T</span>
+                    <span className='text-gray-300 text-sm'>By IEDC EMEA</span>
+                </h1>
 
-                <h1 className="text-4xl font-bold mb-4">About <span className='text-emerald-600'>MARK !T</span></h1>
+                <div className='mb-10 flex items-center justify-start'>
+                    <img src={AboutImage} alt="About" className="object-cover rounded-lg md:min-w-[500px]" />
+                </div>
+                <h1 className="text-[34px] font-bold mb-4">About Us!</h1>
+                <p className="text-lg mb-4">
+                    The Innovation and Entrepreneurship Development Centre <span className='text-emerald-600'>( IEDC )</span> at EMEA College is a dynamic hub that fosters innovation, creativity, and entrepreneurial spirit among students. Our mission is to empower students by providing them with opportunities to experiment, innovate, and develop their creative capabilities. We aim to inspire and incubate student-led startups and innovations, paving the way for their international success. Our vision is to create a streamlined and transparent platform that promotes and supports student innovations, helping them grow into global powerhouses. Our goal is to continue our track record of success and develop a new wave of student startups and innovations that can compete with established players in the entrepreneurial landscape. Join us at IEDC to innovate, inspire, and incubate your ideas into reality. For more information, visit our website <span className='text-emerald-600 cursor-pointer' onClick={() => window.open("https://iedc-emea.vercel.app/#/")}>here</span>.
+                </p>
+
+                <h1 className="text-[32px] font-bold mb-4">About <span className='text-emerald-600'>MARK !T</span></h1>
                 <p className="text-lg mb-4">
                     <span className='text-emerald-600'>MARK !T</span> is a solution developed for EMEA College to streamline the process of collecting student data during events organized by clubs and other departments. Previously, volunteers had to manually write down details such as admission number, name, roll number, department, and whether they are undergraduate or postgraduate students. This manual process was not only time-consuming but also prone to errors, especially during data sorting and entry into the attendance software.
                 </p>

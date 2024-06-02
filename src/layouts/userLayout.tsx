@@ -10,8 +10,10 @@ import {
     SheetFooter,
 } from "@/components/ui/sheet"
 import { Button } from '@/components/ui/button';
-import { FaHome, FaUser, FaEnvelope } from "react-icons/fa";
-import { IoHeartCircleSharp } from "react-icons/io5";
+import { AiOutlineInfoCircle } from "react-icons/ai";
+import { RiMessage3Line } from "react-icons/ri";
+import { GoHome } from "react-icons/go";
+import { HiOutlineUser } from "react-icons/hi2";
 import { LogOut } from 'lucide-react';
 import { auth } from '@/config/firebase';
 import { signOut } from 'firebase/auth';
@@ -62,22 +64,22 @@ const UserLayout: React.FC = ({ }) => {
     const NavItems = [
         {
             name: 'Home',
-            icon: <FaHome className='text-xl' />,
+            icon: <GoHome className='text-xl font-black ' />,
             route: '/'
         },
         {
             name: 'Profile',
-            icon: <FaUser className='text-xl' />,
+            icon: <HiOutlineUser className='text-xl font-black' />,
             route: '/profile'
         },
         {
             name: 'About',
-            icon: <IoHeartCircleSharp className='h-7 w-6' />,
+            icon: <AiOutlineInfoCircle className='text-xl font-black' />,
             route: '/home/about'
         },
         {
             name: 'Contact',
-            icon: <FaEnvelope className='text-xl' />,
+            icon: <RiMessage3Line className='text-xl font-black' />,
             route: '/home/contact'
         }
     ]
@@ -120,7 +122,7 @@ const UserLayout: React.FC = ({ }) => {
                         MARK !T
                     </h1>
 
-                    <Avatar onClick={() => navigate('/profile')} className='cursor-pointer'>
+                    <Avatar onClick={() => navigate('/profile')} className='cursor-pointer border border-slate-100 bg-white dark:border-gray-600'>
                         <AvatarImage src={UserProfile} />
                         <AvatarFallback className='text-emerald-600 p-2 text-sm'>{userDp}</AvatarFallback>
                     </Avatar>
@@ -141,9 +143,9 @@ const UserLayout: React.FC = ({ }) => {
                             <nav className='flex-1 flex flex-col items-center justify-start w-full gap-1'>
                                 <ul className='w-full mt-8 flex flex-col gap-3'>
                                     {NavItems.map((item, index) => (
-                                        <li key={index} className={`py-2 px-4 font-semibold text-gray-500 flex items-center gap-2 rounded-md w-full hover:bg-slate-100 hover:text-black/80 dark:hover:text-black/80 transition-all ease-in-out cursor-pointer ${pathname === item.route ? 'bg-slate-100 text-black/80 dark:text-black/80' : ''}`} onClick={() => handleNavigate(item.route)}>
-                                            <span className='mr-2'>{item.icon}</span>
-                                            <span>{item.name}</span>
+                                        <li key={index} className={`py-2 px-4 font-semibold text-gray-600 dark:text-gray-300 flex items-center gap-2 rounded-md w-full hover:bg-emerald-400/20 transition-all ease-in-out cursor-pointer ${pathname === item.route ? 'bg-emerald-400/20 text-emerald-700 dark:text-emerald-600' : ''}`} onClick={() => handleNavigate(item.route)}>
+                                            <span  className={`mr-4 text-black dark:text-white font-extrabold ${pathname === item.route ? ' text-emerald-600 dark:text-emerald-600' : ''}`}>{item.icon}</span>
+                                            <span className={`${pathname === item.route ? ' text-emerald-600 dark:text-emerald-600' : ''}`}>{item.name}</span>
                                         </li>
                                     ))}
                                 </ul>
@@ -208,8 +210,8 @@ const UserLayout: React.FC = ({ }) => {
                 {/* Add your footer component here */}
                 <footer className=''>
                     {/* Add your footer content */}
-                    <div className='p-2 text-center'>
-                        <p className='text-sm text-gray-500 dark:text-gray-300'>
+                    <div className='p-2 text-center '>
+                        <p className='text-sm text-gray-500 dark:text-gray-300 w-fit mx-auto'  onClick={() => window.open("https://iedc-emea.vercel.app/#/")}>
                             IEDC EMEA &copy; {new Date().getFullYear()} All rights reserved.
                         </p>
                     </div>
