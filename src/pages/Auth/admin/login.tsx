@@ -147,7 +147,7 @@ const Login: React.FC = () => {
                 </h1>
                 <p className='text-gray-600 -mt-2 text-sm dark:text-gray-300'>Sign to your admin account</p>
             </div>
-            <div className='bg-slate-200 rounded-md py-3 px-6'>
+            <div className='dark:text-white rounded-md py-0 px-0 m-0'>
                 <p className='underline text-center'>For testing</p>
                 <Button onClick={handleFilldata} className='w-full my-2 text-white font-semibold'>Click to Fill </Button>
             </div>

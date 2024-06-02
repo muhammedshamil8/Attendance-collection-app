@@ -8,23 +8,12 @@ export default defineConfig({
   },
   plugins: [react()],
   build: {
-    sourcemap: false,
-    chunkSizeWarningLimit: 1000,
     rollupOptions: {
       input: {
-        main: path.resolve(__dirname, 'index.html'),
-        sw: path.resolve(__dirname, '/service-worker.ts')
-      },
-      output: {
-        entryFileNames: 'service-worker.js',
-        chunkFileNames: '[name].js',
-        assetFileNames: '[name].[ext]',
-        manualChunks: {
-          vendor: ['react', 'react-dom', 'react-router-dom'],
-        },
-      },
-      
-    },
+        main: 'index.html',
+        'sw': 'sw.js' 
+      }
+    }
   },
   server: {
     port: 3000,

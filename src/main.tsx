@@ -47,24 +47,10 @@ updateMetaThemeColor(storedTheme);
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/service-worker.ts').then(registration => {
+    navigator.serviceWorker.register('sw.js').then(registration => {
       console.log('Service Worker registered with scope:', registration.scope);
     }).catch(error => {
       console.error('Service Worker registration failed:', error);
     });
   });
 }
-//  package.json
-// "build": "vite build && tsc src/service-worker.ts --outDir dist",
-//  vercel.json
-// {
-//   "rewrites": [
-//     {
-//       "source": "/src/service-worker.ts",
-//       "destination": "/src/service-worker.ts",
-//       "headers": {
-//         "Content-Type": "application/javascript"
-//       }
-//     }
-//   ]
-// }

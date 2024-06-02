@@ -1,3 +1,5 @@
+// sw.js
+
 const CACHE_NAME = 'my-cache-v1';
 const urlsToCache = [
   '/',
@@ -6,10 +8,12 @@ const urlsToCache = [
   '/favicon.ico',
   '/icon-192.png',
   '/icon-512.png',
-  '/offline.html', 
+  '/broken-icon.png',
+  '/offline.html', // Add the offline page to the cache
+  // Add any other assets you want to cache
 ];
 
-self.addEventListener('install', (event: any) => {
+self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(cache => {
@@ -18,7 +22,7 @@ self.addEventListener('install', (event: any) => {
   );
 });
 
-self.addEventListener('fetch', (event: any) => {
+self.addEventListener('fetch', (event) => {
   event.respondWith(
     caches.match(event.request)
       .then(response => {
@@ -34,7 +38,7 @@ self.addEventListener('fetch', (event: any) => {
   );
 });
 
-self.addEventListener('activate', (event: any) => {
+self.addEventListener('activate', (event) => {
   const cacheWhitelist = [CACHE_NAME];
   event.waitUntil(
     caches.keys().then(cacheNames => {
