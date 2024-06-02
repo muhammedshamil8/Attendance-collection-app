@@ -15,13 +15,12 @@ const AuthLayout: React.FC = ({ }) => {
     return (
         <div className="auth-layout bg-white dark:bg-gray-800 min-h-screen overflow-auto relative">
             <header className="flex p-2 w-full  items-end  gap-4 justify-center mb-10">
-                <div className='rounded-md p-2.5  dark:bg-gray-950 dark:hover:bg-gray-800 border dark:border-none hover:bg-slate-100 cursor-pointer transition-all ease-in-out'>
-                <FaHome className='text-xl dark:text-slate-100 cursor-pointer  dark:hover:text-gray-200' onClick={() => handleNavigation('/')} />
+                <div className='rounded-md p-2.5  dark:bg-gray-950 dark:hover:bg-gray-800 border dark:border-none hover:bg-slate-100 cursor-pointer transition-all ease-in-out' onClick={() => handleNavigation('/')} >
+                    <FaHome className='text-xl dark:text-slate-100 cursor-pointer  dark:hover:text-gray-200' />
                 </div>
-                <div className='rounded-md p-2.5  dark:bg-gray-950 dark:hover:bg-gray-800  border dark:border-none hover:bg-slate-100 cursor-pointer transition-all ease-in-out'>
-               
-                <FaGrinStars className='text-xl dark:text-slate-100  cursor-pointer  dark:hover:text-gray-200' onClick={() => handleNavigation('/about')} />
-               </div>
+                <div className='rounded-md p-2.5  dark:bg-gray-950 dark:hover:bg-gray-800  border dark:border-none hover:bg-slate-100 cursor-pointer transition-all ease-in-out' onClick={() => handleNavigation('/about')}>
+                    <FaGrinStars className='text-xl dark:text-slate-100  cursor-pointer  dark:hover:text-gray-200' />
+                </div>
                 <ModeToggle />
             </header>
             {/* md:border-x */}
