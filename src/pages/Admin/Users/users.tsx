@@ -499,7 +499,7 @@ function users() {
       <div className='w-full flex flex-col gap-4 pb-8'>
         <div className="overflow-x-auto">
           <div className='flex items-center justify-between gap-4 py-4'>
-            <div className='w-full relative max-w-[300px]'>
+            <div className='w-full relative max-w-[360px]'>
               <IoIosSearch className='absolute bottom-4 right-2 text-lg text-emerald-700' />
               <Input type="search" placeholder="Filter Users..." className='h-[50px]  bg-slate-300 pr-8 pl-4' value={searchName} onChange={(e) => setSearchName(e.target.value)} />
             </div>

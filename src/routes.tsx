@@ -123,6 +123,10 @@ const router = createBrowserRouter([
     ]
   },
   {
+    path: 'offline.html',
+    element: <Navigate to='/' />
+  },
+  {
     path: "/401",
     element: <UnAuth />
   },
