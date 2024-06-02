@@ -896,7 +896,7 @@ function Event() {
                           <FormItem>
                             <FormLabel >Student Name</FormLabel>
                             <FormControl>
-                              <Input className='h-[50px]' placeholder="eg: - NSS" {...field} />
+                              <Input className='h-[50px]' placeholder="eg: - Saleel" {...field} />
                             </FormControl>
                             {/* <FormDescription>
                                         This is your public display name.
@@ -1054,7 +1054,6 @@ function Event() {
                       />
                       <div className='flex gap-2 items-center justify-center pb-6'>
                         <Button type='button' onClick={closeModal} className='!bg-slate-200 font-bold mt-6 !text-emerald-600 w-full'>Cancel</Button>
-                        <Button type='submit' className='!bg-emerald-600 font-bold mt-6 !text-white w-full'>Submit</Button>
                         <LoadingButton type='submit' className='bg-emerald-600 font-bold mt-6 !text-white w-full transition-all ease-in-out hover:bg-emerald-700' loading={CreateSubmitLoading} >Submit</LoadingButton>
                       </div>
                     </form>
