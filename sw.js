@@ -9,8 +9,7 @@ const urlsToCache = [
   '/icon-192.png',
   '/icon-512.png',
   '/broken-icon.png',
-  '/offline.html', // Add the offline page to the cache
-  // Add any other assets you want to cache
+  '/offline.html', 
 ];
 
 self.addEventListener('install', (event) => {
@@ -23,15 +22,18 @@ self.addEventListener('install', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
+  console.log('Fetch event:', event.request.url);
   event.respondWith(
     caches.match(event.request)
       .then(response => {
         if (response) {
+          console.log('Found in cache:', event.request.url);
           return response;
         }
 
         return fetch(event.request)
           .catch(() => {
+            console.error('Error fetching:', event.request.url);
             return caches.match('/offline.html');
           });
       })
