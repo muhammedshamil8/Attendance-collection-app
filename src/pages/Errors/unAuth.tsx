@@ -18,7 +18,7 @@ function unAuth() {
         <p className="output">
           The page your are trying to access is restricted to authorized users only.
         </p>
-        <p className="output">Please try to <a onClick={handleGoBack} className="cursor-pointer">go back</a> or <a onClick={() => navigate('/')}>return to the homepage</a>.</p>
+        <p className="output">Please try to <a onClick={handleGoBack} className="cursor-pointer select-none">go back</a> or <a className="cursor-pointer select-none" onClick={() => navigate('/')}>return to the homepage</a>.</p>
         <p className="output">Good luck.</p>
         <p className="output">_</p>
       </div>
