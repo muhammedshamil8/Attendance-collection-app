@@ -191,7 +191,7 @@ const UserLayout: React.FC = ({ }) => {
 
 
                 {/* Add your main content */}
-                <main className='custom-container pt-1 px-2'>
+                <main className='custom-container pt-1 px-2 mb-10'>
                     <motion.div
                         initial="initial"
                         animate="enter"

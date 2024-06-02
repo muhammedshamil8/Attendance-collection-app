@@ -384,6 +384,19 @@ const Contact: React.FC = () => {
         }
     }, [form.watch('subject')]);
 
+    const handleNextButton = () => {
+        if (form.watch('email') === '' || form.watch('subject') === '' || form.watch('message') === '') {
+            toast({
+                variant: 'destructive',
+                title: 'Cannot Proceed',
+                description: 'Please fill all the required fields',
+                duration: 2000,
+            });
+            return;
+        }
+        setCurrentStep(currentStep + 1);
+    }
+
     return (
         <div className='flex flex-col gap-10 justify-start items-center  min-h-screen pt-10 '>
             <div className='text-center '>
@@ -404,9 +417,9 @@ const Contact: React.FC = () => {
                                     name="email"
                                     render={({ field }) => (
                                         <FormItem ref={parent}>
-                                            <FormLabel>Email</FormLabel>
+                                            <FormLabel className="after:content-['*'] after:ml-1 after:text-red-500">Email</FormLabel>
                                             <FormControl>
-                                                <Input className='h-[50px]' placeholder="Email" {...field}
+                                                <Input className='h-[50px]' placeholder="Email " {...field}
                                                 />
                                             </FormControl>
                                             {/* <FormDescription>
@@ -421,7 +434,7 @@ const Contact: React.FC = () => {
                                     name="subject"
                                     render={({ field }) => (
                                         <FormItem ref={parent}>
-                                            <FormLabel>Subject</FormLabel>
+                                            <FormLabel className="after:content-['*'] after:ml-1 after:text-red-500">Subject</FormLabel>
                                             <FormControl>
                                                 <Select
                                                     onValueChange={field.onChange} defaultValue={field.value}
@@ -449,7 +462,7 @@ const Contact: React.FC = () => {
                                     name="message"
                                     render={({ field }) => (
                                         <FormItem ref={parent}>
-                                            <FormLabel>Your Message</FormLabel>
+                                            <FormLabel className="after:content-['*'] after:ml-1 after:text-red-500">Your Message</FormLabel>
                                             <FormControl>
                                                 <Textarea className='dark:text-white border dark:border-slate-900 focus:border-emerald-400 dark:focus:border-emerald-400 p-3' placeholder="Type your message here..." {...field} />
                                             </FormControl>
@@ -465,7 +478,7 @@ const Contact: React.FC = () => {
                                         <Button
                                             type='button'
                                             className="bg-emerald-600 text-white px-4 py-2 rounded min-w-[120px] "
-                                            onClick={() => setCurrentStep(currentStep + 1)}
+                                            onClick={() => handleNextButton()}
                                         >
                                             Next
                                         </Button>
@@ -489,9 +502,9 @@ const Contact: React.FC = () => {
                                             name="team_name"
                                             render={({ field }) => (
                                                 <FormItem ref={parent}>
-                                                    <FormLabel>Team Name</FormLabel>
+                                                    <FormLabel className="after:content-['*'] after:ml-1 after:text-red-500">Team Name</FormLabel>
                                                     <FormControl>
-                                                        <Input className='h-[50px]' placeholder="Team Name" {...field} />
+                                                        <Input className='h-[50px]' placeholder="Team Name " {...field} />
                                                     </FormControl>
                                                     <FormMessage />
                                                 </FormItem>
@@ -502,9 +515,9 @@ const Contact: React.FC = () => {
                                             name="Nodal_Officer"
                                             render={({ field }) => (
                                                 <FormItem ref={parent}>
-                                                    <FormLabel>Nodal Officer</FormLabel>
+                                                    <FormLabel className="after:content-['*'] after:ml-1 after:text-red-500">Nodal Officer</FormLabel>
                                                     <FormControl>
-                                                        <Input className='h-[50px]' placeholder="Nodal Officer" {...field} />
+                                                        <Input className='h-[50px]' placeholder="Nodal Officer " {...field} />
                                                     </FormControl>
                                                     <FormMessage />
                                                 </FormItem>
@@ -515,9 +528,9 @@ const Contact: React.FC = () => {
                                             name="phone_number"
                                             render={({ field }) => (
                                                 <FormItem>
-                                                    <FormLabel>Phone Number</FormLabel>
+                                                    <FormLabel className="after:content-['*'] after:ml-1 after:text-red-500">Phone Number</FormLabel>
                                                     <FormControl>
-                                                        <Input className='h-[50px]' placeholder="Phone Number" {...field} />
+                                                        <Input className='h-[50px]' placeholder="Phone Number " {...field} />
                                                     </FormControl>
                                                     <FormMessage />
                                                 </FormItem>
@@ -529,9 +542,9 @@ const Contact: React.FC = () => {
                                             name="contact_number"
                                             render={({ field }) => (
                                                 <FormItem>
-                                                    <FormLabel>Contact Number</FormLabel>
+                                                    <FormLabel >Contact Number</FormLabel>
                                                     <FormControl>
-                                                        <Input className='h-[50px]' placeholder="Contact Number" {...field} />
+                                                        <Input className='h-[50px]' placeholder="Contact Number (optional)" {...field} />
                                                     </FormControl>
                                                     <FormMessage />
                                                 </FormItem>
@@ -542,9 +555,9 @@ const Contact: React.FC = () => {
                                             name="password"
                                             render={({ field }) => (
                                                 <FormItem ref={parent}>
-                                                    <FormLabel>Password</FormLabel>
+                                                    <FormLabel className="after:content-['*'] after:ml-1 after:text-red-500">Password</FormLabel>
                                                     <FormControl>
-                                                        <Input className='h-[50px]' placeholder="Password" type="password" {...field} />
+                                                        <Input className='h-[50px]' placeholder="Password " type="password" {...field} />
                                                     </FormControl>
                                                     <FormMessage />
                                                 </FormItem>
