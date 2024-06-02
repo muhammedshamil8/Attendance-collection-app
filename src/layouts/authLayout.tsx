@@ -44,8 +44,9 @@ const AuthLayout: React.FC = ({ }) => {
             </div>
             <footer className='w-full absolute bottom-0 h-auto'>
                 {/* Add your footer content */}
-                <div className=' p-2 text-center'>
-                    <p className='text-sm text-gray-500 dark:text-gray-300'>IEDC EMEA &copy; {new Date().getFullYear()}  All rights reserved.</p>
+                <div className=' p-2 text-center w-fit mx-auto'>
+                    <p className='text-sm text-gray-500 dark:text-gray-300' onClick={() => window.open("https://iedc-emea.vercel.app/#/")}>IEDC EMEA &copy; {new Date().getFullYear()}  All rights reserved.
+                    </p>
                 </div>
             </footer>
         </div>
