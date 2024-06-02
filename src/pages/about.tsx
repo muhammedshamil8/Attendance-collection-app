@@ -94,7 +94,7 @@ const About: React.FC = () => {
 
 
     return (
-        <div className="text-black dark:text-white p-8 pb-2 m-4 flex flex-col justify-between min-h-screen mb-20">
+        <div className="text-black dark:text-white p-2  m-2 flex flex-col justify-between min-h-screen mb-20">
             <div>
 
                 <h1 className="text-4xl font-bold mb-4">About <span className='text-emerald-600'>MARK !T</span></h1>

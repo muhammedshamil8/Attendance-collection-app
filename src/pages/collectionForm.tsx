@@ -196,7 +196,7 @@ function CollectionForm() {
 
             <div className='flex flex-col gap-5 w-full  mx-auto mb-10 h-full'>
                 <div className='w-full'>
-                    <div className='flex flex-col gap-5 w-full max-w-[340px] mx-auto mt-4'>
+                    <div className='flex flex-col gap-5 w-full max-w-[360px] mx-auto mt-4'>
                         <Form {...form}>
                             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                                 <FormField

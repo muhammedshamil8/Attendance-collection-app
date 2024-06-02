@@ -176,7 +176,7 @@ const Contact: React.FC = () => {
                     Send us a message and we will get back to you
                 </p>
             </div>
-            <div className='flex flex-col gap-5 w-full max-w-[340px] mt-10'>
+            <div className='flex flex-col gap-5 w-full max-w-[360px] mt-10'>
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                         <FormField

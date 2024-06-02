@@ -392,7 +392,7 @@ const Contact: React.FC = () => {
                 </h1>
                 <p className='text-gray-600 -mt-2 text-sm dark:text-gray-300'>Send account request to admin</p>
             </div>
-            <div className='flex flex-col gap-5 w-full max-w-[340px] mt-4 min-h-fit' ref={parent}>
+            <div className='flex flex-col gap-5 w-full max-w-[360px] mt-4 min-h-fit' ref={parent}>
                 {AccReq &&
                     <Stepper steps={steps} currentStep={currentStep} />}
                 <Form {...form}>
