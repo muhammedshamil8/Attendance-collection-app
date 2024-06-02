@@ -364,7 +364,7 @@ const Home: React.FC = () => {
                             <p className="text-emerald-600 text-center font-medium dark:text-slate-300">
                                 ( {event.eventDate?.toDate().toDateString()} )
                             </p>
-                            <p className="text-gray-600 max-w-full text-wrap text-center font-medium dark:text-slate-200" style={{ overflow: 'hidden', overflowWrap: 'anywhere', display: '-webkit-box', WebkitBoxOrient: 'vertical', WebkitLineClamp: 2 }}>
+                            <p className="text-gray-600 max-w-full text-wrap text-center font-medium dark:text-slate-200" style={{ overflow: 'hidden', overflowWrap: 'anywhere', display: '-webkit-box', WebkitBoxOrient: 'vertical', WebkitLineClamp: 3 }}>
                                 {event.description}
                             </p>
 

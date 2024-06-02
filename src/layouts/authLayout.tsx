@@ -27,7 +27,7 @@ const AuthLayout: React.FC = ({ }) => {
                 <ModeToggle />
             </header>
             {/* md:border-x */}
-            <div className="auth-layout__content custom-container  min-h-full pt-2">
+            <div className="auth-layout__content custom-container  min-h-full pt-2 mb-10">
                 <motion.div
                     initial="initial"
                     animate="enter"
