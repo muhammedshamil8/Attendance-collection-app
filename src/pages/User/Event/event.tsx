@@ -81,6 +81,7 @@ import getStudentYear from '@/lib/Year';
 import exportToExcel from '@/lib/Excel';
 import BarcodeReader from '@/components/BarcodeReader';
 import { onAuthStateChanged } from 'firebase/auth';
+import { LoadingButton } from '@/components/ui/loading-button';
 
 const formSchema = z.object({
   name: z.string().nonempty({ message: "Name is required" }),
@@ -143,6 +144,10 @@ function Event() {
   const [eventLoading, setEventLoading] = useState(true);
   const [scanModal, setScanModal] = useState(false);
   const [barcode, setBarcode] = useState<string>('');
+  const [CreateSubmitLoading, setCreateSubmitLoading] = useState(false);
+  const [AddSubmitLoading, setAddSubmitLoading] = useState(false);
+  const [ClearSubmitLoading, setClearSubmitLoading] = useState(false);
+  const [DeleteLoading, setDeleteLoading] = useState(false);
 
   const handleDetected = (result: string) => {
     setBarcode(result);
@@ -181,12 +186,15 @@ function Event() {
     if (values.id === '') {
       values.id = values.admissionNo;
     }
+    setCreateSubmitLoading(true);
     const alreadyAdded = students.some(student => student.admissionNo === values.admissionNo);
     if (alreadyAdded) {
+      setCreateSubmitLoading(false);
       return toast({
         variant: "destructive",
         description: "Student admission no already added",
       });
+
     }
     try {
 
@@ -212,6 +220,7 @@ function Event() {
           description: "Student added successfully",
         })
         await getStudents()
+        setCreateSubmitLoading(false);
         setHandleCreateStudent(false);
         form.reset();
       } else {
@@ -219,28 +228,33 @@ function Event() {
           variant: "destructive",
           description: data.message,
         })
+        setCreateSubmitLoading(false);
       }
     } catch (error: any) {
       toast({
         variant: "destructive",
         description: error.message,
       })
+      setCreateSubmitLoading(false);
     }
   }
 
   const AddStudenttoList = async (ids: string[]) => {
-    await getStudents();
+    setAddSubmitLoading(true);
     if (!ids.length) {
+      setAddSubmitLoading(false);
       return toast({
         variant: "destructive",
         description: "Please select a student",
       });
     } else if (!id) {
+      setAddSubmitLoading(false);
       return toast({
         variant: "destructive",
         description: "Event not found",
       });
     } else if (ids.includes('')) {
+      setAddSubmitLoading(false);
       return toast({
         variant: "destructive",
         description: "Student ID cannot be empty",
@@ -248,6 +262,7 @@ function Event() {
     }
     const alreadyAdded = ids.some((id) => attendedStudents.includes(id));
     if (alreadyAdded) {
+      setAddSubmitLoading(false);
       return toast({
         variant: "destructive",
         description: "Student admission no already added",
@@ -258,6 +273,7 @@ function Event() {
     const validStudents = ids.filter((id) => students.some((student) => student.id === id));
     // console.log(validStudents);
     if (validStudents.length !== ids.length) {
+      setAddSubmitLoading(false);
       return toast({
         variant: "destructive",
         title: "Student not found",
@@ -278,18 +294,23 @@ function Event() {
       closeModal();
       setSelectedStudents([]);
       setSearchAdmNo('');
+      setAddSubmitLoading(false);
       // console.log('Student added successfully');
     } catch (error: any) {
+      setAddSubmitLoading(false);
       console.error(error);
     }
   }
 
   const RemoveStudentFromList = async (Studnetid: string) => {
+    setDeleteLoading(true);
     if (!Studnetid) {
+      setDeleteLoading(false);
       return toast({
         variant: "destructive",
         description: "Please select a student",
       });
+
     }
     try {
       const updateDoc = doc(eventCollectionRef, id);
@@ -301,13 +322,18 @@ function Event() {
         description: "Student removed successfully",
       });
       getAttendedStudents();
+      setDeleteLoading(false);
       // console.log('Student removed successfully');
     } catch (error: any) {
+      setDeleteLoading(false);
+
       console.error(error);
     }
   }
 
   const handleClearAttendedStudents = async () => {
+    setClearSubmitLoading(true);
+    setDeleteLoading(false);
     try {
       const updateDoc = doc(eventCollectionRef, id);
       await setDoc(updateDoc, {
@@ -318,13 +344,18 @@ function Event() {
         description: "All students removed successfully",
       });
       getAttendedStudents();
+      setClearSubmitLoading(false);
+      setDeleteLoading(false);
       // console.log('All students removed successfully');
     } catch (error: any) {
+      setClearSubmitLoading(false);
+      setDeleteLoading(false);
       console.error(error);
     }
   }
 
   const getAttendedStudents = async () => {
+    setLoading(true);
     try {
       const eventDoc = await getDoc(doc(eventCollectionRef, id));
       const event = eventDoc.data();
@@ -381,6 +412,8 @@ function Event() {
       }
     } catch (error: any) {
       console.error(error);
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -551,6 +584,18 @@ function Event() {
 
   return (
     <div className='flex flex-col gap-10 justify-start items-center h-full mt-20  mx-auto min-h-screen' >
+
+      {DeleteLoading && (
+        <div className='fixed top-0 left-0 w-full h-full bg-black/50 flex items-center justify-center z-50'>
+          <div className='bg-white p-4 rounded-lg shadow-md flex flex-col gap-4'>
+            <div className='w-full flex items-center justify-center gap-4'>
+              <ImSpinner6 className="animate-spin h-6 w-6 text-emerald-600" />
+              <h1 className='text-emerald-600 font-bold'>Deleting Students from list...</h1>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className='text-center flex flex-col items-center justify-center max-w-[500px] overflow-hidden'>
         {eventLoading && eventLoading ? (
           <div className='bg-slate-400 dark:bg-slate-200 animate-pulse w-60 h-12 rounded-md my-2' />
@@ -597,7 +642,7 @@ function Event() {
           <div className='flex items-center justify-between gap-4 py-4'>
             <div className='w-full relative max-w-[300px]'>
               <IoIosSearch className='absolute bottom-4 right-2 text-lg text-emerald-700' />
-              <Input type="search" placeholder="Filter Students..." className='h-[50px]  bg-slate-300 pr-8 pl-4' value={searchName} onChange={(e) => setSearchName(e.target.value)} />
+              <Input type="search" placeholder="Search Students..." className='h-[50px]  bg-slate-300 pr-8 pl-4' value={searchName} onChange={(e) => setSearchName(e.target.value)} />
             </div>
             <div className='flex gap-2'>
 
@@ -713,7 +758,7 @@ function Event() {
         <div className='flex gap-4 items-center justify-center'>
           <AlertDialog>
             <AlertDialogTrigger asChild>
-              <Button className='!bg-slate-300 font-bold mt-6 !text-emerald-600 min-w-[120px]'>Clear</Button>
+              <LoadingButton className='!bg-slate-300 font-bold mt-6 !text-emerald-600 min-w-[120px]' loading={ClearSubmitLoading} >Clear</LoadingButton>
             </AlertDialogTrigger>
             <AlertDialogContent>
               <AlertDialogHeader>
@@ -782,7 +827,7 @@ function Event() {
             <Tabs defaultValue="addStudent" className="w-full mx-auto flex items-center flex-col justify-center">
               <TabsList >
                 <TabsTrigger value="addStudent">Add Student</TabsTrigger>
-                <TabsTrigger value="createStudent">Create Studnet</TabsTrigger>
+                <TabsTrigger value="createStudent">Create Student</TabsTrigger>
               </TabsList>
               <TabsContent value="addStudent" className='w-full'>
                 <div className='flex flex-col gap-5 w-full max-w-[320px] mx-auto mt-4'>
@@ -805,9 +850,15 @@ function Event() {
                                 <Checkbox
                                   id={`student-${student.admissionNo}`}
                                   checked={selectedStudents.includes(student.admissionNo)}
-                                  disabled={attendedStudents.includes(student.admissionNo)}
+                                  // disabled={attendedStudents.includes(student.admissionNo)}
                                   onCheckedChange={(checked) => {
-                                    if (checked) {
+                                    if (attendedStudents.includes(student.admissionNo)) {
+                                      toast({
+                                        variant: "destructive",
+                                        description: "Student already added",
+                                      });
+                                      return;
+                                    } else if (checked) {
                                       setSelectedStudents((prevStudents) => [...prevStudents, student.admissionNo]);
                                     } else {
                                       setSelectedStudents((prevStudents) => prevStudents.filter((admNo) => admNo !== student.admissionNo));
@@ -830,7 +881,7 @@ function Event() {
                   </div>
                   <div className='flex gap-2 items-center justify-center pb-6'>
                     <Button onClick={closeModal} className='!bg-slate-200 font-bold mt-4 !text-emerald-600 w-full'>Cancel</Button>
-                    <Button onClick={() => AddStudenttoList(selectedStudents)} className='!bg-emerald-600 font-bold mt-4 !text-white w-full'>Submit</Button>
+                    <LoadingButton onClick={() => AddStudenttoList(selectedStudents)} className='bg-emerald-600 font-bold mt-4 !text-white w-full transition-all ease-in-out hover:bg-emerald-700' loading={AddSubmitLoading} >Submit</LoadingButton>
                   </div>
                 </div>
               </TabsContent>
@@ -1004,6 +1055,7 @@ function Event() {
                       <div className='flex gap-2 items-center justify-center pb-6'>
                         <Button type='button' onClick={closeModal} className='!bg-slate-200 font-bold mt-6 !text-emerald-600 w-full'>Cancel</Button>
                         <Button type='submit' className='!bg-emerald-600 font-bold mt-6 !text-white w-full'>Submit</Button>
+                        <LoadingButton type='submit' className='bg-emerald-600 font-bold mt-6 !text-white w-full transition-all ease-in-out hover:bg-emerald-700' loading={CreateSubmitLoading} >Submit</LoadingButton>
                       </div>
                     </form>
                   </Form>
@@ -1034,7 +1086,7 @@ function Event() {
             <Input type="text" placeholder="Search Admission No" name="title" className='h-[50px] w-full mt-4' value={barcode} onChange={(e) => setBarcode(e.target.value.toUpperCase())} />
             <div className='flex gap-2 items-center justify-center pb-6'>
               <Button onClick={closeScanModal} className='!bg-slate-200 font-bold mt-4 !text-emerald-600 w-full'>Cancel</Button>
-              <Button onClick={() => AddStudenttoList([barcode])} className='!bg-emerald-600 font-bold mt-4 !text-white w-full'>Submit</Button>
+              <LoadingButton onClick={() => AddStudenttoList([barcode])} className='bg-emerald-600 font-bold mt-4 !text-white w-full transition-all ease-in-out hover:bg-emerald-700' loading={AddSubmitLoading} >Submit</LoadingButton>
             </div>
           </div>
         </DialogContent>

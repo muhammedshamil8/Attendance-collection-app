@@ -17,6 +17,7 @@ import { Label } from '@/components/ui/label';
 const useQuery = () => {
     return new URLSearchParams(useLocation().search);
 };
+import { LoadingButton } from '@/components/ui/loading-button';
 
 const Action: React.FC = () => {
     const [status, setStatus] = useState<string | null>(null);
@@ -150,7 +151,7 @@ const Action: React.FC = () => {
                                 className='w-full h-[50px] my-2'
                             />
                         </div>
-                        <Button type="submit" className='w-full'>Reset Password</Button>
+                        <LoadingButton type="submit" className='bg-emerald-600 font-bold  !text-white w-full transition-all ease-in-out hover:bg-emerald-700' loading={loading}>Reset Password</LoadingButton>
                     </form>
 
                 </div>

@@ -38,6 +38,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { useAutoAnimate } from '@formkit/auto-animate/react'
+import { LoadingButton } from '@/components/ui/loading-button';
 
 const formSchema2 = z.object({
   department: z.string().nonempty('Department is required'),
@@ -56,7 +57,8 @@ const Dashboard: React.FC = () => {
   const { toast } = useToast()
   const [DepartmentLoading, setDepartmentLoading] = useState<boolean>(true);
   const [parent] = useAutoAnimate();
-
+  const [SubmitLoading, setSubmitLoading] = useState<boolean>(false);
+  const [DeleteLoading, setDeleteLoading] = useState<boolean>(false);
   const Departmentform = useForm<z.infer<typeof formSchema2>>({
     resolver: zodResolver(formSchema2),
     defaultValues: {
@@ -66,6 +68,7 @@ const Dashboard: React.FC = () => {
 
   async function onSubmitDepartment(values: z.infer<typeof formSchema2>) {
     // console.log(values);
+    setSubmitLoading(true);
     const data = {
       department: values.department,
       createdAt: Timestamp.now(),
@@ -78,16 +81,19 @@ const Dashboard: React.FC = () => {
         variant: "success",
         description: "Department created successfully",
       })
+      setSubmitLoading(false);
       if (department) {
         setHandlecreateDepartment(false);
         Departmentform.reset();
       }
     } catch (error: any) {
+      setSubmitLoading(false);
       console.error(error);
     }
   }
 
   const deleteDepartment = async (id: string) => {
+    setDeleteLoading(true);
     try {
       await deleteDoc(doc(db, 'departments', id));
       toast({
@@ -95,7 +101,9 @@ const Dashboard: React.FC = () => {
         description: "Department item deleted successfully",
       })
       getDepartment();
+      setDeleteLoading(false);
     } catch (error: any) {
+      setDeleteLoading(false);
       console.error(error);
     }
   }
@@ -137,6 +145,19 @@ const Dashboard: React.FC = () => {
 
   return (
     <div className='flex flex-col gap-10 justify-start items-center h-full mt-20 mb-10 max-w-[320px] mx-auto'>
+
+      {DeleteLoading && (
+        <div className='fixed top-0 left-0 w-full h-full bg-black/50 flex items-center justify-center z-50'>
+          <div className='bg-white p-4 rounded-lg shadow-md flex flex-col gap-4'>
+            <div className='w-full flex items-center justify-center gap-4'>
+              <ImSpinner6 className="animate-spin h-6 w-6 text-emerald-600" />
+              <h1 className='text-emerald-600 font-bold'>Deleting Students from list...</h1>
+            </div>
+          </div>
+        </div>
+      )}
+
+
       <div>
         <h1 className='font-bold text-green-900 dark:text-emerald-400 text-[30px]'>
           Admin Dashboard
@@ -233,7 +254,7 @@ const Dashboard: React.FC = () => {
                 />
                 <div className='flex gap-2 items-center justify-end pb-4'>
                   <Button type='button' onClick={closeDepartmentModal} className='!bg-slate-200 font-bold mt-6 !text-emerald-600 min-w-[110px]'>Cancel</Button>
-                  <Button type='submit' className='!bg-emerald-600 font-bold mt-6 !text-white min-w-[110px]'>Submit</Button>
+                  <LoadingButton className='bg-emerald-600 font-bold mt-6 !text-white min-w-[110px] transition-all ease-in-out hover:bg-emerald-700' loading={SubmitLoading} type="submit">Submit</LoadingButton>
                 </div>
 
               </form>

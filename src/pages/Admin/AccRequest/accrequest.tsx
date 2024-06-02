@@ -38,6 +38,8 @@ import {
 import { FaEye } from "react-icons/fa";
 import { Button } from '@/components/ui/button';
 import { Badge } from "@/components/ui/badge"
+import { LoadingButton } from '@/components/ui/loading-button';
+import { FaWhatsapp } from "react-icons/fa";
 
 interface User {
   id: string;
@@ -70,6 +72,9 @@ function AccountRequest() {
   const [sheet, setSheet] = useState(false);
   const [sortBox, setSortBox] = useState(false);
   const [selectedItem, setSelectedItem] = useState<string>('');
+  const [SubmitLoadingR, setSubmitLoadingR] = useState(false);
+  const [SubmitLoadingA, setSubmitLoadingA] = useState(false);
+  const [DeleteLoading, setDeleteLoading] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -85,6 +90,7 @@ function AccountRequest() {
   }, []);
 
   const DeleteUser = async (id: string) => {
+    setDeleteLoading(true);
     try {
       //  by client sdk firebase and firesote delete user from collection 
       await deleteDoc(doc(db, 'NewAccountReq', id));
@@ -93,6 +99,7 @@ function AccountRequest() {
         description: 'User deleted successfully',
       });
       getUsers();
+      setDeleteLoading(false);
     }
     catch (error: any) {
       console.error(error);
@@ -100,6 +107,7 @@ function AccountRequest() {
         variant: 'destructive',
         description: 'There was an error deleting the user',
       });
+      setDeleteLoading(false);
     }
   }
 
@@ -174,6 +182,7 @@ function AccountRequest() {
 
   const handleReject = async (user: User | null) => {
     if (!user) return;
+    setSubmitLoadingR(true);
     try {
       const response = await fetch(`${APIURL}/admin/reject`, {
         method: 'POST',
@@ -192,17 +201,20 @@ function AccountRequest() {
         variant: 'success',
         description: 'User Rejected Successfully',
       });
+      setSubmitLoadingR(false);
     } catch (error: any) {
       console.error(error);
       toast({
         variant: 'destructive',
         description: 'There was an error rejecting the user',
       });
+      setSubmitLoadingR(false);
     }
   }
 
   const handleAccept = async (user: User | null) => {
     if (!user) return;
+    setSubmitLoadingA(true);
     try {
       const data = {
         email: user.email,
@@ -225,6 +237,7 @@ function AccountRequest() {
       const responseData = await response.json();
       // console.log('responseData', responseData);
       if (response.ok) {
+        setSubmitLoadingA(false);
         // await DeleteUser(user.id);
         setSheet(false);
         toast({
@@ -233,6 +246,7 @@ function AccountRequest() {
         });
         getUsers();
       } else {
+        setSubmitLoadingA(false);
         toast({
           variant: 'destructive',
           description: responseData.message,
@@ -244,6 +258,7 @@ function AccountRequest() {
         variant: 'destructive',
         description: error.message,
       })
+      setSubmitLoadingA(false);
     }
   }
 
@@ -260,6 +275,17 @@ function AccountRequest() {
   }
   return (
     <div className='flex flex-col gap-10 justify-start items-center h-full mt-20  mx-auto' >
+
+      {DeleteLoading && (
+        <div className='fixed top-0 left-0 w-full h-full bg-black/50 flex items-center justify-center z-50'>
+          <div className='bg-white p-4 rounded-lg shadow-md flex flex-col gap-4'>
+            <div className='w-full flex items-center justify-center gap-4'>
+              <ImSpinner6 className="animate-spin h-6 w-6 text-emerald-600" />
+              <h1 className='text-emerald-600 font-bold'>Deleting Students from list...</h1>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className='w-full flex flex-col gap-4 pb-8'>
         <div className="overflow-x-auto">
@@ -398,11 +424,9 @@ function AccountRequest() {
               </div>
               <div className='flex items-center'>
                 <dt className='text-gray-600 dark:text-gray-400'>Phone Number</dt>
-                <dd className='ml-2 text-gray-800 dark:text-gray-200'>{selectedUser?.phone_number}</dd>
-              </div>
-              <div className='flex items-center'>
-                <dt className='text-gray-600 dark:text-gray-400'>Role</dt>
-                <dd className='ml-2 text-gray-800 dark:text-gray-200'>{selectedUser?.role}</dd>
+                <dd className='ml-2 text-gray-800 dark:text-gray-200'>{selectedUser?.phone_number}
+
+                </dd>
               </div>
               {selectedUser?.contact_number && (
                 <div className='flex items-center'>
@@ -430,7 +454,7 @@ function AccountRequest() {
             <div className='flex items-center justify-around'>
               <AlertDialog>
                 <AlertDialogTrigger asChild>
-                  <Button className='bg-emerald-700 text-white dark:text-white dark:bg-emerald-700 min-w-[120px] hover:bg-emerald-800 dark:hover:bg-emerald-800'>Accept</Button>
+                  <LoadingButton className='bg-emerald-700 text-white dark:text-white dark:bg-emerald-700 min-w-[120px] hover:bg-emerald-800 dark:hover:bg-emerald-800' loading={SubmitLoadingA} >Accept</LoadingButton>
                 </AlertDialogTrigger>
                 <AlertDialogContent>
                   <AlertDialogHeader>
@@ -450,7 +474,7 @@ function AccountRequest() {
               </AlertDialog>
               <AlertDialog>
                 <AlertDialogTrigger asChild>
-                  <Button className='bg-red-500 text-white dark:text-white dark:bg-red-500 min-w-[120px] hover:bg-red-700 dark:hover:bg-red-700'>Reject</Button>
+                  <LoadingButton className='bg-red-500 text-white dark:text-white dark:bg-red-500 min-w-[120px] hover:bg-red-700 dark:hover:bg-red-700' loading={SubmitLoadingR} >Reject</LoadingButton>
                 </AlertDialogTrigger>
                 <AlertDialogContent>
                   <AlertDialogHeader>
@@ -474,6 +498,11 @@ function AccountRequest() {
           </div>
           <p className='text-gray-600 dark:text-gray-300 p-4 border-l-4 border-blue-500 bg-blue-100 dark:bg-slate-900'>
             If you need clarification on the user request, you can contact the user by email or phone number.
+            If you are sure that the user is genuine, you can accept the request. <br />
+            <span className='flex items-center justify-start gap-2'>
+              if your are not sure <a href={`https://wa.me/${selectedUser?.phone_number}`} className='inline before:content-[""] after:content-[""] cursor-pointer'> <FaWhatsapp className='text-green-500 dark:text-green-500' /></a> contact the user.
+            </span>
+
           </p>
         </SheetContent>
       </Sheet>

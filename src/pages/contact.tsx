@@ -39,6 +39,7 @@ import { useAutoAnimate } from '@formkit/auto-animate/react';
 import Stepper from '@/components/Stepper';
 import ErrorImg from "@/assets/error.svg";
 import SuccessImg from "@/assets/succes.svg";
+import { LoadingButton } from '@/components/ui/loading-button';
 
 
 const FormSchemacode = z.object({
@@ -51,6 +52,8 @@ const FormSchemacode = z.object({
 const Contact: React.FC = () => {
     const [showDialog, setShowDialog] = useState(false);
     const [loading, setLoading] = useState(true);
+    const [Submitloading, setSubmitLoading] = useState(false);
+    const [SubmitCodeLoading, setSubmitCodeLoading] = useState(false);
     const [done, setDone] = useState(false);
     const { toast } = useToast();
     const [parent] = useAutoAnimate({});
@@ -80,19 +83,22 @@ const Contact: React.FC = () => {
     })
     //  Handle the Verify Code form submission
     function onSubmitCode(data: z.infer<typeof FormSchemacode>) {
+        setSubmitCodeLoading(true);
         try {
-            toast({
-                title: "You submitted the following values:",
-                description: (
-                    <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
-                        <code className="text-white">{JSON.stringify(data, null, 2)}</code>
-                    </pre>
-                ),
-            })
+
+            // toast({
+            //     title: "You submitted the following values:",
+            //     description: (
+            //         <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
+            //             <code className="text-white">{JSON.stringify(data, null, 2)}</code>
+            //         </pre>
+            //     ),
+            // })
             if (data.code) {
                 handleVerifyCode(data.code);
             }
         } catch (error: any) {
+            setSubmitCodeLoading(false);
             toast({
                 variant: 'destructive',
                 title: 'Message Not Sent',
@@ -119,6 +125,7 @@ const Contact: React.FC = () => {
     // Handle the form submission
     async function onSubmit(values: z.infer<typeof formSchema>) {
         setLoading(true);
+        setSubmitLoading(true);
         // console.log(values);
         try {
             if (values.subject === 'Account Request') {
@@ -134,6 +141,7 @@ const Contact: React.FC = () => {
                 description: 'Your message could not be sent. Please try again later',
                 duration: 2000,
             });
+            setSubmitLoading(false);
             console.error(error);
         }
     }
@@ -149,6 +157,7 @@ const Contact: React.FC = () => {
                     description: 'Please fill all the required fields',
                     duration: 2000,
                 });
+                setSubmitLoading(false);
                 return;
             } else if (values.phone_number === '' || values.phone_number?.length !== 10 || Number.isNaN(Number(values.phone_number))) {
                 toast({
@@ -156,6 +165,7 @@ const Contact: React.FC = () => {
                     title: 'Message Not Sent',
                     description: 'Please enter a valid phone number',
                 })
+                setSubmitLoading(false);
                 return;
             } else if (values.contact_number && values.contact_number?.length !== 10) {
                 toast({
@@ -163,6 +173,7 @@ const Contact: React.FC = () => {
                     title: 'Message Not Sent',
                     description: 'Please enter a valid contact number',
                 })
+                setSubmitLoading(false);
                 return;
             } else {
                 setShowDialog(true);
@@ -189,6 +200,7 @@ const Contact: React.FC = () => {
 
             if (response.ok) {
                 setLoading(false);
+                setSubmitLoading(false);
                 setCodeSented(true);
                 toast({
                     variant: 'success',
@@ -198,6 +210,7 @@ const Contact: React.FC = () => {
                 });
             } else {
                 setLoading(false);
+                setSubmitLoading(false);
                 toast({
                     variant: 'destructive',
                     title: 'Account Request Not Sent',
@@ -208,6 +221,7 @@ const Contact: React.FC = () => {
         } catch (error) {
             setDone(false);
             setLoading(false);
+            setSubmitLoading(false);
             console.error(error);
         }
     }
@@ -221,6 +235,7 @@ const Contact: React.FC = () => {
                     description: 'Please fill all the required fields',
                     duration: 2000,
                 });
+                setSubmitCodeLoading(false);
                 return;
             } else if (emailid === '') {
                 toast({
@@ -229,6 +244,7 @@ const Contact: React.FC = () => {
                     description: 'Please fill all the required fields',
                     duration: 2000,
                 });
+                setSubmitCodeLoading(false);
                 return;
             }
             const result = await fetch(`${APIURL}/auth/verify-code`, {
@@ -246,6 +262,7 @@ const Contact: React.FC = () => {
                 // console.log(data);
             }
             if (result.ok) {
+                setSubmitCodeLoading(false);
                 setDone(true);
                 toast({
                     variant: 'success',
@@ -259,6 +276,7 @@ const Contact: React.FC = () => {
                     handleDialogClose();
                 }, 5000);
             } else {
+                setSubmitCodeLoading(false);
                 toast({
                     variant: 'destructive',
                     title: 'The code is invalid',
@@ -267,6 +285,7 @@ const Contact: React.FC = () => {
                 });
             }
         } catch (error) {
+            setSubmitCodeLoading(false);
             console.error(error);
         }
     }
@@ -281,6 +300,8 @@ const Contact: React.FC = () => {
                     description: 'Please fill all the required fields',
                     duration: 2000,
                 });
+                setSubmitLoading(false);
+
                 return;
             }
             setShowDialog(true);
@@ -292,6 +313,8 @@ const Contact: React.FC = () => {
                 body: JSON.stringify(values),
             });
             if (response.ok) {
+                setSubmitLoading(false);
+
                 setLoading(false);
                 setDone(true);
                 toast({
@@ -302,6 +325,8 @@ const Contact: React.FC = () => {
                 });
                 form.reset();
             } else {
+                setSubmitLoading(false);
+
                 setLoading(false);
                 setDone(false);
                 toast({
@@ -313,6 +338,8 @@ const Contact: React.FC = () => {
             }
             form.reset();
         } catch (error) {
+            setSubmitLoading(false);
+
             setLoading(false);
             toast({
                 variant: 'destructive',
@@ -446,7 +473,7 @@ const Contact: React.FC = () => {
                                 ) : (
                                     <div className='flex gap-2 items-center justify-end'>
                                         <Button className='!bg-slate-200 font-bold mt-6 !text-emerald-600 min-w-[120px]' onClick={handleClear}>Clear</Button>
-                                        <Button type="submit" className='!bg-emerald-600 font-bold mt-6 !text-white min-w-[120px]'>Submit</Button>
+                                        <LoadingButton type="submit" className='bg-emerald-600 font-bold mt-6 !text-white min-w-[120px] transition-all ease-in-out hover:bg-emerald-700' loading={Submitloading}>Submit</LoadingButton>
                                     </div>
                                 )
                                 }
@@ -528,7 +555,7 @@ const Contact: React.FC = () => {
 
                                 <div className='flex gap-2 items-center justify-between'>
                                     <Button type='button' className='bg-gray-500 text-white px-4 py-2 rounded ml-2 min-w-[120px]' onClick={() => setCurrentStep(currentStep - 1)}>Previous</Button>
-                                    <Button type="submit" className='!bg-emerald-600 font-bold px-4 py-2  !text-white min-w-[120px]'>Submit</Button>
+                                    <LoadingButton type="submit" className='bg-emerald-600 font-bold px-4 py-2 !text-white min-w-[120px] transition-all ease-in-out hover:bg-emerald-700' loading={Submitloading}>Submit</LoadingButton>
                                 </div>
                             </>
                         )}
@@ -589,7 +616,7 @@ const Contact: React.FC = () => {
                                                     </FormItem>
                                                 )}
                                             />
-                                            <Button type="submit" className='w-full'>Submit</Button>
+                                             <LoadingButton type="submit" className='bg-emerald-600 font-bold  !text-white w-full transition-all ease-in-out hover:bg-emerald-700' loading={SubmitCodeLoading}>Verify</LoadingButton>
                                         </form>
                                     </Form>
                                 </div>

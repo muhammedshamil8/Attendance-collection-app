@@ -49,6 +49,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import { onAuthStateChanged } from 'firebase/auth';
 import { MdPerson, MdPersonAddDisabled } from "react-icons/md";
+import { LoadingButton } from '@/components/ui/loading-button';
 
 import { useAutoAnimate } from '@formkit/auto-animate/react'
 import useDebounce from '@/lib/debounce';
@@ -83,6 +84,10 @@ function users() {
   const debouncedSearchTerm = useDebounce(searchName, 300);
   const [method, setMethod] = useState('POST');
   const [updateuserId, setUpdateUserId] = useState('');
+  const [submitLoading, setSubmitLoading] = useState(false);
+  const [DeleteLoading, setDeleteLoading] = useState(false);
+  const [EnableDisableLoading, setEnableDisableLoading] = useState(false);
+  const [EnableDisableText, setEnableDisableText] = useState('Disabling User...');
 
   const formSchema = z.object({
     email: z.string().email({ message: 'Invalid email address' }),
@@ -128,12 +133,14 @@ function users() {
   }
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    setSubmitLoading(true);
     if (method === 'POST') {
       CreateUser(values);
     } else if (method === 'PUT') {
       if (updateuserId)
         UpdateUser(updateuserId, values);
     } else {
+      setSubmitLoading(false);
       // console.log('User ID not found');
     }
   }
@@ -166,6 +173,7 @@ function users() {
           description: responseData.message,
         });
         getUsers();
+        setSubmitLoading(false);
         form.reset();
         closeModal();
       } else {
@@ -173,6 +181,7 @@ function users() {
           variant: 'destructive',
           description: responseData.message,
         });
+        setSubmitLoading(false);
       }
     } catch (error: any) {
       console.error(error);
@@ -181,11 +190,13 @@ function users() {
         description: error.message,
       })
       closeModal();
+      setSubmitLoading(false);
       form.reset();
     }
   }
 
   const DeleteUser = async (id: string) => {
+    setDeleteLoading(true);
     try {
       const response = await fetch(`${APIURL}/admin/delete-user/${id}`, {
         method: 'DELETE',
@@ -201,11 +212,13 @@ function users() {
           description: data.message,
         });
         getUsers();
+        setDeleteLoading(false);
       } else {
         toast({
           variant: 'destructive',
           description: data.message,
         });
+        setDeleteLoading(false);
       }
     }
     catch (error: any) {
@@ -214,10 +227,13 @@ function users() {
         variant: 'destructive',
         description: error.message,
       });
+      setDeleteLoading(false);
     }
   }
 
   const DisableUser = async (id: string) => {
+    setEnableDisableText('Disabling User...');
+    setEnableDisableLoading(true);
     try {
       const response = await fetch(`${APIURL}/admin/disable-user/${id}`, {
         method: 'PATCH',
@@ -233,11 +249,13 @@ function users() {
           description: data.message,
         });
         getUsers();
+        setEnableDisableLoading(false);
       } else {
         toast({
           variant: 'destructive',
           description: data.message,
         });
+        setEnableDisableLoading(false);
       }
     }
     catch (error: any) {
@@ -246,10 +264,13 @@ function users() {
         variant: 'destructive',
         description: error.message,
       });
+      setEnableDisableLoading(false);
     }
   }
 
   const EnableUser = async (id: string) => {
+    setEnableDisableText('Enabling User...');
+    setEnableDisableLoading(true);
     try {
       const response = await fetch(`${APIURL}/admin/enable-user/${id}`, {
         method: 'PATCH',
@@ -265,11 +286,13 @@ function users() {
           description: data.message,
         });
         getUsers();
+        setEnableDisableLoading(false);
       } else {
         toast({
           variant: 'destructive',
           description: data.message,
         });
+        setEnableDisableLoading(false);
       }
     }
     catch (error: any) {
@@ -278,6 +301,7 @@ function users() {
         variant: 'destructive',
         description: error.message,
       });
+      setEnableDisableLoading(false);
     }
   }
 
@@ -307,11 +331,13 @@ function users() {
           description: data.message,
         });
         getUsers();
+        setSubmitLoading(false);
       } else {
         toast({
           variant: 'destructive',
           description: data.message,
         });
+        setSubmitLoading(false);
       }
     }
     catch (error: any) {
@@ -320,7 +346,9 @@ function users() {
         variant: 'destructive',
         description: error.message,
       });
+      setSubmitLoading(false);
     } finally {
+      setSubmitLoading(false);
       form.reset();
       closeModal();
     }
@@ -434,6 +462,29 @@ function users() {
 
   return (
     <div className='flex flex-col gap-10 justify-start items-center h-full mt-20  mx-auto' >
+
+      {DeleteLoading && (
+        <div className='fixed top-0 left-0 w-full h-full bg-black/50 flex items-center justify-center z-50'>
+          <div className='bg-white p-4 rounded-lg shadow-md flex flex-col gap-4'>
+            <div className='w-full flex items-center justify-center gap-4'>
+              <ImSpinner6 className="animate-spin h-6 w-6 text-emerald-600" />
+              <h1 className='text-emerald-600 font-bold'>Deleting Students from list...</h1>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {EnableDisableLoading && (
+        <div className='fixed top-0 left-0 w-full h-full bg-black/50 flex items-center justify-center z-50'>
+          <div className='bg-white p-4 rounded-lg shadow-md flex flex-col gap-4'>
+            <div className='w-full flex items-center justify-center gap-4'>
+              <ImSpinner6 className="animate-spin h-6 w-6 text-emerald-600" />
+              <h1 className='text-emerald-600 font-bold'>{EnableDisableText}</h1>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className='w-full'>
         <Button className='!bg-slate-300 w-full flex justify-between items-center gap-4 font-bold h-[50px] rounded-xl' onClick={() => openModal('POST')}>
           <p className='text-emerald-700'>
@@ -535,7 +586,7 @@ function users() {
                             <AlertDialog>
                               <AlertDialogTrigger asChild>
                                 <>
-                                <MdPerson className='col-action mx-auto text-emerald-700 cursor-pointer hover:text-gray-500 transition-all ease-in-out' />
+                                  <MdPerson className='col-action mx-auto text-emerald-700 cursor-pointer hover:text-gray-500 transition-all ease-in-out' />
                                 </>
                               </AlertDialogTrigger>
                               <AlertDialogContent>
@@ -682,7 +733,7 @@ function users() {
                   )}
                   <div className='flex gap-2 items-center justify-center pb-4'>
                     <Button type='button' onClick={closeModal} className='!bg-slate-200 font-bold mt-6 !text-emerald-600 w-full'>Cancel</Button>
-                    <Button type='submit' className='!bg-emerald-600 font-bold mt-6 !text-white w-full'>Submit</Button>
+                    <LoadingButton className='bg-emerald-600 font-bold mt-6 !text-white w-full transition-all ease-in-out hover:bg-emerald-700' loading={submitLoading} type="submit">Submit</LoadingButton>
                   </div>
                 </form>
               </Form>
