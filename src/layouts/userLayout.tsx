@@ -10,7 +10,8 @@ import {
     SheetFooter,
 } from "@/components/ui/sheet"
 import { Button } from '@/components/ui/button';
-import { FaHome , FaUser , FaGrinStars , FaEnvelope } from "react-icons/fa";
+import { FaHome, FaUser, FaEnvelope } from "react-icons/fa";
+import { IoHeartCircleSharp } from "react-icons/io5";
 import { LogOut } from 'lucide-react';
 import { auth } from '@/config/firebase';
 import { signOut } from 'firebase/auth';
@@ -27,7 +28,7 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
-
+import { motion } from "framer-motion";
 
 
 const UserLayout: React.FC = ({ }) => {
@@ -57,26 +58,26 @@ const UserLayout: React.FC = ({ }) => {
         setSidebar(false);
         navigate(route);
     }
-    
+
     const NavItems = [
         {
             name: 'Home',
-            icon: <FaHome />,
+            icon: <FaHome className='text-xl' />,
             route: '/'
         },
         {
             name: 'Profile',
-            icon: <FaUser />,
+            icon: <FaUser className='text-xl' />,
             route: '/profile'
         },
         {
             name: 'About',
-            icon: <FaGrinStars />,
+            icon: <IoHeartCircleSharp className='h-7 w-6' />,
             route: '/home/about'
         },
         {
             name: 'Contact',
-            icon: <FaEnvelope />,
+            icon: <FaEnvelope className='text-xl' />,
             route: '/home/contact'
         }
     ]
@@ -106,7 +107,7 @@ const UserLayout: React.FC = ({ }) => {
         <AuthRoleRequire role='user'>
             <div className='bg-slate-200 dark:bg-slate-900 min-h-screen overflow-auto'>
                 {/* Add your header component here */}
-                <header className='border-b border-slate-200   flex items-center justify-between p-2 px-4 shadow-lg dark:shadow-black/30 dark:border-slate-950'>
+                <header className='border-b border-emerald-800/20  flex items-center justify-between p-2 px-4  dark:border-slate-600/20 '>
                     {/* Add your header content */}
                     <button className='flex items-center justify-center h-full w-fit ' onClick={openSidebar}>
                         <div className={`nav-icon ${isOpen ? 'open' : ''}`} >
@@ -115,13 +116,13 @@ const UserLayout: React.FC = ({ }) => {
                             <div className='line line-3 bg-emerald-600'></div>
                         </div>
                     </button>
-                    <h1 className='text-xl font-bold dark:text-white'>
-                        Mark!t
+                    <h1 className='text-xl font-bold text-emerald-600'>
+                        MARK !T
                     </h1>
 
                     <Avatar onClick={() => navigate('/profile')} className='cursor-pointer'>
                         <AvatarImage src={UserProfile} />
-                        <AvatarFallback className='dark:text-white p-2 text-sm'>{userDp}</AvatarFallback>
+                        <AvatarFallback className='text-emerald-600 p-2 text-sm'>{userDp}</AvatarFallback>
                     </Avatar>
 
                 </header>
@@ -131,24 +132,20 @@ const UserLayout: React.FC = ({ }) => {
                     <Sheet open={sidebar} onOpenChange={closeSideBar}>
                         <SheetContent className='flex flex-col h-full justify-between'>
                             <SheetHeader>
-                                <SheetTitle>Mark!t</SheetTitle>
+                                <SheetTitle className='text-emerald-600'>MARK !T</SheetTitle>
                                 {/* <SheetDescription>
                                 This action cannot be undone. This will permanently delete your account
                                 and remove your data from our servers.
                             </SheetDescription> */}
                             </SheetHeader>
-                            <nav className='flex-1 flex flex-col items-center justify-start  w-full gap-1'>
-                                <ul className='w-full mt-8 '>
+                            <nav className='flex-1 flex flex-col items-center justify-start w-full gap-1'>
+                                <ul className='w-full mt-8 flex flex-col gap-3'>
                                     {NavItems.map((item, index) => (
-                                        <li key={index} className={`p-2 font-semibold text-gray-500 flex items-center gap-2 justify-center rounded-md  w-full hover:bg-slate-100  hover:text-black/80 dark:hover:text-black/80 transition-all ease-in-out cursor-pointer my-2 ${pathname === item.route ? 'bg-slate-100 text-black/80 dark:text-black/80' : ''}`} onClick={() => handleNavigate(item.route)} >
-                                            {item.icon}
-                                            <span>
-                                                {item.name}
-                                            </span>
+                                        <li key={index} className={`py-2 px-4 font-semibold text-gray-500 flex items-center gap-2 rounded-md w-full hover:bg-slate-100 hover:text-black/80 dark:hover:text-black/80 transition-all ease-in-out cursor-pointer ${pathname === item.route ? 'bg-slate-100 text-black/80 dark:text-black/80' : ''}`} onClick={() => handleNavigate(item.route)}>
+                                            <span className='mr-2'>{item.icon}</span>
+                                            <span>{item.name}</span>
                                         </li>
                                     ))}
-
-
                                 </ul>
                             </nav>
                             {/* <SheetTrigger>
@@ -193,13 +190,25 @@ const UserLayout: React.FC = ({ }) => {
 
                 {/* Add your main content */}
                 <main className='custom-container'>
-                    <Outlet />
+                    <motion.div
+                        initial="initial"
+                        animate="enter"
+                        exit="exit"
+                        variants={{
+                            initial: { opacity: 0, x: -50 },
+                            enter: { opacity: 1, x: 0, transition: { duration: 0.5 } },
+                            exit: { opacity: 0, x: 50, transition: { duration: 0.5 } }
+                        }}
+                        key={pathname}
+                    >
+                        <Outlet />
+                    </motion.div>
                 </main>
 
                 {/* Add your footer component here */}
                 <footer className=''>
                     {/* Add your footer content */}
-                    <div className='bg-slate-200 dark:bg-slate-950 border-t border-slate-200 dark:border-slate-900 p-2 text-center'>
+                    <div className='p-2 text-center'>
                         <p className='text-sm text-gray-500 dark:text-gray-300'>
                             IEDC EMEA &copy; {new Date().getFullYear()} All rights reserved.
                         </p>
