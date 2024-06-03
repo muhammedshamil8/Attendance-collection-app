@@ -349,7 +349,7 @@ const Home: React.FC = () => {
 
   return (
     <div
-      className="mx-auto mb-10 mt-20 flex h-full min-h-screen max-w-[360px] flex-col items-center justify-start gap-10"
+      className="mx-auto mb-10 mt-20 flex h-full min-h-screen min-w-[250px] flex-col items-center justify-start gap-10"
       ref={formRef}
     >
       {DeleteLoading && (
@@ -368,7 +368,7 @@ const Home: React.FC = () => {
         </h1>
       </div>
 
-      <div className="w-full">
+      <div className="w-full p-1">
         <Button
           className="flex h-[50px] w-full gap-4 !bg-emerald-700 font-bold !text-white"
           onClick={() => openModal("POST")}
@@ -392,20 +392,20 @@ const Home: React.FC = () => {
         />
       </div>
 
-      <div className="flex w-full flex-col gap-4">
+      <div className="flex w-full flex-col flex-wrap justify-center gap-4 sm:flex-row">
         {loading && loading ? (
           <>
-            {Array.from({ length: 4 }, (_, index) => (
+            {Array.from({ length: 6 }, (_, index) => (
               <div
                 key={index}
-                className="flex min-h-36 w-full animate-pulse flex-col gap-2 rounded-md bg-gray-300 p-2 text-center"
+                className="mx-auto flex min-h-36 w-full animate-pulse flex-col gap-2 rounded-md bg-gray-300 p-2 text-center md:w-[45%]"
               ></div>
             ))}
           </>
         ) : filteredEvents.length > 0 ? (
           filteredEvents.map((event: Event) => (
             <div
-              className="flex flex-col gap-3 overflow-hidden rounded-xl bg-emerald-600/10 p-4 shadow-md dark:bg-emerald-200/20"
+              className="mx-auto flex w-full min-w-[320px] max-w-[380px] flex-col gap-3 overflow-hidden rounded-xl bg-emerald-600/10 p-4 shadow-md dark:bg-emerald-200/20 md:w-[45%]"
               key={event.id}
             >
               <div className="flex flex-col justify-between">

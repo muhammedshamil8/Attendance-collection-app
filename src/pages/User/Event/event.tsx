@@ -624,7 +624,7 @@ function Event() {
   }, [students]);
 
   return (
-    <div className="mx-auto mt-20 flex h-full min-h-screen flex-col items-center justify-start gap-10">
+    <div className="mx-auto mt-20 flex h-full min-h-screen min-w-[250px] flex-col items-center justify-start gap-10">
       {DeleteLoading && (
         <div className="fixed left-0 top-0 z-50 flex h-full w-full items-center justify-center bg-black/50">
           <div className="flex flex-col gap-4 rounded-lg bg-white p-4 shadow-md">

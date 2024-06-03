@@ -148,7 +148,7 @@ const Dashboard: React.FC = () => {
   };
 
   return (
-    <div className="mx-auto mb-10 mt-20 flex h-full max-w-[360px] flex-col items-center justify-start gap-10">
+    <div className="mx-auto mb-10 mt-20 flex h-full min-w-[250px] max-w-[380px] flex-col items-center justify-start gap-10 sm:max-w-[600px]">
       {DeleteLoading && (
         <div className="fixed left-0 top-0 z-50 flex h-full w-full items-center justify-center bg-black/50">
           <div className="flex flex-col gap-4 rounded-lg bg-white p-4 shadow-md">
@@ -180,67 +180,69 @@ const Dashboard: React.FC = () => {
         </Button>
       </div>
 
-      <div
-        className="mx-auto flex w-full max-w-[320px] flex-col gap-5"
-        ref={parent}
-      >
+      <div className="mx-auto flex w-full flex-col gap-5">
         <h2 className="text-center text-xl font-bold dark:text-white">
           Departments
         </h2>
-        {DepartmentLoading && DepartmentLoading ? (
-          Array.from({ length: 4 }, (_, index) => (
-            <p
-              className="flex h-20 animate-pulse items-center justify-center rounded-md bg-slate-200 text-center dark:text-white"
-              key={index}
-            >
-              <ImSpinner6 className="mx-2 h-8 w-8 animate-spin text-lg text-white" />{" "}
-              Loading
-            </p>
-          ))
-        ) : department.length > 0 ? (
-          department.map((item) => (
-            <div
-              key={item.id}
-              className="flex items-center justify-between rounded-md bg-gray-400 p-4 dark:bg-gray-100"
-            >
-              <div className="flex items-center gap-2">
-                <AiFillEye className="text-slate-100 dark:text-gray-500" />
-                <span className="font-semibold text-white dark:text-gray-700">
-                  {item.department}
-                </span>
-                {/* <span className="text-gray-500 text-xs">({item.createdAt.toDate().toDateString()}) </span> */}
+        <div
+          className="mx-auto flex w-full flex-col flex-wrap justify-center gap-5 sm:flex-row"
+          ref={parent}
+        >
+          {DepartmentLoading && DepartmentLoading ? (
+            Array.from({ length: 4 }, (_, index) => (
+              <p
+                className="flex h-20 w-full animate-pulse items-center justify-center rounded-md bg-slate-200 text-center dark:text-white sm:w-[45%]"
+                key={index}
+              >
+                <ImSpinner6 className="mx-2 h-8 w-8 animate-spin text-lg text-white" />{" "}
+                Loading
+              </p>
+            ))
+          ) : department.length > 0 ? (
+            department.map((item) => (
+              <div
+                key={item.id}
+                className="mx-auto flex w-full items-center justify-between rounded-md bg-gray-400 p-4 dark:bg-gray-100 sm:w-[48%]"
+              >
+                <div className="flex items-center gap-2">
+                  <AiFillEye className="text-slate-100 dark:text-gray-500" />
+                  <span className="font-semibold text-white dark:text-gray-700">
+                    {item.department}
+                  </span>
+                  {/* <span className="text-gray-500 text-xs">({item.createdAt.toDate().toDateString()}) </span> */}
+                </div>
+                <AlertDialog>
+                  <AlertDialogTrigger>
+                    <AiFillDelete className="text-red-500" />
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle className="dark:text-white">
+                        Are you sure you want to delete this department?
+                      </AlertDialogTitle>
+                      <AlertDialogDescription>
+                        This action cannot be undone. it will delete the
+                        department permanently. so be sure before you continue.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel className="dark:text-white">
+                        Cancel
+                      </AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={() => deleteDepartment(item.id)}
+                      >
+                        Continue
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               </div>
-              <AlertDialog>
-                <AlertDialogTrigger>
-                  <AiFillDelete className="text-red-500" />
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle className="dark:text-white">
-                      Are you sure you want to delete this department?
-                    </AlertDialogTitle>
-                    <AlertDialogDescription>
-                      This action cannot be undone. it will delete the
-                      department permanently. so be sure before you continue.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel className="dark:text-white">
-                      Cancel
-                    </AlertDialogCancel>
-                    <AlertDialogAction
-                      onClick={() => deleteDepartment(item.id)}
-                    >
-                      Continue
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
-            </div>
-          ))
-        ) : (
-          <p className="text-center dark:text-white">No Department Found</p>
-        )}
+            ))
+          ) : (
+            <p className="text-center dark:text-white">No Department Found</p>
+          )}
+        </div>
       </div>
 
       <Dialog open={handlecreateDepartment} onOpenChange={closeDepartmentModal}>
