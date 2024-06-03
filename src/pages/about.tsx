@@ -103,7 +103,7 @@ const About: React.FC = () => {
                 </h1>
 
                 <div className='mb-10 flex items-center justify-start'>
-                    <img src={AboutImage} alt="About" className="object-cover rounded-lg md:min-w-[500px]" />
+                    <img src={AboutImage} alt="About" className="object-cover rounded-lg " />
                 </div>
                 <h1 className="text-[34px] font-bold mb-4">About Us!</h1>
                 <p className="text-lg mb-4">

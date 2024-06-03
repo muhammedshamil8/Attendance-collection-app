@@ -16,7 +16,7 @@ const AuthLayout: React.FC = ({ }) => {
 
 
     return (
-        <div className="auth-layout bg-white dark:bg-gray-800 min-h-screen overflow-auto relative">
+        <div className="auth-layout bg-white dark:bg-gray-800 min-h-screen overflow-auto relative pb-20">
             <header className="flex p-2 w-full  items-end  gap-4 justify-center mb-10">
                 <div className='rounded-md p-2.5  dark:bg-gray-950 dark:hover:bg-gray-800 border dark:border-none hover:bg-slate-100 cursor-pointer transition-all ease-in-out' onClick={() => handleNavigation('/')} >
                     <GoHome className='text-xl dark:text-emerald-500 text-emerald-500 cursor-pointer  dark:hover:text-gray-200' />

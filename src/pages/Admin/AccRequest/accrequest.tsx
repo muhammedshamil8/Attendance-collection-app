@@ -113,15 +113,19 @@ function AccountRequest() {
 
   const SortFields = [
     'pending',
-    'verified',
+    'Rejected',
+    'Accepted',
   ];
 
   const SortData = (field: string) => {
     if (field === 'pending') {
-      setFilteredUsers(ReqUsers.filter((user) => user.status === 'pending'));
+      setFilteredUsers(ReqUsers.filter((user) => user.Verification === 'pending'));
       return;
-    } else if (field === 'verified') {
-      setFilteredUsers(ReqUsers.filter((user) => user.status === 'verified'));
+    } else if (field === 'Accepted') {
+      setFilteredUsers(ReqUsers.filter((user) => user.Verification === 'Accepted'));
+      return;
+    } else if (field === 'Rejected') {
+      setFilteredUsers(ReqUsers.filter((user) => user.Verification === 'Rejected'));
       return;
     } else {
       setSortBox(false);
@@ -267,7 +271,7 @@ function AccountRequest() {
       return 'destructive';
     } else if (verification === 'pending') {
       return 'pending';
-    } else if (verification === 'verified') {
+    } else if (verification === 'Accepted') {
       return 'active';
     } else {
       return 'default';
@@ -300,6 +304,9 @@ function AccountRequest() {
                   <div className='p-2 bg-emerald-700 flex gap-2 items-center justify-center text-white rounded-lg px-4' onClick={() => setSortBox(!sortBox)}>Sort <IoIosArrowDown /></div>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
+                  <div>
+                    <h1 className='text-center text-lg font-bold dark:text-white'>Verification</h1>
+                  </div>
                   <DropdownMenuSeparator />
                   <DropdownMenuRadioGroup value={selectedItem} onValueChange={setSelectedItem}>
                     {SortFields.map((item) => (
@@ -322,8 +329,8 @@ function AccountRequest() {
                   <th className="col-id tracking-wider">No</th>
                   <th className="col-name tracking-wider">Team Name</th>
                   <th className="col-category tracking-wider">Nodal Officer</th>
-                  <th className="col-email tracking-wider">status</th>
                   <th className="col-email tracking-wider">Verification</th>
+                  <th className="col-email tracking-wider">status</th>
                   <th className="col-action tracking-wider">Action</th>
                 </tr>
               </thead>
@@ -394,7 +401,7 @@ function AccountRequest() {
 
 
       <Sheet open={sheet} onOpenChange={handleSheet}>
-        <SheetContent side={'right'}>
+        <SheetContent side={'right'} className='overflow-auto'>
           <SheetHeader>
             <SheetTitle>
               Account Request Details
@@ -447,8 +454,12 @@ function AccountRequest() {
                 <dd className='ml-2 text-gray-800 dark:text-gray-200'>{selectedUser?.Verification}</dd>
               </div>
               <div className='flex items-center'>
-                <dt className='text-gray-600 dark:text-gray-400'>Message</dt> :<br />
-                <dd className='ml-2 text-gray-800 dark:text-gray-200 text-left'>{selectedUser?.message}</dd>
+                <dt className='text-gray-600 dark:text-gray-400'>Email Status</dt>
+                <dd className='ml-2 text-gray-800 dark:text-gray-200'>{selectedUser?.status}</dd>
+              </div>
+              <div className='flex items-start flex-col'>
+                <dt className='text-gray-600 dark:text-gray-400'>Message :</dt> 
+                <dd className='ml-2 mt-1 indent-4 text-gray-800 dark:text-gray-200 text-left'>{selectedUser?.message}</dd>
               </div>
             </dl>
             <div className='flex items-center justify-around'>
@@ -496,17 +507,29 @@ function AccountRequest() {
 
             </div>
           </div>
-          <p className='text-gray-600 dark:text-gray-300 p-4 border-l-4 border-blue-500 bg-blue-100 dark:bg-slate-900'>
+          <p className='text-gray-600 dark:text-gray-300 p-4 border-l-4 border-blue-500 bg-blue-100 dark:bg-slate-900 my-2'>
             If you need clarification on the user request, you can contact the user by email or phone number.
-            If you are sure that the user is genuine, you can accept the request. <br />
-            if your are not sure <div onClick={() => window.open(`https://wa.me/${selectedUser?.phone_number}`)} className='cursor-pointer'> <FaWhatsapp className='text-green-500 dark:text-green-500' /></div> contact the user.
+            If you are sure that the user is genuine, you can accept the request,
+            if your are not sure contact the user.
+            <div onClick={() => window.open(`https://wa.me/${selectedUser?.phone_number}`)} className='cursor-pointer mt-2 flex w-full justify-end items-center gap-1'><FaWhatsapp className='text-green-500 dark:text-green-500 text-xl' />user</div>
+          </p>
+
+          <p className='text-gray-600 dark:text-gray-300 p-4 border-l-4 border-blue-500 bg-blue-100 dark:bg-slate-900 my-2 mt-4'>
+            if Accept and Reject is not working then you can create a new account for the user and send email to the user with the details and delete from this list.
+            or contact the user for the details. or contact the developer for the help.
+            <div onClick={() => window.open(`https://wa.me/8089465673`)} className='cursor-pointer mt-2 flex w-full justify-end items-center gap-1'><FaWhatsapp className='text-green-500 dark:text-green-500 text-xl' />dev</div>
           </p>
         </SheetContent>
       </Sheet>
       <p className='text-gray-600 dark:text-gray-300 p-4 border-l-4 border-blue-500 bg-blue-100 dark:bg-slate-800'>
-        The Status is when user request sent , we sent a verification code to their email and when they verify the code then the status is changed to verified. Others are pending.
+        The Verification is the current status of the user request. If the user is Accepted then the Verification is Accepted. If the user is not verified then the Verification is pending.if the user is rejected then the Verification is Rejected.
+      </p>
+      <p className='text-gray-600 dark:text-gray-300 p-4 border-l-4 border-blue-500 bg-blue-100 dark:bg-slate-800'>
+        The  Status is when user request sent , we sent a verification code to their email and when they verify the code then the Verification is changed to verified. Others are pending. (itz a email verification)
         So before accepting pending request be sure that the user is genuine.
       </p>
+
+
     </div >
   )
 }
