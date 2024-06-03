@@ -10,7 +10,9 @@ const Test: React.FC = () => {
 
   return (
     <div>
-      <h1 className='text-center font-semibold m-4'>testing Page dev@IEDCEMEA</h1>
+      <h1 className="m-4 text-center font-semibold">
+        testing Page dev@IEDCEMEA
+      </h1>
     </div>
   );
 };

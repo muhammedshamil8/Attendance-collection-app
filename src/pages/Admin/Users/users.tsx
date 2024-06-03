@@ -1,13 +1,13 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from "react";
 import { LuPlus } from "react-icons/lu";
-import { Button } from '@/components/ui/button';
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"
-import { Input } from '@/components/ui/input';
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 import { AiFillEdit, AiFillDelete } from "react-icons/ai";
 import { IoIosArrowDown, IoIosSearch } from "react-icons/io";
 import {
@@ -16,15 +16,15 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
   DropdownMenuCheckboxItem,
-} from "@/components/ui/dropdown-menu"
+} from "@/components/ui/dropdown-menu";
 
-import { auth, db } from '@/config/firebase';
-import { collection, getDocs, Timestamp } from 'firebase/firestore';
-import { useToast } from "@/components/ui/use-toast"
+import { auth, db } from "@/config/firebase";
+import { collection, getDocs, Timestamp } from "firebase/firestore";
+import { useToast } from "@/components/ui/use-toast";
 
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
-import { z } from "zod"
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 import {
   Form,
   FormControl,
@@ -32,8 +32,8 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form"
-import { IoEyeOffOutline, IoEyeOutline } from 'react-icons/io5';
+} from "@/components/ui/form";
+import { IoEyeOffOutline, IoEyeOutline } from "react-icons/io5";
 import { ImSpinner6 } from "react-icons/im";
 
 import {
@@ -46,16 +46,13 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
-import { onAuthStateChanged } from 'firebase/auth';
+} from "@/components/ui/alert-dialog";
+import { onAuthStateChanged } from "firebase/auth";
 import { MdPerson, MdPersonAddDisabled } from "react-icons/md";
-import { LoadingButton } from '@/components/ui/loading-button';
+import { LoadingButton } from "@/components/ui/loading-button";
 
-import { useAutoAnimate } from '@formkit/auto-animate/react'
-import useDebounce from '@/lib/debounce';
-
-
-
+import { useAutoAnimate } from "@formkit/auto-animate/react";
+import useDebounce from "@/lib/debounce";
 
 interface User {
   id: string;
@@ -71,40 +68,47 @@ interface User {
 
 function users() {
   const [handleCreateUser, setHandleCreateUser] = useState(false);
-  const [searchName, setSearchName] = useState('')
+  const [searchName, setSearchName] = useState("");
   const [loading, setLoading] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [Users, setUsers] = useState<User[]>([]);
   const [filteredUsers, setFilteredUsers] = useState<User[]>(Users);
-  const { toast } = useToast()
-  const UserCollectionRef = collection(db, 'users');
-  const [token, setToken] = useState<string>('');
+  const { toast } = useToast();
+  const UserCollectionRef = collection(db, "users");
+  const [token, setToken] = useState<string>("");
   const APIURL = import.meta.env.VITE_API_URL;
-  const [parent,] = useAutoAnimate();
+  const [parent] = useAutoAnimate();
   const debouncedSearchTerm = useDebounce(searchName, 300);
-  const [method, setMethod] = useState('POST');
-  const [updateuserId, setUpdateUserId] = useState('');
+  const [method, setMethod] = useState("POST");
+  const [updateuserId, setUpdateUserId] = useState("");
   const [submitLoading, setSubmitLoading] = useState(false);
   const [DeleteLoading, setDeleteLoading] = useState(false);
   const [EnableDisableLoading, setEnableDisableLoading] = useState(false);
-  const [EnableDisableText, setEnableDisableText] = useState('Disabling User...');
+  const [EnableDisableText, setEnableDisableText] =
+    useState("Disabling User...");
 
   const formSchema = z.object({
-    email: z.string().email({ message: 'Invalid email address' }),
-    password: method === 'POST' ? z.string().min(6, { message: 'Password must be at least 6 characters' }) : z.string().optional(),
-    team_name: z.string().min(3, { message: 'Name must be at least 3 characters' }),
+    email: z.string().email({ message: "Invalid email address" }),
+    password:
+      method === "POST"
+        ? z
+            .string()
+            .min(6, { message: "Password must be at least 6 characters" })
+        : z.string().optional(),
+    team_name: z
+      .string()
+      .min(3, { message: "Name must be at least 3 characters" }),
     role: z.string(),
     status: z.boolean(),
-    Nodal_Officer: z.string().nonempty({ message: 'Head name required' }),
-  })
+    Nodal_Officer: z.string().nonempty({ message: "Head name required" }),
+  });
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
         user.getIdToken().then((idToken) => {
           setToken(idToken);
-        }
-        );
+        });
       } else {
       }
     });
@@ -115,30 +119,29 @@ function users() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      email: '',
-      password: '',
-      team_name: '',
-      Nodal_Officer: '',
-      role: 'user',
+      email: "",
+      password: "",
+      team_name: "",
+      Nodal_Officer: "",
+      role: "user",
       status: true,
     },
-  })
+  });
 
   const EditUser = (id: string, user: User) => {
     setUpdateUserId(id);
-    form.setValue('email', user.email);
-    form.setValue('team_name', user.team_name);
-    form.setValue('Nodal_Officer', user.Nodal_Officer);
-    openModal('PUT')
-  }
+    form.setValue("email", user.email);
+    form.setValue("team_name", user.team_name);
+    form.setValue("Nodal_Officer", user.Nodal_Officer);
+    openModal("PUT");
+  };
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setSubmitLoading(true);
-    if (method === 'POST') {
+    if (method === "POST") {
       CreateUser(values);
-    } else if (method === 'PUT') {
-      if (updateuserId)
-        UpdateUser(updateuserId, values);
+    } else if (method === "PUT") {
+      if (updateuserId) UpdateUser(updateuserId, values);
     } else {
       setSubmitLoading(false);
       // console.log('User ID not found');
@@ -155,11 +158,11 @@ function users() {
         role: values.role,
         status: values.status,
         createdAt: Timestamp.now(),
-      }
+      };
       const response = await fetch(`${APIURL}/admin/create-user`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(data),
@@ -169,7 +172,7 @@ function users() {
       // console.log('responseData', responseData);
       if (response.ok) {
         toast({
-          variant: 'success',
+          variant: "success",
           description: responseData.message,
         });
         getUsers();
@@ -178,7 +181,7 @@ function users() {
         closeModal();
       } else {
         toast({
-          variant: 'destructive',
+          variant: "destructive",
           description: responseData.message,
         });
         setSubmitLoading(false);
@@ -186,124 +189,121 @@ function users() {
     } catch (error: any) {
       console.error(error);
       toast({
-        variant: 'destructive',
+        variant: "destructive",
         description: error.message,
-      })
+      });
       closeModal();
       setSubmitLoading(false);
       form.reset();
     }
-  }
+  };
 
   const DeleteUser = async (id: string) => {
     setDeleteLoading(true);
     try {
       const response = await fetch(`${APIURL}/admin/delete-user/${id}`, {
-        method: 'DELETE',
+        method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`,
-        }
+        },
       });
       const data = await response.json();
       // console.log(data);
       if (response.ok) {
         toast({
-          variant: 'success',
+          variant: "success",
           description: data.message,
         });
         getUsers();
         setDeleteLoading(false);
       } else {
         toast({
-          variant: 'destructive',
+          variant: "destructive",
           description: data.message,
         });
         setDeleteLoading(false);
       }
-    }
-    catch (error: any) {
+    } catch (error: any) {
       console.error(error);
       toast({
-        variant: 'destructive',
+        variant: "destructive",
         description: error.message,
       });
       setDeleteLoading(false);
     }
-  }
+  };
 
   const DisableUser = async (id: string) => {
-    setEnableDisableText('Disabling User...');
+    setEnableDisableText("Disabling User...");
     setEnableDisableLoading(true);
     try {
       const response = await fetch(`${APIURL}/admin/disable-user/${id}`, {
-        method: 'PATCH',
+        method: "PATCH",
         headers: {
           Authorization: `Bearer ${token}`,
-        }
+        },
       });
       const data = await response.json();
       // console.log(data);
       if (response.ok) {
         toast({
-          variant: 'success',
+          variant: "success",
           description: data.message,
         });
         getUsers();
         setEnableDisableLoading(false);
       } else {
         toast({
-          variant: 'destructive',
+          variant: "destructive",
           description: data.message,
         });
         setEnableDisableLoading(false);
       }
-    }
-    catch (error: any) {
+    } catch (error: any) {
       console.error(error);
       toast({
-        variant: 'destructive',
+        variant: "destructive",
         description: error.message,
       });
       setEnableDisableLoading(false);
     }
-  }
+  };
 
   const EnableUser = async (id: string) => {
-    setEnableDisableText('Enabling User...');
+    setEnableDisableText("Enabling User...");
     setEnableDisableLoading(true);
     try {
       const response = await fetch(`${APIURL}/admin/enable-user/${id}`, {
-        method: 'PATCH',
+        method: "PATCH",
         headers: {
           Authorization: `Bearer ${token}`,
-        }
+        },
       });
       const data = await response.json();
       // console.log(data);
       if (response.ok) {
         toast({
-          variant: 'success',
+          variant: "success",
           description: data.message,
         });
         getUsers();
         setEnableDisableLoading(false);
       } else {
         toast({
-          variant: 'destructive',
+          variant: "destructive",
           description: data.message,
         });
         setEnableDisableLoading(false);
       }
-    }
-    catch (error: any) {
+    } catch (error: any) {
       console.error(error);
       toast({
-        variant: 'destructive',
+        variant: "destructive",
         description: error.message,
       });
       setEnableDisableLoading(false);
     }
-  }
+  };
 
   const UpdateUser = async (id: string, values: z.infer<typeof formSchema>) => {
     try {
@@ -314,11 +314,11 @@ function users() {
         role: values.role,
         status: values.status,
         updatedAt: Timestamp.now(),
-      }
+      };
       const response = await fetch(`${APIURL}/admin/update-user/${id}`, {
-        method: 'PUT',
+        method: "PUT",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(Datas),
@@ -327,23 +327,22 @@ function users() {
       // console.log(data);
       if (response.ok) {
         toast({
-          variant: 'success',
+          variant: "success",
           description: data.message,
         });
         getUsers();
         setSubmitLoading(false);
       } else {
         toast({
-          variant: 'destructive',
+          variant: "destructive",
           description: data.message,
         });
         setSubmitLoading(false);
       }
-    }
-    catch (error: any) {
+    } catch (error: any) {
       console.error(error);
       toast({
-        variant: 'destructive',
+        variant: "destructive",
         description: error.message,
       });
       setSubmitLoading(false);
@@ -352,7 +351,7 @@ function users() {
       form.reset();
       closeModal();
     }
-  }
+  };
 
   const Fields = [
     { label: "No", value: "col-id" },
@@ -370,8 +369,7 @@ function users() {
     "col-action",
   ]);
 
-
-  const handleItemSelect = (item: { label: string, value: string }) => {
+  const handleItemSelect = (item: { label: string; value: string }) => {
     let updatedItems;
     if (selectedItems.includes(item.value)) {
       updatedItems = selectedItems.filter((value) => value !== item.value);
@@ -380,69 +378,77 @@ function users() {
     }
     setSelectedItems(updatedItems);
     updateSelectedItems(updatedItems);
-  }
+  };
 
   const updateSelectedItems = (selectedItems: string[]) => {
-    const allItems = Fields.map(item => item.value);
-    const unselectedItems = allItems.filter(item => !selectedItems.includes(item));
+    const allItems = Fields.map((item) => item.value);
+    const unselectedItems = allItems.filter(
+      (item) => !selectedItems.includes(item),
+    );
 
     // Hide unselected columns
     unselectedItems.forEach((item) => {
       const elements = document.querySelectorAll(`.${item}`);
-      elements.forEach(element => {
-        (element as HTMLElement).classList.add('hidden-column');
+      elements.forEach((element) => {
+        (element as HTMLElement).classList.add("hidden-column");
       });
     });
 
     // Show selected columns
     selectedItems.forEach((item) => {
       const elements = document.querySelectorAll(`.${item}`);
-      elements.forEach(element => {
-        (element as HTMLElement).classList.remove('hidden-column');
+      elements.forEach((element) => {
+        (element as HTMLElement).classList.remove("hidden-column");
       });
     });
-  }
+  };
 
   const getUsers = async () => {
     try {
       const usersSnapshot = await getDocs(UserCollectionRef);
-      const filteredUsers = usersSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })) as User[];
-      const filteredUserRoleUsers = filteredUsers.filter((user) => user.role === 'user');
+      const filteredUsers = usersSnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      })) as User[];
+      const filteredUserRoleUsers = filteredUsers.filter(
+        (user) => user.role === "user",
+      );
       // console.log('filteredUserRoleUsers', filteredUserRoleUsers);
       setUsers(filteredUserRoleUsers);
       setLoading(false);
       filterAndSortStudents();
     } catch (error: any) {
       console.error(error);
-
     }
-  }
+  };
 
   const closeModal = () => {
     setHandleCreateUser(false);
-  }
+  };
   const openModal = (method: string) => {
     setMethod(method);
-    if (method === 'POST') {
-      form.setValue('email', '');
-      form.setValue('password', '');
-      form.setValue('team_name', '');
-      form.setValue('Nodal_Officer', '');
-      form.setValue('role', 'user');
-      form.setValue('status', true);
+    if (method === "POST") {
+      form.setValue("email", "");
+      form.setValue("password", "");
+      form.setValue("team_name", "");
+      form.setValue("Nodal_Officer", "");
+      form.setValue("role", "user");
+      form.setValue("status", true);
     }
     setHandleCreateUser(true);
-  }
+  };
 
   function filterAndSortStudents() {
     let filtered = Users;
-    if (searchName !== '') {
-      filtered = filtered.filter((user) => user.team_name.toLowerCase().includes(searchName.toLowerCase()));
+    if (searchName !== "") {
+      filtered = filtered.filter((user) =>
+        user.team_name.toLowerCase().includes(searchName.toLowerCase()),
+      );
     } else {
       filtered = Users;
     }
     return setFilteredUsers(filtered);
-  };
+  }
 
   useEffect(() => {
     getUsers();
@@ -461,54 +467,62 @@ function users() {
   };
 
   return (
-    <div className='flex flex-col gap-10 justify-start items-center h-full mt-20  mx-auto' >
-
+    <div className="mx-auto mt-20 flex h-full flex-col items-center justify-start gap-10">
       {DeleteLoading && (
-        <div className='fixed top-0 left-0 w-full h-full bg-black/50 flex items-center justify-center z-50'>
-          <div className='bg-white p-4 rounded-lg shadow-md flex flex-col gap-4'>
-            <div className='w-full flex items-center justify-center gap-4'>
-              <ImSpinner6 className="animate-spin h-6 w-6 text-emerald-600" />
-              <h1 className='text-emerald-600 font-bold'>Deleting Students from list...</h1>
+        <div className="fixed left-0 top-0 z-50 flex h-full w-full items-center justify-center bg-black/50">
+          <div className="flex flex-col gap-4 rounded-lg bg-white p-4 shadow-md">
+            <div className="flex w-full items-center justify-center gap-4">
+              <ImSpinner6 className="h-6 w-6 animate-spin text-emerald-600" />
+              <h1 className="font-bold text-emerald-600">Deleting User...</h1>
             </div>
           </div>
         </div>
       )}
 
       {EnableDisableLoading && (
-        <div className='fixed top-0 left-0 w-full h-full bg-black/50 flex items-center justify-center z-50'>
-          <div className='bg-white p-4 rounded-lg shadow-md flex flex-col gap-4'>
-            <div className='w-full flex items-center justify-center gap-4'>
-              <ImSpinner6 className="animate-spin h-6 w-6 text-emerald-600" />
-              <h1 className='text-emerald-600 font-bold'>{EnableDisableText}</h1>
+        <div className="fixed left-0 top-0 z-50 flex h-full w-full items-center justify-center bg-black/50">
+          <div className="flex flex-col gap-4 rounded-lg bg-white p-4 shadow-md">
+            <div className="flex w-full items-center justify-center gap-4">
+              <ImSpinner6 className="h-6 w-6 animate-spin text-emerald-600" />
+              <h1 className="font-bold text-emerald-600">
+                {EnableDisableText}
+              </h1>
             </div>
           </div>
         </div>
       )}
 
-      <div className='w-full'>
-        <Button className='!bg-slate-300 w-full flex justify-between items-center gap-4 font-bold h-[50px] rounded-xl' onClick={() => openModal('POST')}>
-          <p className='text-emerald-700'>
-            Add User
-          </p>
-          <div className='bg-emerald-700 rounded-full w-6 h-6 flex items-center justify-center'>
-            <LuPlus className='text-white' />
+      <div className="w-full">
+        <Button
+          className="flex h-[50px] w-full items-center justify-between gap-4 rounded-xl !bg-slate-300 font-bold"
+          onClick={() => openModal("POST")}
+        >
+          <p className="text-emerald-700">Add User</p>
+          <div className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-700">
+            <LuPlus className="text-white" />
           </div>
         </Button>
       </div>
 
-      <div className='w-full flex flex-col gap-4 pb-8'>
+      <div className="flex w-full flex-col gap-4 pb-8">
         <div className="overflow-x-auto">
-          <div className='flex items-center justify-between gap-4 py-4'>
-            <div className='w-full relative max-w-[360px]'>
-              <IoIosSearch className='absolute bottom-4 right-2 text-lg text-emerald-700' />
-              <Input type="search" placeholder="Filter Users..." className='h-[50px]  bg-slate-300 pr-8 pl-4' value={searchName} onChange={(e) => setSearchName(e.target.value)} />
+          <div className="flex items-center justify-between gap-4 py-4">
+            <div className="relative w-full max-w-[360px]">
+              <IoIosSearch className="absolute bottom-4 right-2 text-lg text-emerald-700" />
+              <Input
+                type="search"
+                placeholder="Filter Users..."
+                className="h-[50px] bg-slate-300 pl-4 pr-8"
+                value={searchName}
+                onChange={(e) => setSearchName(e.target.value)}
+              />
             </div>
-            <div className='flex gap-2'>
-
-
+            <div className="flex gap-2">
               <DropdownMenu>
-                <DropdownMenuTrigger className='outline-none border-none'>
-                  <div className='p-2 bg-emerald-700 flex gap-2 items-center justify-center text-white rounded-lg px-4'>Columns <IoIosArrowDown /></div>
+                <DropdownMenuTrigger className="border-none outline-none">
+                  <div className="flex items-center justify-center gap-2 rounded-lg bg-emerald-700 p-2 px-4 text-white">
+                    Columns <IoIosArrowDown />
+                  </div>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
                   {/* <DropdownMenuLabel>My Account</DropdownMenuLabel> */}
@@ -528,11 +542,10 @@ function users() {
             </div>
           </div>
 
-
-          <div className='border border-emerald-700 rounded-[20px] overflow-auto '>
-            <table className="min-w-full rounded-xl  " id='custom-table'>
-              <thead className=''>
-                <tr >
+          <div className="overflow-auto rounded-[20px] border border-emerald-700">
+            <table className="min-w-full rounded-xl" id="custom-table">
+              <thead className="">
+                <tr>
                   <th className="col-id tracking-wider">No</th>
                   <th className="col-name tracking-wider">Name</th>
                   <th className="col-officer tracking-wider">Nodal Officer</th>
@@ -543,103 +556,134 @@ function users() {
               <tbody ref={parent}>
                 {loading && loading ? (
                   <tr>
-                    <td colSpan={6} className='text-center '>
-                      <div className='flex items-center justify-center'>
-                        <ImSpinner6 className='animate-spin h-8 w-8 text-gray-400 text-lg mx-2' /> Loading...
+                    <td colSpan={6} className="text-center">
+                      <div className="flex items-center justify-center">
+                        <ImSpinner6 className="mx-2 h-8 w-8 animate-spin text-lg text-gray-400" />{" "}
+                        Loading...
                       </div>
                     </td>
                   </tr>
-                ) : (
-                  filteredUsers.length > 0 ? (
-                    filteredUsers.map((user, index) => (
-                      <tr key={index + 1}>
-                        <td className="col-id whitespace-nowrap">{index + 1}</td>
-                        <td className="col-name whitespace-nowrap">{user.team_name}</td>
-                        <td className="col-officer whitespace-nowrap">{user.Nodal_Officer}</td>
-                        <td className="col-email whitespace-nowrap">{user.email}</td>
-                        <td className='col-action whitespace-nowrap flex gap-1 items-center justify-center h-full w-full'>
-                          <AiFillEdit className='col-action mx-auto text-emerald-700 cursor-pointer hover:text-emerald-600 transition-all ease-in-out' onClick={() => EditUser(user.id, user)} />
+                ) : filteredUsers.length > 0 ? (
+                  filteredUsers.map((user, index) => (
+                    <tr key={index + 1}>
+                      <td className="col-id whitespace-nowrap">{index + 1}</td>
+                      <td className="col-name whitespace-nowrap">
+                        {user.team_name}
+                      </td>
+                      <td className="col-officer whitespace-nowrap">
+                        {user.Nodal_Officer}
+                      </td>
+                      <td className="col-email whitespace-nowrap">
+                        {user.email}
+                      </td>
+                      <td className="col-action flex h-full w-full items-center justify-center gap-1 whitespace-nowrap">
+                        <AiFillEdit
+                          className="col-action mx-auto cursor-pointer text-emerald-700 transition-all ease-in-out hover:text-emerald-600"
+                          onClick={() => EditUser(user.id, user)}
+                        />
+                        <AlertDialog>
+                          <AlertDialogTrigger>
+                            <>
+                              <AiFillDelete className="col-action mx-auto cursor-pointer text-red-500 transition-all ease-in-out hover:text-red-600" />
+                            </>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle className="dark:text-white">
+                                Are you sure you want to delete this user?
+                              </AlertDialogTitle>
+                              <AlertDialogDescription>
+                                This action cannot be undone. it will delete the
+                                user permanently. so be sure before you
+                                continue. the user & user all data will be lost.
+                                you can disable the user if you want to keep the
+                                data.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel className="dark:text-white">
+                                Cancel
+                              </AlertDialogCancel>
+                              <AlertDialogAction
+                                onClick={() => DeleteUser(user.id)}
+                              >
+                                Continue
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                        {user.status ? (
                           <AlertDialog>
-                            <AlertDialogTrigger>
+                            <AlertDialogTrigger asChild>
                               <>
-                                <AiFillDelete className='col-action mx-auto text-red-500 cursor-pointer hover:text-red-600 transition-all ease-in-out' />
+                                <MdPerson className="col-action mx-auto cursor-pointer text-emerald-700 transition-all ease-in-out hover:text-gray-500" />
                               </>
                             </AlertDialogTrigger>
                             <AlertDialogContent>
                               <AlertDialogHeader>
-                                <AlertDialogTitle className='dark:text-white'>
-                                  Are you sure you want to delete this user?
+                                <AlertDialogTitle className="dark:text-white">
+                                  Are you sure you want to disable this user?
                                 </AlertDialogTitle>
                                 <AlertDialogDescription>
-                                  This action cannot be undone. it will delete the user permanently.
-                                  so be sure before you continue. the user & user all data will be lost.
-                                  you can disable the user if you want to keep the data.
+                                  This action will disable the user. the user
+                                  will not be able to login. you can enable the
+                                  user again if you want to.
                                 </AlertDialogDescription>
                               </AlertDialogHeader>
                               <AlertDialogFooter>
-                                <AlertDialogCancel className='dark:text-white'>Cancel</AlertDialogCancel>
-                                <AlertDialogAction onClick={() => DeleteUser(user.id)}>Continue</AlertDialogAction>
+                                <AlertDialogCancel className="dark:text-white">
+                                  Cancel
+                                </AlertDialogCancel>
+                                <AlertDialogAction
+                                  onClick={() => DisableUser(user.id)}
+                                >
+                                  Continue
+                                </AlertDialogAction>
                               </AlertDialogFooter>
                             </AlertDialogContent>
                           </AlertDialog>
-                          {user.status ? (
-                            <AlertDialog>
-                              <AlertDialogTrigger asChild>
-                                <>
-                                  <MdPerson className='col-action mx-auto text-emerald-700 cursor-pointer hover:text-gray-500 transition-all ease-in-out' />
-                                </>
-                              </AlertDialogTrigger>
-                              <AlertDialogContent>
-                                <AlertDialogHeader>
-                                  <AlertDialogTitle className='dark:text-white'>
-                                    Are you sure you want to disable this user?
-                                  </AlertDialogTitle>
-                                  <AlertDialogDescription>
-                                    This action will disable the user. the user will not be able to login.
-                                    you can enable the user again if you want to.
-                                  </AlertDialogDescription>
-                                </AlertDialogHeader>
-                                <AlertDialogFooter>
-                                  <AlertDialogCancel className='dark:text-white'>Cancel</AlertDialogCancel>
-                                  <AlertDialogAction onClick={() => DisableUser(user.id)}>Continue</AlertDialogAction>
-                                </AlertDialogFooter>
-                              </AlertDialogContent>
-                            </AlertDialog>
-                          ) : (
-                            <AlertDialog>
-                              <AlertDialogTrigger asChild>
-                                <MdPersonAddDisabled className='col-action mx-auto text-emerald-700 cursor-pointer hover:text-gray-500 transition-all ease-in-out' />
-                              </AlertDialogTrigger>
-                              <AlertDialogContent>
-                                <AlertDialogHeader>
-                                  <AlertDialogTitle className='dark:text-white'>
-                                    Are you sure you want to enable this user?
-                                  </AlertDialogTitle>
-                                  <AlertDialogDescription>
-                                    This action will enable the user. the user will be able to login.
-                                    you can disable the user again if you want to.
-                                  </AlertDialogDescription>
-                                </AlertDialogHeader>
-                                <AlertDialogFooter>
-                                  <AlertDialogCancel className='dark:text-white'>Cancel</AlertDialogCancel>
-                                  <AlertDialogAction onClick={() => EnableUser(user.id)}>Continue</AlertDialogAction>
-                                </AlertDialogFooter>
-                              </AlertDialogContent>
-                            </AlertDialog>
-                          )}
-                        </td>
-                      </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td colSpan={6} className='text-center'>No data found</td>
+                        ) : (
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <MdPersonAddDisabled className="col-action mx-auto cursor-pointer text-emerald-700 transition-all ease-in-out hover:text-gray-500" />
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle className="dark:text-white">
+                                  Are you sure you want to enable this user?
+                                </AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  This action will enable the user. the user
+                                  will be able to login. you can disable the
+                                  user again if you want to.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel className="dark:text-white">
+                                  Cancel
+                                </AlertDialogCancel>
+                                <AlertDialogAction
+                                  onClick={() => EnableUser(user.id)}
+                                >
+                                  Continue
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        )}
+                      </td>
                     </tr>
-                  )
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={6} className="text-center">
+                      No data found
+                    </td>
+                  </tr>
                 )}
               </tbody>
             </table>
           </div>
-
         </div>
         {/* <div className='flex gap-2 items-center justify-center'>
           <Button onClick={closeModal} className='!bg-slate-300 font-bold mt-6 !text-emerald-600'>Clear</Button>
@@ -648,10 +692,10 @@ function users() {
       </div>
 
       <Dialog open={handleCreateUser} onOpenChange={closeModal}>
-        <DialogContent className='max-w-[480px]'>
+        <DialogContent className="max-w-[480px]">
           <DialogHeader>
             <DialogTitle>
-              <div className='!text-[30px] !font-bold mx-auto text-center my-4 dark:text-white'>
+              <div className="mx-auto my-4 text-center !text-[30px] !font-bold dark:text-white">
                 Create User
               </div>
             </DialogTitle>
@@ -659,10 +703,13 @@ function users() {
                             you can create an event here
                         </DialogDescription> */}
           </DialogHeader>
-          <div className='flex flex-col gap-5 w-full  mx-auto max-w-[320px]'>
-            <div className='w-full'>
+          <div className="mx-auto flex w-full max-w-[320px] flex-col gap-5">
+            <div className="w-full">
               <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                <form
+                  onSubmit={form.handleSubmit(onSubmit)}
+                  className="space-y-6"
+                >
                   <FormField
                     control={form.control}
                     name="team_name"
@@ -670,7 +717,11 @@ function users() {
                       <FormItem ref={parent}>
                         <FormLabel>Team Name</FormLabel>
                         <FormControl>
-                          <Input className='h-[50px]' placeholder="eg: - IEDC" {...field} />
+                          <Input
+                            className="h-[50px]"
+                            placeholder="eg: - IEDC"
+                            {...field}
+                          />
                         </FormControl>
                         {/* <FormDescription>
                                         This is your public display name.
@@ -684,9 +735,13 @@ function users() {
                     name="Nodal_Officer"
                     render={({ field }) => (
                       <FormItem ref={parent}>
-                        <FormLabel >Nodal Officer</FormLabel>
+                        <FormLabel>Nodal Officer</FormLabel>
                         <FormControl>
-                          <Input className='h-[50px]' placeholder="Faisal Sir" {...field} />
+                          <Input
+                            className="h-[50px]"
+                            placeholder="Faisal Sir"
+                            {...field}
+                          />
                         </FormControl>
                         {/* <FormDescription>
                                         This is your public display name.
@@ -700,9 +755,14 @@ function users() {
                     name="email"
                     render={({ field }) => (
                       <FormItem ref={parent}>
-                        <FormLabel >Email</FormLabel>
+                        <FormLabel>Email</FormLabel>
                         <FormControl>
-                          <Input type="email" className='h-[50px]' placeholder="Email" {...field} />
+                          <Input
+                            type="email"
+                            className="h-[50px]"
+                            placeholder="Email"
+                            {...field}
+                          />
                         </FormControl>
                         {/* <FormDescription>
                                         This is your public display name.
@@ -711,7 +771,7 @@ function users() {
                       </FormItem>
                     )}
                   />
-                  {method === 'POST' && (
+                  {method === "POST" && (
                     <FormField
                       control={form.control}
                       name="password"
@@ -719,10 +779,22 @@ function users() {
                         <FormItem ref={parent}>
                           <FormLabel>Password</FormLabel>
                           <FormControl>
-                            <div className='relative'>
-                              <Input type={showPassword ? 'text' : 'password'} className='h-[50px]' placeholder="Password" {...field} />
-                              <div className='absolute right-4 top-4 cursor-pointer dark:text-white' onClick={toggleShowPassword}>
-                                {showPassword ? <IoEyeOutline /> : <IoEyeOffOutline />}
+                            <div className="relative">
+                              <Input
+                                type={showPassword ? "text" : "password"}
+                                className="h-[50px]"
+                                placeholder="Password"
+                                {...field}
+                              />
+                              <div
+                                className="absolute right-4 top-4 cursor-pointer dark:text-white"
+                                onClick={toggleShowPassword}
+                              >
+                                {showPassword ? (
+                                  <IoEyeOutline />
+                                ) : (
+                                  <IoEyeOffOutline />
+                                )}
                               </div>
                             </div>
                           </FormControl>
@@ -731,19 +803,30 @@ function users() {
                       )}
                     />
                   )}
-                  <div className='flex gap-2 items-center justify-center pb-4'>
-                    <Button type='button' onClick={closeModal} className='!bg-slate-200 font-bold mt-6 !text-emerald-600 w-full'>Cancel</Button>
-                    <LoadingButton className='bg-emerald-600 font-bold mt-6 !text-white w-full transition-all ease-in-out hover:bg-emerald-700' loading={submitLoading} type="submit">Submit</LoadingButton>
+                  <div className="flex items-center justify-center gap-2 pb-4">
+                    <Button
+                      type="button"
+                      onClick={closeModal}
+                      className="mt-6 w-full !bg-slate-200 font-bold !text-emerald-600"
+                    >
+                      Cancel
+                    </Button>
+                    <LoadingButton
+                      className="mt-6 w-full bg-emerald-600 font-bold !text-white transition-all ease-in-out hover:bg-emerald-700"
+                      loading={submitLoading}
+                      type="submit"
+                    >
+                      Submit
+                    </LoadingButton>
                   </div>
                 </form>
               </Form>
             </div>
           </div>
-
         </DialogContent>
       </Dialog>
     </div>
-  )
+  );
 }
 
 export default users;
