@@ -118,7 +118,7 @@ const UserLayout: React.FC = ({ }) => {
                             <div className='line line-3 bg-emerald-600'></div>
                         </div>
                     </button>
-                    <h1 className='text-xl font-bold text-emerald-600'>
+                    <h1 className='text-xl font-bold text-emerald-600' onClick={() => navigate('/')}>
                         MARK !T
                     </h1>
 
